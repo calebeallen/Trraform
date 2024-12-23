@@ -3,9 +3,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [sveltekit()],
-	optimizeDeps: {
-		include: []
-    },
+	optimizeDeps: {},
     build: {
         commonjsOptions: {
             transformMixedEsModules: true

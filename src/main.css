@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+    *{
+
+        @apply text-left text-white;
+
+    }
+
+    header{
+
+        @apply fixed top-0 left-0 flex justify-between w-full p-3 h-14;
+
+    }
+
+    body{
+
+        @apply overflow-x-hidden touch-pan-y;        
+
+    }
+
+    html{
+
+        @apply bg-black overscroll-none;
+        color-scheme: dark;
+
+    }
+
+    .logo-animated-loading-wrapper{
+
+        @apply absolute min-w-10 max-w-20 w-[20%] aspect-square left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+
+    }
+
+    .tag{
+
+        @apply absolute p-2 transition-transform bg-zinc-900 rounded-xl;
+        transform: scale(0%);
+        
+    }
+
+    .menu-bg{
+
+        @apply absolute top-0 left-0 w-screen h-screen bg-black bg-opacity-50;
+
+    }
+
+    .container0{
+
+        @apply p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max;
+
+    }
+
+    .button0{
+
+        @apply px-2 py-1 text-sm text-center transition-colors bg-blue-700 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-blue-600 enabled:active:bg-blue-700 focus:outline-none enabled:focus:bg-blue-600;
+
+    }
+
+    .button1{
+
+        @apply px-2 py-1 text-sm text-center transition-colors rounded-lg bg-zinc-700 disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-zinc-600 enabled:active:bg-zinc-700 focus:outline-none enabled:focus:bg-zinc-600;
+
+    }
+
+    .menu-bg{
+
+        @apply w-screen h-screen bg-black bg-opacity-50;
+
+    }
+
+    .menu-head{
+
+        @apply flex flex-row items-center justify-between gap-6 p-2 mx-3 border-b;
+
+    }
+    
+    .hide-scrollbar{
+
+        -ms-overflow-style: none; 
+        scrollbar-width: none;
+
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+
+        display: none;
+
+    }
+
+    .hide-number-arrows{
+
+        -moz-appearance: textfield;
+
+    }
+
+    .hide-number-arrows::-webkit-inner-spin-button,
+    .hide-number-arrows::-webkit-inner-spin-button{
+
+        -webkit-appearance: none;
+        margin: 0;
+
+    }
+
+    .plot-container{
+
+        @apply relative overflow-hidden w-60 h-80 rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900;
+
+    }
+
+    .plot-options-container{
+
+        @apply absolute bottom-0 left-0 w-full p-1 space-y-0.5 transition-opacity bg-opacity-50 opacity-0 bg-zinc-950
+
+    }
+
+    .plot-option{
+
+        @apply block text-sm text-center w-full py-0.5 px-2 transition-colors rounded-lg bg-zinc-900 bg-opacity-0 hover:bg-opacity-80 focus:outline-none active:bg-opacity-80;
+
+    }
+
+}

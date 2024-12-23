@@ -1,0 +1,11 @@
+
+# dependencies
+node_modules
+
+# svelte
+.svelte-kit
+
+# misc
+.DS_Store
+
+wrangler.toml

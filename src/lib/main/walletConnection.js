@@ -4,9 +4,9 @@ import { createConfig, getConnectors, getWalletClient, getPublicClient } from "@
 import { mainnet, sepolia } from "@wagmi/core/chains"
 import { parseAbi } from 'abitype'
 import { parseEther, http } from "viem"
-import { CONTRACT_ADDRESS, D0_MINT_PRICE, DEFAULT_SMP, MAX_DEPTH } from "@packages/global/constants"
+import { CONTRACT_ADDRESS, D0_MINT_PRICE, DEFAULT_SMP, MAX_DEPTH } from "../common/constants"
 import { myPlots, setNotification, walletAddress } from "./store"
-import PlotId from "@packages/global/plotId"
+import PlotId from "../common/plotId"
 import MyPlot from "./plot/myPlot"
 
 const COINBASE_ICON = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTI4IDU2YzE1LjQ2NCAwIDI4LTEyLjUzNiAyOC0yOFM0My40NjQgMCAyOCAwIDAgMTIuNTM2IDAgMjhzMTIuNTM2IDI4IDI4IDI4WiIgZmlsbD0iIzFCNTNFNCIvPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNyAyOGMwIDExLjU5OCA5LjQwMiAyMSAyMSAyMXMyMS05LjQwMiAyMS0yMVMzOS41OTggNyAyOCA3IDcgMTYuNDAyIDcgMjhabTE3LjIzNC02Ljc2NmEzIDMgMCAwIDAtMyAzdjcuNTMzYTMgMyAwIDAgMCAzIDNoNy41MzNhMyAzIDAgMCAwIDMtM3YtNy41MzNhMyAzIDAgMCAwLTMtM2gtNy41MzNaIiBmaWxsPSIjZmZmIi8+PC9zdmc+"

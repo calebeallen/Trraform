@@ -3,8 +3,8 @@ import { Sphere, Vector3, Vector4 } from "three";
 import PlotData from "./plotData";
 import Task from "../task/task";
 import { refs } from "../store";
-import { MAX_DEPTH, PLOT_COUNT } from "@packages/global/constants";
-import { I2P, P2I } from "@packages/global/functions";
+import { MAX_DEPTH, PLOT_COUNT } from "../../common/constants";
+import { I2P, P2I } from "../../common/utils";
 import WalletConnection from "../walletConnection"
 
 export default class Plot extends PlotData {

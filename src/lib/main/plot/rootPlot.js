@@ -1,12 +1,12 @@
 
 import { Sphere, Vector3 } from "three";
-import PlotId from "@packages/global/plotId";
-import { expand, I2P } from "@packages/global/functions";
+import PlotId from "../../common/plotId";
+import { expand, I2P } from "../../common/utils";
 import Queue from "../structures/queue";
 import Plot from "./plot";
 import Octree from "../structures/octree";
 import Task from "../task/task";
-import { D0_MINT_PRICE } from "@packages/global/constants"
+import { D0_MINT_PRICE } from "../../common/constants"
 import { parseEther } from "viem";
 
 

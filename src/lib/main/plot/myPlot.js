@@ -1,12 +1,11 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial } from "three"
-import { buildImageUrl } from "@packages/global/buildImage"
-import { expand } from "@packages/global/functions"
+import { buildImageUrl } from "../../common/buildImage"
+import { expand } from "../../common/utils"
 import PlotData from "./plotData"
-import PlotId from "@packages/global/plotId"
+import PlotId from "../../common/plotId"
 import Task from "../task/task"
 import { newPlots } from "../store"
-import { get } from "svelte/store"
 
 export default class MyPlot extends PlotData{
 

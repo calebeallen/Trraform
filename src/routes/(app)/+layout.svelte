@@ -9,21 +9,21 @@
     //add mobile controls
 
     import "../../main.css"
+	import { LinearSRGBColorSpace, Scene, Spherical, Vector3, Vector4, WebGLRenderer } from "three"
+    import MobileDetect from "mobile-detect"
 	import { onMount } from "svelte"
     import { page } from "$app/stores"
     import { goto } from '$app/navigation';
-	import { LinearSRGBColorSpace, Scene, Spherical, Vector3, Vector4, WebGLRenderer } from "three"
-    import Camera from "@packages/global/camera"
-    import { Loading } from "@packages/ui"
+    import Camera from "$lib/common/camera"
+    import Loading from "$lib/common/components/loading.svelte"
+    import Notification from "$lib/common/components/notification.svelte";
+    import PlotId from "$lib/common/plotId"
     import { isMobileBrowser, insideOf, refs, settings, notification } from "$lib/main/store"
-    import PlotId from "@packages/global/plotId"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
     import Plot from "$lib/main/plot/Plot"
-    import MobileDetect from "mobile-detect"
-    import { Notification } from "@packages/ui";
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -577,21 +577,11 @@
 
 </script>
 
-<svelte:window 
-    on:resize={resize} 
-    on:mouseup={mousecancel}
-    on:mouseleave={mousecancel}
-    on:blur={mousecancel}
-/>
+<svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
-<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen -z-10 {$page?.route?.id === "/(app)/myplots" || $page?.route?.id === "/(app)/myplots/[id]" ? "blur-xl" : ""}">
+<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$page?.route?.id === "/(app)/myplots" || $page?.route?.id === "/(app)/myplots/[id]" ? "blur-xl" : ""}">
     <canvas bind:this={glCanvas} class="absolute top-0 left-0 w-full h-full"></canvas>
-    <canvas 
-        bind:this={tagCanvas} 
-        on:mousedown={mousedown} 
-        on:mousemove={mousemove}
-        class="absolute top-0 left-0 w-full h-full"
-    ></canvas>
+    <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="absolute top-0 left-0 w-full h-full"></canvas>
 </div>
 
 <slot/>
@@ -600,4 +590,4 @@
     <Loading/>
 {/if}
 
-<Notification notifStore={notification}/>
+<Notification store={notification}/>

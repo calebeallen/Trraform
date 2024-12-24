@@ -3,7 +3,6 @@
 
     import { onMount } from "svelte"
     import { fly } from "svelte/transition"
-    import { Logo, DiscordSVG, GithubSVG, EthSmallSVG, Ethereum, Dodecahedron, Icosahedron } from "@packages/ui"
     import { refs, isMobileBrowser } from "$lib/main/store"
 
     let inView = false
@@ -61,36 +60,16 @@
 
 <svelte:window on:scroll={scroll}/>
 
-<header class="opacity-50">
-    <div class="flex items-center gap-2 pointer-events-none select-none">
-        <div class="flex-none w-8 h-8">
-            <Logo/> 
-        </div>
-    </div>
-    <div class="flex items-center gap-3 ml-3">
-        <div class="w-0.5 bg-white opacity-50 rounded-full h-5 inline-block"></div>
-        <a href="/" class="inline-block w-8 h-8">
-            <DiscordSVG/>
-        </a>
-        <a href="/" class="inline-block w-7 h-7">
-            <GithubSVG/>
-        </a>
-    </div>   
-</header>
-
-
 {#if !inView}
-    <div transition:fly={ { x: -500, opacity: 1 } } class="fixed left-5 bottom-5 w-[calc(100%-40px)] max-w-[427px]">
-        <div class="w-full text-5xl font-bold align-text-bottom">Millions of Worlds.</div>
-        <div class="mt-1">Powered by <b>Ethereum</b>
-            <div class="inline-block w-2 h-3 translate-y-px">
-                <EthSmallSVG/>
-            </div>
-        </div>
-        <a class="mt-4 main-button" href="0x00">Explore</a>
-        {#if !$isMobileBrowser}
-            <a class="mt-3 main-button" target="_blank" href="/editor">Build</a>
-        {/if}
+    <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full max-w-md p-3 sm:p-5">
+        <h1>Millions of Worlds</h1>
+        <h3 class="mt-1">Powered by <b>Ethereum</b> <img class="inline-block w-2 h-3 translate-y-px" src="/eth-small.svg" alt=""></h3>
+        <nav class="flex flex-col w-full gap-3 mt-4">
+            <a class="nav-option" href="/0x00">Explore</a>
+            {#if !$isMobileBrowser}
+                <a class="nav-option" target="_blank" href="/editor">Build</a>
+            {/if}
+        </nav>
     </div>
 {/if}
 
@@ -167,7 +146,7 @@
         <div class="flex flex-col w-full gap-3 p-2 mt-10">
             <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-200 info-widget">
                 <div class="w-6 h-6 ml-auto">
-                    <Icosahedron/>
+                    <!-- <Icosahedron/> -->
                 </div>
                 <h4 class="sm:mb-1 mb-0.5">Depth 0 (base layer)</h4>
                 <ul class="ml-2">
@@ -177,7 +156,7 @@
             </div>
             <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-300 info-widget">
                 <div class="w-6 h-6 ml-auto">
-                    <Icosahedron/>
+                    <!-- <Icosahedron/> -->
                 </div>
                 <h4 class="sm:mb-1 mb-0.5">Depth 1</h4>
                 <ul class="ml-2">
@@ -187,7 +166,7 @@
             </div>
             <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-[400ms] info-widget">
                 <div class="w-6 h-6 ml-auto">
-                    <Dodecahedron/>
+                    <!-- <Dodecahedron/> -->
                 </div>
                 <h4 class="sm:mb-1 mb-0.5">Depth 2</h4>
                 <ul class="ml-2">
@@ -210,7 +189,7 @@
         </div>
         <div class="ml-auto mr-8 space-y-2 w-max sm:mr-10 sm:space-y-3">
             <h1 class="{renderS3 ? "" : "-translate-x-5 opacity-0"} text-right duration-500 delay-75">Trraform Editor</h1>
-            <h3 class="{renderS3 ? "" : "-translate-x-5 opacity-0"} text-right duration-500 delay-150">With 3D Model Conversion</h3>
+            <h2 class="{renderS3 ? "" : "-translate-x-5 opacity-0"} text-right duration-500 delay-150">With 3D Model Conversion</h2>
         </div>
         <a target="_blank" href="/editor" class="{renderS3 ? "" : "translate-y-5 opacity-0"} duration-500 delay-200 block px-2 mt-10 transition-all">
             <img class="aspect-[16/9] w-full sm:rounded-2xl rounded-xl outline outline-1 shadow-2xl outline-zinc-600" src="/editor.png" alt="" loading="lazy">
@@ -228,16 +207,42 @@
     <!-- eth svg -->
     <div class="absolute -translate-y-1/2 translate-x-32 right-0 bottom-[35%] opacity-10 -z-10">
         <div class="rotate-12 w-[50vw] max-w-screen-md min-w-[500px] aspect-square">
-            <Ethereum/>
+            <!-- <Ethereum/> -->
         </div>
     </div>
 </div>
 
+
+<header class="fixed top-0 left-0 flex justify-between w-full p-4 opacity-50">
+    <div class="flex items-center flex-shrink-0 gap-1">
+        <img class="icon-option" src="/logo.svg" alt="Logo">
+        <span class="mr-4 text-lg font-semibold sm:text-xl w-max">Trraform</span>
+    </div>
+    <ul class="flex items-center gap-4">
+        <div class="w-0.5 h-5 bg-white opacity-50 rounded-full"></div>
+        <a class="icon-option" href="/">
+            <img src="/instagram.svg" alt="Instagram">
+        </a>
+        <a class="icon-option" href="/">
+            <img src="/discord.svg" alt="Discord">
+        </a>
+        <a class="icon-option" href="/">
+            <img src="/x.svg" alt="X">
+        </a>
+    </ul>
+</header>
+
 <style lang="postcss">
 
-    .main-button{
+    .icon-option {
 
-        @apply hover:scale-105 active:scale-100 cursor-pointer transition-transform block text-center text-lg font-semibold w-full py-3 bg-blue-700 outline-blue-500 outline outline-1 rounded-2xl;
+        @apply w-6 sm:w-7 aspect-square;
+
+    }
+
+    .nav-option{
+
+        @apply hover:scale-[1.02] active:scale-100 cursor-pointer transition-transform block text-center sm:text-lg font-semibold w-full py-2.5 sm:py-3 bg-blue-700 outline-blue-500 outline outline-1 rounded-xl sm:rounded-2xl;
         
     }
 
@@ -259,9 +264,21 @@
 
     }
 
-    h1{
+    h1 {
 
         @apply sm:text-5xl text-4xl font-bold;
+
+    }
+
+    h2 {
+
+        @apply sm:text-xl text-lg font-semibold text-zinc-300;
+
+    }
+
+    h3 {
+
+        @apply sm:text-base text-sm font-semibold;
 
     }
 
@@ -271,21 +288,11 @@
         
     }
     
-    h3{
-
-        @apply sm:text-xl text-lg font-semibold text-zinc-300;
-
-    }
+    
 
     h4{
 
         @apply sm:text-lg font-bold;
-
-    }
-
-    ul{
-
-        @apply sm:space-y-1 space-y-0.5;
 
     }
 
@@ -320,28 +327,3 @@
     }
 
 </style>
-
-<!-- 
-<section bind:this={s3} class="relative w-full mt-72">
-        <div class="absolute left-0 top-0 w-full !h-full">
-            <svg fill="transparent" stroke-width="3" class="w-full h-full">
-                <defs>
-                    <linearGradient id="grad" x1="0" x2="100%" y1="100%" y2="0">
-                        <stop offset="0%" stop-color="#06b6d4"/>
-                        <stop offset="100%" stop-color="#3b82f6"/>
-                    </linearGradient>
-                </defs>
-                <circle stroke="#3b82f6" class="accent-circle" cx={s3p0.x} cy={s3p0.y} r="6"/>
-                <path stroke="url(#grad)" class="s3-path" bind:this={s3Path} stroke-dasharray={s3strokeLen} stroke-dashoffset={s3strokeLen} d="M {s3p0.x} {s3p0.y + 6} L {s3p1.x} {s3p1.y} A {s3p2.r} {s3p2.r} 0 0 1 {s3p2.x} {s3p2.y} L {s3p3.x + 6} {s3p3.y}"/>
-                <circle stroke="#06b6d4" class="accent-circle" style="animation-delay: 1s;" cx={s3p3.x} cy={s3p3.y} r="6"/>
-            </svg>
-        </div>
-        <div class="ml-auto mr-5 sm:mr-10 w-max">
-            <h1 transition:fly={ { x: -20 } } class="ml-auto">Building Anything</h1>
-            <h3 transition:fly={ { x: -20, delay: 100 } } class="ml-auto text-right sm:mt-1">Trraform editor</h3>
-        </div>
-        <div class="sm:py-10 py-5 mx-auto sm:w-[calc(100%-80px)] w-[calc(100%-40px)]">
-            <div transition:fly={ { x: -20, delay: 200 } } class="aspect-[16/10] mx-auto w-full bg-zinc-900 sm:rounded-3xl rounded-2xl"></div>
-        </div>
-        
-</section> -->

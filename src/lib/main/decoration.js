@@ -1,6 +1,6 @@
 import { BufferGeometry, Color, DoubleSide, Float32BufferAttribute, InstancedMesh, MeshBasicMaterial, Object3D, Spherical, Uint16BufferAttribute, Vector3, BufferAttribute, Points, ShaderMaterial } from "three";
 import { refs } from "./store";
-import { disposeMesh } from "@packages/global/functions";
+import { disposeMesh } from "../common/utils";
 
 function confetti(pos, buildSize){
 

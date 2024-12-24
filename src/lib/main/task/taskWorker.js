@@ -2,9 +2,9 @@
 /* TODO: Port to wasm, this is way too slow in js */
 
 import { Vector3 } from "three"
-import { ColorLibrary } from "@packages/global/colorLibrary"
-import { PLOT_COUNT, LOW_RES, CHUNK_SIZE } from "@packages/global/constants"
-import { I2P, P2I, backFace, bottomFace, expand, frontFace, getVertexIndicies, leftFace, rightFace, topFace, decodePlotData } from "@packages/global/functions"
+import { ColorLibrary } from "../../common/colorLibrary"
+import { PLOT_COUNT, LOW_RES, CHUNK_SIZE } from "../../common/constants"
+import { I2P, P2I, backFace, bottomFace, expand, frontFace, getVertexIndicies, leftFace, rightFace, topFace, decodePlotData } from "../../common/utils"
 
 postMessage("loaded")
 

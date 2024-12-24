@@ -61,10 +61,10 @@
 <svelte:window on:scroll={scroll}/>
 
 {#if !inView}
-    <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full max-w-md p-3 sm:p-5">
+    <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full p-3 sm:p-5 max-w-max">
         <h1>Millions of Worlds</h1>
-        <h3 class="mt-1">Powered by <b>Ethereum</b> <img class="inline-block w-2 h-3 translate-y-px" src="/eth-small.svg" alt=""></h3>
-        <nav class="flex flex-col w-full gap-3 mt-4">
+        <h3 class="mt-1">Powered by <b>Ethereum</b> <img class="inline-block w-2 h-3 translate-y-px" src="/eth-small.svg" alt="eth small"></h3>
+        <nav class="w-full mt-4 space-y-3">
             <a class="nav-option" href="/0x00">Explore</a>
             {#if !$isMobileBrowser}
                 <a class="nav-option" target="_blank" href="/editor">Build</a>
@@ -75,26 +75,26 @@
 
 
 <div bind:this={sectionContainer} class="relative w-full max-w-screen-lg mx-auto mt-[100vh] py-1">
-    <section bind:this={s0} class="flex items-stretch mt-10 min-h-64">
-        <div class="w-8 sm:w-10 shrink-0"> 
-            <div class="sm:mt-[60px] mt-[46px]">
+    <section bind:this={s0} class="mt-10">
+        <div class="accent-container"> 
+            <div class="accent-circle-container">
                 <div class="{renderS0 ? "" : "opacity-0 delay-500"} accent-circle outline-blue-500"></div>
             </div>
             <div class="accent-line-container">
                 <div class="{renderS0 ? "" : "-translate-y-full"} accent-line from-blue-500 to-cyan-500"></div>
             </div>
         </div>
-        <div class="flex flex-col items-center justify-between flex-1 w-full gap-2 mb-64 sm:flex-row sm:items-start">
-            <div class="space-y-2 sm:space-y-3">
+        <div class="flex flex-col items-center justify-between w-full gap-2 mb-64 sm:flex-row sm:items-start">
+            <div class="content-container">
                 <div class="{renderS0 ? "" : "translate-x-5 opacity-0"} section-tag text-blue-500">Create and Explore</div>
                 <h1 class="{renderS0 ? "" : "translate-x-5 opacity-0"} duration-500 delay-75 mt-2">Build Your World</h1>
                 <div class="{renderS0 ? "" : "translate-x-5 opacity-0"} duration-500 delay-150 w-full sm:max-w-md pr-2 space-y-1 sm:space-y-2">
-                    <p>Create <b class="text-lime-300">worlds within worlds</b>, and bring your unique creations to life alongside <b class="text-lime-300">thousands</b> of others.</p>
+                    <p>Create <b class="text-lime-300">worlds within worlds</b>, and bring your unique creations to life alongside <b class="text-lime-300">millions</b> of others.</p>
                     <p>With <b class="text-lime-300">unmatched innovation</b>, Trraform offers a truly unique approach to crypto—an experience tailored not only to holders, but to <b class="text-lime-300">everyone</b>.</p>
                 </div>
             </div>
-            <div class="{renderS0 ? "" : "translate-y-10 opacity-0"} duration-500 delay-150 transition-all relative hidden mr-2 -transform w-72 md:w-96 shrink-0 sm:block aspect-square bg-radial-gradient">
-                <img src="/buildExample.png" alt="" loading="lazy">
+            <div class="{renderS0 ? "" : "translate-y-10 opacity-0"} duration-500 delay-150 relative hidden mr-2 w-72 md:w-96 shrink-0 sm:block aspect-square bg-radial-gradient">
+                <img src="/buildExample.png" alt="example build" loading="lazy">
                 <div class="absolute w-56 bottom-1 right-1 container0 space-y-0.5 scale-75 md:scale-100 shadow-xl hover:shadow-2xl transition-shadow">
                     <div class="text-xs opacity-70">id: 0xa124b1c4</div>
                     <div class="max-w-full font-bold">Japanese Farmhouse 民家</div>
@@ -104,16 +104,16 @@
             </div>
         </div>  
     </section>  
-    <section bind:this={s1} class="flex items-stretch min-h-64">
-        <div class="flex-row w-8 sm:w-10"> 
-            <div class="sm:mt-[60px] mt-[46px]">
+    <section bind:this={s1}>
+        <div class="accent-container"> 
+            <div class="accent-circle-container">
                 <div class="{renderS0 ? "" : "opacity-0"} accent-circle outline-cyan-500"></div>
             </div>
             <div class="accent-line-container">
                 <div class="{renderS1 ? "" : "-translate-y-full"} accent-line from-cyan-500 to-blue-500"></div>
             </div>
         </div>
-        <div class="flex-1 mb-64 space-y-2 sm:space-y-3">
+        <div class="mb-64 content-container">
             <div class="{renderS1 ? "" : "translate-x-5 opacity-0"} section-tag text-cyan-500">Crypto</div>
             <h1 class="{renderS1 ? "" : "translate-x-5 opacity-0"} duration-500 delay-75">Mint, Earn, Trade</h1>
             <div class="{renderS1 ? "" : "translate-x-5 opacity-0"} duration-500 delay-150 w-full pr-2 space-y-1 sm:space-y-2">
@@ -122,56 +122,58 @@
             </div>
         </div>
     </section>
-    <section bind:this={s2} class="relative">
-        <div class="absolute top-0 left-0 w-8 h-full sm:w-10 -z-10"> 
-            <div class="sm:mt-[60px] mt-[46px]">
+    <section bind:this={s2}>
+        <div class="accent-container"> 
+            <div class="accent-circle-container">
                 <div class="{renderS1 ? "" : "opacity-0"} accent-circle outline-blue-500"></div>
             </div>
             <div class="accent-line-container">
                 <div class="{renderS2 ? "" : "-translate-y-full"} accent-line from-blue-500 to-cyan-500"></div>
             </div>
-            <div>
+            <div class="-translate-y-2">
                 <div class="{renderS2 ? "" : "opacity-0"} delay-500 accent-circle outline-cyan-500"></div>
             </div>
         </div>
-        <div class="ml-8 sm:ml-10">
-            <div class="w-full space-y-2 sm:space-y-3">
-                <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} section-tag text-blue-500">Whats included?</div>
-                <h1 class="{renderS2 ? "" : "translate-x-5 opacity-0"} duration-500 delay-75">Benefits at Every Level</h1>
-                <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} duration-500 delay-150 w-full max-w-md pr-2 space-y-1 sm:space-y-2">
-                    <p>Depth indicates how many layers of plots a single plot is nested within. There's perks to all of them!</p>
+        <div class="content-container">
+            <div>
+                <div class="w-full content-container">
+                    <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} section-tag text-blue-500">Whats included?</div>
+                    <h1 class="{renderS2 ? "" : "translate-x-5 opacity-0"} duration-500 delay-75">Benefits at Every Level</h1>
+                    <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} duration-500 delay-150 w-full max-w-md pr-2 space-y-1 sm:space-y-2">
+                        <p>Depth indicates how many layers of plots a single plot is nested within. There's perks to all of them!</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="flex flex-col w-full gap-3 p-2 mt-10">
-            <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-200 info-widget">
-                <div class="w-6 h-6 ml-auto">
-                    <!-- <Icosahedron/> -->
+            <div class="flex flex-col w-full gap-3 p-2 mt-10">
+                <div class="{renderS2 ? "-translate-x-16" : "-translate-x-5 opacity-0"} delay-200 info-widget">
+                    <div class="w-6 h-6 ml-auto">
+                        <!-- <Icosahedron/> -->
+                    </div>
+                    <h4 class="sm:mb-1 mb-0.5">Depth 0 (base layer)</h4>
+                    <ul class="ml-2">
+                        <li><b class="text-lime-300">24 mintable subplots</b></li>
+                        <li>32x32x32 maximum build size</li>
+                    </ul>
                 </div>
-                <h4 class="sm:mb-1 mb-0.5">Depth 0 (base layer)</h4>
-                <ul class="ml-2">
-                    <li><b class="text-lime-300">24 mintable subplots</b></li>
-                    <li>32x32x32 maximum build size</li>
-                </ul>
-            </div>
-            <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-300 info-widget">
-                <div class="w-6 h-6 ml-auto">
-                    <!-- <Icosahedron/> -->
+                <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-300 info-widget">
+                    <div class="w-6 h-6 ml-auto">
+                        <!-- <Icosahedron/> -->
+                    </div>
+                    <h4 class="sm:mb-1 mb-0.5">Depth 1</h4>
+                    <ul class="ml-2">
+                        <li><b class="text-lime-300">24 mintable subplots</b></li>
+                        <li>48x48x48 maximum build size</li>
+                    </ul>
                 </div>
-                <h4 class="sm:mb-1 mb-0.5">Depth 1</h4>
-                <ul class="ml-2">
-                    <li><b class="text-lime-300">24 mintable subplots</b></li>
-                    <li>48x48x48 maximum build size</li>
-                </ul>
-            </div>
-            <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-[400ms] info-widget">
-                <div class="w-6 h-6 ml-auto">
-                    <!-- <Dodecahedron/> -->
+                <div class="{renderS2 ? "" : "translate-x-5 opacity-0"} delay-[400ms] info-widget">
+                    <div class="w-6 h-6 ml-auto">
+                        <!-- <Dodecahedron/> -->
+                    </div>
+                    <h4 class="sm:mb-1 mb-0.5">Depth 2</h4>
+                    <ul class="ml-2">
+                        <li><b class="text-lime-300">64x64x64 maximum build size</b></li>
+                    </ul>
                 </div>
-                <h4 class="sm:mb-1 mb-0.5">Depth 2</h4>
-                <ul class="ml-2">
-                    <li><b class="text-lime-300">64x64x64 maximum build size</b></li>
-                </ul>
             </div>
         </div>
     </section>
@@ -226,7 +228,7 @@
         <a class="icon-option" href="/">
             <img src="/discord.svg" alt="Discord">
         </a>
-        <a class="icon-option" href="/">
+        <a class="p-px icon-option" href="/">
             <img src="/x.svg" alt="X">
         </a>
     </ul>
@@ -234,33 +236,9 @@
 
 <style lang="postcss">
 
-    .icon-option {
+    section {
 
-        @apply w-6 sm:w-7 aspect-square;
-
-    }
-
-    .nav-option{
-
-        @apply hover:scale-[1.02] active:scale-100 cursor-pointer transition-transform block text-center sm:text-lg font-semibold w-full py-2.5 sm:py-3 bg-blue-700 outline-blue-500 outline outline-1 rounded-xl sm:rounded-2xl;
-        
-    }
-
-    .section-tag{
-
-        @apply w-max sm:text-sm text-xs px-2 sm:mb-1 py-0.5 outline outline-2 font-semibold rounded-full bg-transparent transition-transform;
-
-    }
-
-    .info-widget{
-
-        @apply transition-all duration-500 flex-1 sm:p-4 p-3 bg-zinc-900 outline outline-1 outline-zinc-800 rounded-2xl w-full max-w-lg;
-
-    }
-
-    section{
-
-        @apply min-h-36 w-full;
+        @apply flex items-stretch min-h-64 w-full;
 
     }
 
@@ -282,11 +260,42 @@
 
     }
 
-    p{
+    p { 
 
         @apply sm:text-lg text-zinc-100;
+
+    }
+
+    .icon-option {
+
+        @apply w-6 sm:w-7 aspect-square;
+
+    }
+
+    .nav-option{
+
+        @apply hover:scale-[1.02] active:scale-100 cursor-pointer transition-transform block text-center sm:text-lg font-semibold w-full py-2.5 sm:py-3 bg-blue-700 outline-blue-500 outline outline-1 rounded-xl sm:rounded-2xl;
         
     }
+
+    .section-tag{
+
+        @apply w-max sm:text-sm text-xs px-2 sm:mb-1 py-0.5 outline outline-2 font-semibold rounded-full bg-transparent transition-transform;
+
+    }
+
+    .content-container{
+
+        @apply space-y-2 sm:space-y-3;
+
+    }
+
+    .info-widget{
+
+        @apply transition-all duration-500 flex-1 sm:p-4 p-3 bg-zinc-900 outline outline-1 outline-zinc-800 rounded-2xl w-full max-w-lg;
+
+    }
+
     
     
 
@@ -302,9 +311,27 @@
 
     }
 
+    .accent-container{
+
+        @apply w-8 sm:w-10 shrink-0;
+
+    }
+
+    .accent-circle-container{
+
+        @apply pt-[46px] sm:pt-[60px] ;
+
+    }
+
+    .accent-circle{
+
+        @apply w-2 h-2 mx-auto rounded-full outline-[3px] outline transition-opacity;
+
+    }
+
     .accent-line-container{
 
-        @apply flex-shrink w-full h-[calc(100%-10px)] overflow-y-hidden;
+        @apply h-full pb-2 overflow-y-hidden;
 
     }
 
@@ -314,15 +341,9 @@
 
     } 
 
-    .accent-circle{
-
-        @apply w-2 h-2 mx-auto rounded-full outline-[3px] outline transition-opacity;
-
-    }
-
     .bg-radial-gradient{
 
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%)
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
 
     }
 

@@ -11,13 +11,6 @@
 
     }
 
-    .tag{
-
-        @apply absolute p-2 transition-transform bg-zinc-900 rounded-xl;
-        transform: scale(0%);
-        
-    }
-
     .menu-bg{
 
         @apply absolute top-0 left-0 w-screen h-screen bg-black bg-opacity-50;
@@ -39,12 +32,6 @@
     .button1{
 
         @apply px-2 py-1 text-sm text-center transition-colors rounded-lg bg-zinc-700 disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-zinc-600 enabled:active:bg-zinc-700 focus:outline-none enabled:focus:bg-zinc-600;
-
-    }
-
-    .menu-bg{
-
-        @apply w-screen h-screen bg-black bg-opacity-50;
 
     }
 
@@ -81,11 +68,6 @@
 
     }
 
-    .plot-container{
-
-        @apply relative overflow-hidden w-60 h-80 rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900;
-
-    }
 
     .plot-options-container{
 

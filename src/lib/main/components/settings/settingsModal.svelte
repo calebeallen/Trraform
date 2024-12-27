@@ -3,13 +3,13 @@
 
     import { onMount } from "svelte"
     import { refs, settings, defaultSettings } from "../../store"
-    import Modal from "../modal.svelte";
+    import WalletConnection from "../../walletConnection";
+    import Modal from "../../../common/components/modal.svelte"
     import SliderSetting from "./sliderSetting.svelte";
     import OptionSetting from "./optionSetting.svelte";
-    import { Tip } from "@packages/ui";
+    import Tip from "../../../common/components/tip.svelte";
     import DropDown from "./dropDown.svelte";
     import ConnectWalletModal from "../connectWallet/connectWalletModal.svelte";
-    import WalletConnection from "../../walletConnection"
 
     let selectedTab = 0
     let showConnectModal = false

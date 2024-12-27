@@ -94,9 +94,11 @@ export default class MyPlot extends PlotData{
 
         if(this.buildData === null)
 
-            return
+            this.imgUrl = "/default.png"
 
-        this.imgUrl = MyPlot.imgUrl(this.buildData)
+        else    
+
+            this.imgUrl = await MyPlot.imgUrl(this.buildData)
 
     }
 

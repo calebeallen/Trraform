@@ -1,7 +1,7 @@
 
 <script>
 
-    import { LogoAnimated } from '@packages/ui';
+    import LogoAnimated from "../../../common/components/logoAnimated.svelte";
     import { fly } from 'svelte/transition';
     import { createEventDispatcher } from "svelte";
 

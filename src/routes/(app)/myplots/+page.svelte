@@ -10,12 +10,10 @@
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import PlotsList from "$lib/main/components/myPlots/plotsList.svelte";
     import EditPlot from "$lib/main/components/myPlots/editPlot.svelte";
-    import Loading from "$lib/common/components/loading.svelte"
 
     let connected = false
     let showConnectModal = false
     let editingPlot = null
-    let load
 
     onMount(async () => {
 
@@ -78,7 +76,7 @@
             {#if editingPlot === null}
                 <PlotsList bind:editingPlot/>
             {:else}
-                <EditPlot bind:load bind:editingPlot/>
+                <EditPlot bind:editingPlot/>
             {/if}
         </div>
     {/if}
@@ -86,9 +84,5 @@
 
 {#if showConnectModal}
     <ConnectWalletModal on:cancel={connectionCancel} on:success={connectionSuccess}/>
-{/if}
-
-{#if load}
-    <Loading class="opacity-50"/>
 {/if}
 

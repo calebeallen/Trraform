@@ -34,12 +34,6 @@
         @apply px-2 py-1 text-sm text-center transition-colors rounded-lg bg-zinc-700 disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-zinc-600 enabled:active:bg-zinc-700 focus:outline-none enabled:focus:bg-zinc-600;
 
     }
-
-    .menu-head{
-
-        @apply flex flex-row items-center justify-between gap-6 p-2 mx-3 border-b;
-
-    }
     
     .hide-scrollbar{
 

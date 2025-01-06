@@ -5,7 +5,7 @@
     import { verifyBuild, encodePlotData, pushNotification } from "$lib/common/utils"
     import { preprocessPNG } from "$lib/common/buildImage"
     import { MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MIN_SMP, MAX_SMP } from "$lib/common/constants"
-    import { notification } from "$lib/main/store.js"
+    import { notification, loadScreenOpacity } from "$lib/main/store.js"
     import MyPlot from "$lib/main/plot/myPlot.js"
     import PlotWidgetOption from "$lib/main/components/myPlots/plotWidgetOption.svelte"
     import WalletConnection from "$lib/main/walletConnection"
@@ -15,7 +15,6 @@
     import { MAX_DEPTH } from "../../../common/constants";
     
     export let editingPlot
-    export let load
 
     let buildInput
     let depth = 0
@@ -24,7 +23,7 @@
 
     onMount( async () => {
 
-        load = true
+        $loadScreenOpacity = 50
 
         id = editingPlot.id.string()
         depth = editingPlot.id.depth()
@@ -37,7 +36,7 @@
 
         smp = origSmp = formatEther(await WalletConnection.getSmp(editingPlot.id))
 
-        load = false
+        $loadScreenOpacity = 0
 
     })
 
@@ -189,7 +188,7 @@
 
         try {
             
-            load = true
+            $loadScreenOpacity = 50
 
             if(smpChanged){
 
@@ -218,16 +217,22 @@
 
                 }
 
-                const message = "Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information."
-                const signature = await WalletConnection.getSignature(message)
+                const timestamp = Date.now()
+                const message = `Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information.\n\ntimestamp: `
+                const signatureMsg = `${message}${new Date(timestamp).toISOString()}`
+                const signature = await WalletConnection.getSignature(signatureMsg)
 
-                payload.append("signedMessage", new Blob([JSON.stringify({ message, signature })]))
+                payload.append("signedMessage", new Blob([JSON.stringify({ message, timestamp, signature })]))
                 
                 //update
-                await fetch(`https://update-plot.trraform.com/${editingPlot.id.string()}`, { 
+                const res = await fetch(`/api/update-plot?plotId=${editingPlot.id.string()}`, { 
                     method: "POST",
                     body: payload, 
                 })
+
+                if(!res.ok)
+
+                    throw new Error("Api error")
                     
                 editingPlot.name = name
                 editingPlot.desc = desc
@@ -249,7 +254,7 @@
             
         }
 
-        load = false
+        $loadScreenOpacity = 0
 
     }
 
@@ -285,15 +290,15 @@
                 <div class="w-1/2">
                     <div class="flex items-center gap-1">
                         <h2 class="inline text-sm">Link Label</h2>
-                        <Tip text="Give your link"/> 
+                        <Tip class="bottom-0 right-0 -translate-y-4" text="Display you link as text instead of a as a url."/> 
                     </div>
-                    <input bind:value={linkLabel} type="text" class="block w-full hide-number-arrows outline-zinc-800" maxlength={LINK_LABEL_FIELD_MAXLEN} placeholder="e.g. My Website">
+                    <input bind:value={linkLabel} type="text" class="block w-full hide-number-arrows outline-zinc-800" maxlength={LINK_LABEL_FIELD_MAXLEN} placeholder="ex. My Website">
                 </div>
                 <div class="w-1/2 {depth < 2 ? "" : "opacity-50 pointer-events-none select-none"}">
                     <div class="items-baseline gap-1">
                         <div class="flex items-center gap-1">
                             <h2 class="inline text-sm">Subplot Mint Price (ETH)</h2>
-                            <Tip addedClasses="bottom-0 right-0 -translate-y-4" text="You recieve 70% of the value you set when a subplot is minted. Changing this incurs a gas fee. This value has a maximum precision of 18 decimals."/>
+                            <Tip class="bottom-0 right-0 -translate-y-4" text="You recieve 70% of the value you set when a subplot is minted. Changing this incurs a gas fee. This value has a maximum precision of 18 decimals."/>
                         </div>
                     </div>
                     <input bind:value={smp} on:blur={blurSmpInput} type="number" class="block w-full hide-number-arrows {validSmp ? "outline-zinc-800" : "outline-red-600"}" maxlength="6" placeholder="Ether">

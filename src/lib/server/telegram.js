@@ -1,12 +1,11 @@
 
 import axios from "axios"
-import { ALLOWED_ORIGINS } from "$lib/common/constants"
 
 async function sendTelegramMsg(chatId, token, text, photoUrl = null) {
 
     let req
 
-    if(photoUrl){
+    if (photoUrl) {
 
         req = axios.post(`https://api.telegram.org/bot${token}/sendPhoto`, {
             chat_id : chatId,
@@ -14,7 +13,7 @@ async function sendTelegramMsg(chatId, token, text, photoUrl = null) {
             caption: text
         })
 
-    }else{
+    } else {
 
         req = axios.post(`https://api.telegram.org/bot${token}/sendMessage`, { chat_id : chatId, text })
 
@@ -29,3 +28,5 @@ async function deleteTelegramMsg(chatId, token, msgId) {
     await axios.post(`https://api.telegram.org/bot${token}/deleteMessage`, { chat_id : chatId, message_id: msgId })
     
 }
+
+export { sendTelegramMsg, deleteTelegramMsg }

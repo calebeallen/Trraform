@@ -1,6 +1,6 @@
 
 import axios from "axios"
-import { ALLOWED_ORIGINS } from "$lib/common/constants"
+import { ALLOWED_ORIGINS, CACHE_PURGE_ORIGIN } from "$lib/common/constants"
 
 function apiRes({ code = 200, msg = "", err = false, headers = { "Access-Control-Allow-Origin": ALLOWED_ORIGINS, "Content-Type": "application/json" } } = {}) {
    
@@ -12,14 +12,16 @@ function apiRes({ code = 200, msg = "", err = false, headers = { "Access-Control
 
 }
 
-async function cachePurgeFile(urls, zoneId, apiToken){
+async function cachePurgeFile(env, urls){
 
-    await axios.post(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, 
+    const { CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN } = env
+
+    await axios.post(`https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`, 
         {
-            files: urls.map(url => ({ url, headers : { "Origin": "http://localhost:5173" } })) 
+            files: urls.map(url => ({ url, headers : { "Origin": CACHE_PURGE_ORIGIN } })) 
         },{
             headers : {
-                "Authorization": `Bearer ${apiToken}`,
+                "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
                 "Content-Type": "application/json"
             }
         }
@@ -27,20 +29,12 @@ async function cachePurgeFile(urls, zoneId, apiToken){
 
 }
 
-function bytesToBase64(bytes) {
-
-	const binString = Array.from(bytes, (byte) => String.fromCodePoint(byte)).join("")
-
-	return btoa(binString);
-
-}
-
-function tokenMetaData(plotId, b64png){
+function tokenMetaData(plotId){
     
     return JSON.stringify({
         "name": plotId.string(),
         "external_url": `https://trraform.com/${plotId.string()}`, 
-        "image": `data:image/png;base64,${b64png}`, 
+        "image": `https://images.trraform.com/${plotId.string()}.png`, 
         "attributes": [{
             "trait_type": "Depth", 
             "value": plotId.depth()
@@ -49,6 +43,4 @@ function tokenMetaData(plotId, b64png){
 
 }
 
-
-
-export { apiRes, sendTelegramMsg, deleteTelegramMsg, cachePurgeFile, tokenMetaData, bytesToBase64 }
+export { apiRes, cachePurgeFile, tokenMetaData }

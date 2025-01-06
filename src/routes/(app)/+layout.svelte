@@ -18,7 +18,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity } from "$lib/main/store"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
@@ -29,7 +29,6 @@
     let canvasContainer, glCanvas, tagCanvas, tagCtx
     let t1 = 0
     let tagData = [], tags = {}, tagBounds = []
-    let loading = true  
     let ismousedown = false
 
     onMount(async () => {
@@ -79,7 +78,7 @@
         refs.renderer.render( refs.scene, refs.camera )
         updateBg()
 
-        loading = false
+        $loadScreenOpacity = 0
 
     })
 
@@ -586,8 +585,8 @@
 
 <slot/>
 
-{#if loading}
-    <Loading/>
+{#if $loadScreenOpacity !== 0}
+    <Loading bind:opacity={$loadScreenOpacity}/>
 {/if}
 
 <Notification store={notification}/>

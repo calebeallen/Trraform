@@ -3,6 +3,7 @@
 
     export let text = ""
     export let addedClasses = ""
+    export { addedClasses as class }
 
 </script>
 

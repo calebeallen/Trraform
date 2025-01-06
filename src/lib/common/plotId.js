@@ -1,5 +1,5 @@
 
-import { D0_PLOT_COUNT, MAX_DEPTH, PLOT_COUNT, TOKEN_METADATA_BUCKET_URL, PLOT_DATA_BUCKET_URL } from "./constants"
+import { D0_PLOT_COUNT, MAX_DEPTH, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "./constants"
 
 const D0_BIT_MASK = 0xFFFF
 const DN_BIT_MASK = 0xFF
@@ -14,7 +14,7 @@ export default class PlotId {
 
             throw new Error("Invalid plot id")
 
-        return new PlotId(parseInt(hexStr, 16))
+        return new PlotId(id)
 
     }
 
@@ -83,9 +83,9 @@ export default class PlotId {
 
     }
 
-    getMetadataUrl(){
+    getImgUrl(){
 
-        return `${TOKEN_METADATA_BUCKET_URL}/${this.string()}`
+        return `${IMAGES_BUCKET_URL}/${this.string()}`
 
     }
 

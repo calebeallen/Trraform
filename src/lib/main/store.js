@@ -10,6 +10,7 @@ const showConnectErrorModal = writable(false)
 const insideOf = writable()
 const notification = writable([])
 const newPlots = writable(0)
+const loadScreenOpacity = writable(100)
 
 const refs = {
 
@@ -51,4 +52,4 @@ function setNotification(header, text, icon = null, href = "", hrefTargert = "",
 
 }
 
-export { defaultSettings, settings, myPlots, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, setNotification, newPlots }
+export { defaultSettings, settings, myPlots, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, setNotification, newPlots, loadScreenOpacity }

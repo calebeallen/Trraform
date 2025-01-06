@@ -13,29 +13,28 @@ export async function POST({ request, platform }) {
 
         if(!plotId)
 
-            return apiRes({
-                err: true,
-                code: 400,
-                msg: "plotId not provided."
-            }) 
+            throw new Error("plotId not provided.")
 
         if(!reportMsg)
 
-            return apiRes({
-                err: true,
-                code: 400,
-                msg: "reportMsg not provided."
-            }) 
+            throw new Error("reportMsg not provided.")
             
-
         //verify message length
         if(msg.length < REPORT_PLOT_MSG_MINLEN || msg.length > REPORT_PLOT_MSG_MAXLEN)
 
-            return apiRes({
-                err: true,
-                code: 400,
-                msg: `Plot report messsage must be between ${REPORT_PLOT_MSG_MINLEN} and ${REPORT_PLOT_MSG_MAXLEN} characters.`
-            })
+            throw new Error(`Plot report messsage must be between ${REPORT_PLOT_MSG_MINLEN} and ${REPORT_PLOT_MSG_MAXLEN} characters.`)
+
+    } catch (e) {
+
+        return apiRes({
+            err: true,
+            code: 400,
+            msg: e.message
+        })
+
+    }
+
+    try {
 
 
         //filter spam with gpt
@@ -47,9 +46,9 @@ export async function POST({ request, platform }) {
         //     })
 
         //send telegram message
-        const plotObj = await PLOTS.get(plotId)
+        let plotData = await PLOTS.get(plotId)
 
-        if(!plotObj)
+        if(!plotData)
 
             return apiRes({
                 err: true,
@@ -57,7 +56,7 @@ export async function POST({ request, platform }) {
                 msg: "No data exist for plot."
             })
 
-        const plotData = await plotObj.arrayBuffer()
+        plotData = await plotData.arrayBuffer()
         const { name, desc, link, linkLabel } = decodePlotData(new Uint8Array(plotData))
 
         const text = `${plotId}\nReport Msg: "${msg}"\nName: ${name}\nDesc: ${desc}\nLink: ${link}\nLink Label: ${linkLabel}`
@@ -77,6 +76,7 @@ export async function POST({ request, platform }) {
     } catch (e) {
 
         return apiRes({
+            err: true,
             code: 500,
             msg: "Unknown error"
         })

@@ -6,15 +6,7 @@ import PlotId from "@packages/global/plotId"
 
 const WEEK = 7 * 24 * 60 * 60 * 1000
 
-export default POST({ request, platform }){
- 
-		if (request.method !== "POST")
- 
-		    return apiRes({
-                err: true,
-                code: 405,
-                msg: "Method not allowed"
-            })
+export async function POST({ request, platform }){
 
         const { CHAT_ID, REPORT_PLOT_BOT_TOKEN, TELEGRAM_SECRET_TOKEN, PLOTS, TOKEN_METADATA, RESTRICTION, CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN } = env
         const { message } = await request.json()
@@ -117,7 +109,5 @@ export default POST({ request, platform }){
             })
 
         }
- 
-	}
  
 }

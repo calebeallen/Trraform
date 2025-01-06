@@ -95,10 +95,7 @@ export async function POST({ request, platform }) {
     try {
 
         let restriction = await RESTRICTION.get(plotId.string())
-
-        console.log(await PLOTS.get(plotId.string()))
         restriction = restriction ? JSON.parse(restriction) : {}
-
         restrictionEndTime = restriction?.end || 0
         
         if(Date.now() < restrictionEndTime)

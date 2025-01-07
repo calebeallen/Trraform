@@ -1,87 +1,57 @@
 
-
-import { sendTelegramMsg } from '$lib/server/telegram'
-import { decodePlotData } from '$lib/common/utils'
-import { IMAGES_BUCKET_URL } from "$lib/common/constants"
+import PlotId from "$lib/common/plotId"
 
 export async function POST({ request, platform }) {
-    
-    const { REPORT_PLOT_BOT_TOKEN, CHAT_ID, PLOTS, OPENAI_API_KEY, OPENAI_ORG_ID, OPENAI_PROJ_ID } = platform.env
-    const { plotId, reportMsg } = await request.json()
 
-    try {
+    const { DISCORD_PLOT_REPORTS_CHANNEL_ID, DISCORD_BOT_TOKEN } = platform.env
+    let { id, message } = await request.json()
 
-        if(!plotId)
+    id = "0x1"
+    message = "testing hello"
 
-            throw new Error("plotId not provided.")
+    const plotId = PlotId.fromHexString(id)
+    const imgUrl = plotId.getImgUrl()
 
-        if(!reportMsg)
+    const url = `https://discord.com/api/channels/${DISCORD_PLOT_REPORTS_CHANNEL_ID}/messages`;
 
-            throw new Error("reportMsg not provided.")
-            
-        //verify message length
-        if(msg.length < REPORT_PLOT_MSG_MINLEN || msg.length > REPORT_PLOT_MSG_MAXLEN)
-
-            throw new Error(`Plot report messsage must be between ${REPORT_PLOT_MSG_MINLEN} and ${REPORT_PLOT_MSG_MAXLEN} characters.`)
-
-    } catch (e) {
-
-        return apiRes({
-            err: true,
-            code: 400,
-            msg: e.message
-        })
-
+    const headers = {
+        "Authorization": `Bot ${DISCORD_BOT_TOKEN}`,
+        "Content-Type": "application/json"
     }
 
-    try {
+    const body = JSON.stringify({
+        content: message,
+        embeds: [
+            {
+                image: {
+                    url: imgUrl,
+                }
+            }
+        ],
+        components: [
+            {
+                type: 1, // Action Row
+                components: [
+                    {
+                        type: 2,
+                        style: 1,
+                        label: "Ignore", 
+                        custom_id: "ignore",
+                    },
+                    {
+                        type: 2,
+                        style: 4,
+                        label: "Restrict",
+                        custom_id: "restrict",
+                    }
+                ]
+            }
+        ]
+    })
 
+    console.log(await fetch(url, { method: "POST", headers, body }))
 
-        //filter spam with gpt
-        // if(!(await gptFilter(OPENAI_API_KEY, OPENAI_ORG_ID, OPENAI_PROJ_ID, "Is this report highly serious?", msg)))
-
-        //     return apiRes({
-        //         code: 200,
-        //         msg: "Success"
-        //     })
-
-        //send telegram message
-        let plotData = await PLOTS.get(plotId)
-
-        if(!plotData)
-
-            return apiRes({
-                err: true,
-                code: 400,
-                msg: "No data exist for plot."
-            })
-
-        plotData = await plotData.arrayBuffer()
-        const { name, desc, link, linkLabel } = decodePlotData(new Uint8Array(plotData))
-
-        const text = `${plotId}\nReport Msg: "${msg}"\nName: ${name}\nDesc: ${desc}\nLink: ${link}\nLink Label: ${linkLabel}`
-
-        await sendTelegramMsg(
-            CHAT_ID, 
-            REPORT_PLOT_BOT_TOKEN, 
-            text, 
-            `${IMAGES_BUCKET_URL}/${plotId}.png`
-        )
-
-        return apiRes({
-            code: 200,
-            msg: "Success"
-        })
-
-    } catch (e) {
-
-        return apiRes({
-            err: true,
-            code: 500,
-            msg: "Unknown error"
-        })
-
-    }
-
+    return new Response(null, { status: 200 })
 
 }
+

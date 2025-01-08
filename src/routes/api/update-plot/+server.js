@@ -7,6 +7,7 @@ import { apiRes, cachePurgeFile } from "$lib/server/utils"
 import { CONTRACT_ADDRESS } from "$lib/common/constants"
 import { mainnet, sepolia } from "viem/chains"
 import { createPublicClient, http, recoverMessageAddress, parseAbi } from "viem"
+import { logApiErrorDiscord } from "$lib/server/discord"
 
 export async function POST({ request, platform }) {
     
@@ -133,7 +134,7 @@ export async function POST({ request, platform }) {
 
             const pngBuffer = PNG.sync.write(png)
             
-            await IMAGES.put(`${plotId.string()}.png`, new Uint8Array(pngBuffer.buffer), { httpMetadata: { contentType : "image/png" } })
+            await IMAGES.put(`${plotId.string()}.png`, pngBuffer.buffer, { httpMetadata: { contentType : "image/png" } })
             await cachePurgeFile(env, [plotId.getImgUrl()])
 
         }
@@ -144,6 +145,8 @@ export async function POST({ request, platform }) {
         })
 
     } catch(e) {
+
+        await logApiErrorDiscord(env, "Report", payload, e)
 
         return apiRes({
             err: true,

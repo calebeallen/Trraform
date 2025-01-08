@@ -1,6 +1,24 @@
 
 import nacl from "tweetnacl";
 
+async function logApiErrorDiscord(env, apiName, payload, error){
+
+    const { DISCORD_API_ERRORS_CHANNEL_ID, DISCORD_BOT_TOKEN } = env
+    
+    const errorStack = error.stack ? error.stack : error.toString()
+    const content = `================================================================\n\nError in **${apiName}** on **${new Date().toString()}**:\n\n\`\`\`js\n${errorStack}\n\`\`\`\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n================================================================`
+    
+    await fetch(`https://discord.com/api/channels/${DISCORD_API_ERRORS_CHANNEL_ID}/messages`, { 
+        method: "POST", 
+        headers: {
+            "Authorization": `Bot ${DISCORD_BOT_TOKEN}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ content })
+    })
+
+}
+
 async function handleDiscordInteraction(env, request, callback){
 
     const { DISCORD_PUBLIC_KEY } = env
@@ -51,4 +69,4 @@ function hexToUint8Array(hexString) {
 
 }
 
-export { handleDiscordInteraction }
+export { logApiErrorDiscord, handleDiscordInteraction }

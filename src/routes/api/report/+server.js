@@ -1,57 +1,114 @@
 
 import PlotId from "$lib/common/plotId"
+import { apiRes } from "$lib/server/utils"
+import { decodePlotData } from "$lib/common/utils"
+import { REPORT_PLOT_MSG_MINLEN, REPORT_PLOT_MSG_MAXLEN } from "$lib/common/constants"
+import { logApiErrorDiscord } from "$lib/server/discord"
 
 export async function POST({ request, platform }) {
 
-    const { DISCORD_PLOT_REPORTS_CHANNEL_ID, DISCORD_BOT_TOKEN } = platform.env
-    let { id, message } = await request.json()
+    const { env } = platform
+    const { DISCORD_PLOT_REPORTS_CHANNEL_ID, DISCORD_BOT_TOKEN, PLOTS } = env
+    const payload = await request.json()
+    let { plotId, message } = payload
 
-    id = "0x1"
-    message = "testing hello"
+    if(!message || message.length < REPORT_PLOT_MSG_MINLEN || message.length > REPORT_PLOT_MSG_MAXLEN)
 
-    const plotId = PlotId.fromHexString(id)
-    const imgUrl = plotId.getImgUrl()
+        return apiRes({
+            err: true,
+            code: 400,
+            msg: "Invalid report message"
+        })
 
-    const url = `https://discord.com/api/channels/${DISCORD_PLOT_REPORTS_CHANNEL_ID}/messages`;
+    try {
 
-    const headers = {
-        "Authorization": `Bot ${DISCORD_BOT_TOKEN}`,
-        "Content-Type": "application/json"
+        plotId = PlotId.fromHexString(plotId)
+
+        if(!plotId.verify)
+
+            throw new Error("Invalid plot id")
+
+    } catch (e) {
+
+        return apiRes({
+            err: true,
+            code: 400,
+            msg: "Invalid plot id"
+        })
+
     }
 
-    const body = JSON.stringify({
-        content: message,
-        embeds: [
-            {
-                image: {
-                    url: imgUrl,
-                }
-            }
-        ],
-        components: [
-            {
-                type: 1, // Action Row
+    try {
+        
+        const plotIdStr = plotId.string()
+        let plotData = await PLOTS.get(plotIdStr)
+
+        // if(!plotData)
+
+        //     return apiRes({
+        //         err: true,
+        //         code: 400,
+        //         msg: "No plot data was found."
+        //     })
+        
+        // plotData = await plotData.arrayBuffer()
+        const { name, desc, link, linkLabel } = {} // decodePlotData(new Uint8Array(plotData))
+        const text = `"${message}"\n\nName: ${name}\nDesc: ${desc}\nLink: ${link}\nLink Label: ${linkLabel}`
+        const imgUrl = plotId.getImgUrl()
+
+        await fetch(`https://discord.com/api/channels/${DISCORD_PLOT_REPORTS_CHANNEL_ID}/messages`, { 
+            method: "POST", 
+            headers: {
+                "Authorization": `Bot ${DISCORD_BOT_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                content: text,
+                embeds: [
+                    {
+                        image: {
+                            url: imgUrl,
+                        }
+                    }
+                ],
                 components: [
                     {
-                        type: 2,
-                        style: 1,
-                        label: "Ignore", 
-                        custom_id: "ignore",
-                    },
-                    {
-                        type: 2,
-                        style: 4,
-                        label: "Restrict",
-                        custom_id: "restrict",
+                        type: 1, // Action Row
+                        components: [
+                            {
+                                type: 2,
+                                style: 1,
+                                label: "Reinstate", 
+                                custom_id: `${plotIdStr}_reinstate`,
+                            },
+                            {
+                                type: 2,
+                                style: 4,
+                                label: "Restrict",
+                                custom_id: `${plotIdStr}_restrict`,
+                            }
+                        ]
                     }
                 ]
-            }
-        ]
-    })
+            })
+        })
 
-    console.log(await fetch(url, { method: "POST", headers, body }))
+        return apiRes({
+            code: 200,
+            msg: "Success"
+        })
 
-    return new Response(null, { status: 200 })
+    } catch (e) {
+
+        await logApiErrorDiscord(env, "Report", payload, e)
+
+        return apiRes({
+            err: true,
+            code: 500,
+            msg: "Internal error"
+        })
+        
+    }
 
 }
 

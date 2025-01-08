@@ -9,10 +9,10 @@
     const dispatch = createEventDispatcher()
 
     export let plotId
-    let reportMsg = ""
+    let message = ""
     let charCount
 
-    $: charCount = reportMsg.trim().length - 250
+    $: charCount = message.trim().length - 250
 
     async function submit(){
 
@@ -20,9 +20,9 @@
 
         try {
 
-            await fetch( `/reportPlot?plotId=${reportPlotId}`, { 
+            await fetch( `/api/report`, { 
                 method: "POST",
-                body: JSON.stringify({ reportMsg }),
+                body: JSON.stringify({ plotId, message }),
                 headers: { "Content-Type" : "application/json" }
             })
 
@@ -48,7 +48,7 @@
         <p>We appreciate your help with make Trraform a better place for everyone. <b>We do not take actions on reports unless they are highly serious. </b>Spam and abuse of our report system will be automatically filtered.</p>
         <p>Describe your report in detail. If this report involves your personal information, please provide your Discord username.</p>
         <div class="relative w-full">
-            <textarea maxlength="500" bind:value={reportMsg} class="w-full p-1 m-0 mt-1 text-sm align-top transition-colors rounded-lg resize-none outline outline-1 outline-zinc-800 bg-zinc-900" rows="6" placeholder="Minimum 250 characters, maximum 500 characters."></textarea>
+            <textarea maxlength="500" bind:value={message} class="w-full p-1 m-0 mt-1 text-sm align-top transition-colors rounded-lg resize-none outline outline-1 outline-zinc-800 bg-zinc-900" rows="6" placeholder="Minimum 250 characters, maximum 500 characters."></textarea>
             <span class="absolute text-xs opacity-50 bottom-1 right-1 {charCount >= 0 ? "text-green-500" : ""}">{charCount}</span>
         </div>
         <button on:click={submit} class="button0 w-full {charCount < 0 ? "pointer-events-none opacity-50" : ""}">Submit</button>

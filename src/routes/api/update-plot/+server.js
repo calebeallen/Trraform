@@ -3,7 +3,7 @@ import { createPNG } from "$lib/common/buildImage"
 import { PNG } from "pngjs/browser"
 import PlotId from "$lib/common/plotId"
 import { decodePlotData, encodePlotData } from "$lib/common/utils"
-import { apiRes, cachePurgeFile } from "$lib/server/utils"
+import { apiRes, cachePurgeFiles } from "$lib/server/utils"
 import { CONTRACT_ADDRESS } from "$lib/common/constants"
 import { mainnet, sepolia } from "viem/chains"
 import { createPublicClient, http, recoverMessageAddress, parseAbi } from "viem"
@@ -35,7 +35,7 @@ export async function POST({ request, platform }) {
         return apiRes({
             err: true,
             code: 400,
-            msg: "Could not validate request data."
+            msg: "Bad request"
         })
 
     }
@@ -48,11 +48,7 @@ export async function POST({ request, platform }) {
 
         if(!signedMsg)
 
-            return apiRes({
-                err: true,
-                code: 401,
-                msg: "Missing signature."
-            })
+            throw new Error("Missing signature")
 
         const { message, timestamp, signature } = JSON.parse(await signedMsg.text())
         const dt = Date.now() - timestamp 
@@ -87,7 +83,7 @@ export async function POST({ request, platform }) {
         return apiRes({
             err: true,
             code: 401,
-            msg: `Unauthorized/authentication error` 
+            msg: "Unauthorized"
         })
 
     }
@@ -120,7 +116,7 @@ export async function POST({ request, platform }) {
 
         //update plot data
         await PLOTS.put(plotId.string(), encodePlotData(plotData), { httpMetadata: { contentType : "application/octet-stream" } })
-        await cachePurgeFile(env, [plotId.getUrl()])
+        const purgeUrls = [plotId.getUrl()]
 
         //update image
         const pPngData = data.get("png")
@@ -135,9 +131,11 @@ export async function POST({ request, platform }) {
             const pngBuffer = PNG.sync.write(png)
             
             await IMAGES.put(`${plotId.string()}.png`, pngBuffer.buffer, { httpMetadata: { contentType : "image/png" } })
-            await cachePurgeFile(env, [plotId.getImgUrl()])
+            purgeUrls.push(plotId.getImgUrl())
 
         }
+
+        await cachePurgeFiles(env, purgeUrls)
 
         return apiRes({
             code: 200,
@@ -146,7 +144,7 @@ export async function POST({ request, platform }) {
 
     } catch(e) {
 
-        await logApiErrorDiscord(env, "Report", payload, e)
+        await logApiErrorDiscord(env, "update-plot", payload, e)
 
         return apiRes({
             err: true,

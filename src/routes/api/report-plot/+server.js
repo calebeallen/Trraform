@@ -12,6 +12,7 @@ export async function POST({ request, platform }) {
     const payload = await request.json()
     let { plotId, message } = payload
 
+    //validate message
     if(!message || message.length < REPORT_PLOT_MSG_MINLEN || message.length > REPORT_PLOT_MSG_MAXLEN)
 
         return apiRes({
@@ -20,6 +21,7 @@ export async function POST({ request, platform }) {
             msg: "Invalid report message"
         })
 
+    //validate plotId
     try {
 
         plotId = PlotId.fromHexString(plotId)
@@ -43,16 +45,16 @@ export async function POST({ request, platform }) {
         const plotIdStr = plotId.string()
         let plotData = await PLOTS.get(plotIdStr)
 
-        // if(!plotData)
+        if(!plotData)
 
-        //     return apiRes({
-        //         err: true,
-        //         code: 400,
-        //         msg: "No plot data was found."
-        //     })
+            return apiRes({
+                err: true,
+                code: 400,
+                msg: "No plot data was found."
+            })
         
-        // plotData = await plotData.arrayBuffer()
-        const { name, desc, link, linkLabel } = {} // decodePlotData(new Uint8Array(plotData))
+        plotData = await plotData.arrayBuffer()
+        const { name, desc, link, linkLabel } = decodePlotData(new Uint8Array(plotData))
         const text = `"${message}"\n\nName: ${name}\nDesc: ${desc}\nLink: ${link}\nLink Label: ${linkLabel}`
         const imgUrl = plotId.getImgUrl()
 

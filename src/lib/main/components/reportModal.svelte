@@ -20,7 +20,7 @@
 
         try {
 
-            await fetch( `/api/report`, { 
+            await fetch( `/api/report-plot`, { 
                 method: "POST",
                 body: JSON.stringify({ plotId, message }),
                 headers: { "Content-Type" : "application/json" }

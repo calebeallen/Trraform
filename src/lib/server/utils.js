@@ -1,5 +1,4 @@
 
-import axios from "axios"
 import { ALLOWED_ORIGINS, CACHE_PURGE_ORIGIN } from "$lib/common/constants"
 
 function apiRes({ code = 200, msg = "", err = false, headers = { "Access-Control-Allow-Origin": ALLOWED_ORIGINS, "Content-Type": "application/json" } } = {}) {
@@ -12,35 +11,51 @@ function apiRes({ code = 200, msg = "", err = false, headers = { "Access-Control
 
 }
 
-async function cachePurgeFile(env, urls){
+async function cachePurgeFiles(env, urls){
 
     const { CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN } = env
 
-    await axios.post(`https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`, 
-        {
-            files: urls.map(url => ({ url, headers : { "Origin": CACHE_PURGE_ORIGIN } })) 
-        },{
-            headers : {
-                "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
-                "Content-Type": "application/json"
-            }
+    await fetch(`https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`, JSON.stringify({
+        files: urls.map(url => ({ url, headers : { "Origin": CACHE_PURGE_ORIGIN } })) 
+    }), {
+        headers : {
+            "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
+            "Content-Type": "application/json"
         }
-    ).catch(e => console.log(e.response.data.errors[0]))
-
-}
-
-function tokenMetaData(plotId){
-    
-    return JSON.stringify({
-        "name": plotId.string(),
-        "external_url": `https://trraform.com/${plotId.string()}`, 
-        "image": `https://images.trraform.com/${plotId.string()}.png`, 
-        "attributes": [{
-            "trait_type": "Depth", 
-            "value": plotId.depth()
-        }]
     })
+    .catch(e => console.log(e.response.data.errors[0]))
 
 }
 
-export { apiRes, cachePurgeFile, tokenMetaData }
+async function getItemWithWorkerCache(platform, bindingName, item){
+
+    const { caches, context, env } = platform
+    const binding = env[bindingName]
+    const cache = caches.default
+    const key = new Request(`item://${bindingName}/${item}`)
+
+    let response = await cache.match(key);
+
+    if (response)
+
+        return response
+
+    const object = await binding.get(item)
+
+    if(!object)
+
+        return null
+
+    const headers = new Headers()
+    object.writeHttpMetadata(headers)
+    headers.set('etag', object.httpEtag)
+
+    response = new Response(object.body, { headers })
+
+    context.waitUntil(cache.put(key, response.clone()))
+
+    return response
+
+}
+
+export { apiRes, cachePurgeFiles, getItemWithWorkerCache }

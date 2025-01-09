@@ -15,15 +15,17 @@ async function cachePurgeFiles(env, urls){
 
     const { CLOUDFLARE_ZONE_ID, CLOUDFLARE_API_TOKEN } = env
 
-    await fetch(`https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`, JSON.stringify({
-        files: urls.map(url => ({ url, headers : { "Origin": CACHE_PURGE_ORIGIN } })) 
-    }), {
+    await fetch(`https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`, {
+        method: "POST",
+        body: JSON.stringify({
+            files: urls.map(url => ({ url, headers : { "Origin": CACHE_PURGE_ORIGIN } })) 
+        }),
         headers : {
             "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,
             "Content-Type": "application/json"
         }
     })
-    .catch(e => console.log(e.response.data.errors[0]))
+    .catch(e => console.log(e))
 
 }
 

@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base{
+
+    *{
+
+        @apply text-left text-white;
+    
+    }    
+    
+    body{
+
+        @apply overflow-hidden bg-black touch-none;
+
+    }
+
+    .divider{
+
+        @apply w-full border-b border-zinc-700;
+
+    }
+
+    .panel-container{
+
+        @apply absolute p-2 rounded-xl bg-zinc-900 border-[1px] border-zinc-800; 
+
+    }
+
+    .panel-number-input{
+
+        @apply w-16 px-1 py-0.5 m-0 text-xs outline-none transition-colors bg-zinc-800 border-[1px] border-zinc-700 rounded-lg;
+
+    }
+
+    .panel-number-input::-webkit-outer-spin-button,
+    .panel-number-input::-webkit-inner-spin-button {
+
+        -webkit-appearance: none;
+
+    }  
+
+    .panel-number-input:focus{
+
+        @apply bg-zinc-700;
+
+    }
+
+    .panel-input{
+
+        @apply p-1 text-xs transition-colors rounded bg-zinc-800 placeholder-zinc-400;
+
+    }
+
+    .panel-input:focus{
+
+        @apply outline-none bg-zinc-700;
+
+    }
+
+    .editor-btn{
+
+        @apply w-full p-1 text-xs text-center transition-colors rounded-lg bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-800;
+
+    }
+
+}

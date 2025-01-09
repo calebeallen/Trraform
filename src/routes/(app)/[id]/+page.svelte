@@ -372,7 +372,7 @@
     </div>
 </header>
 
-<div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { profile === null ? "-translate-x-[calc(100%+20px)]" : ""}">
+<div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
     {#await profile || new Promise(() => {})}
         <div class="w-full h-20 animate-pulse">
             <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
@@ -386,17 +386,20 @@
                     <button on:click={() => {
                         sharePlotId = id
                         showShareModal = true
-                    }} class="relative w-4 h-4 group">
+                    }} class="relative w-4 h-4 select-none group">
                         <img src="/share.svg" alt="report">   
                         <span class="plot-option-tag">Share</span>
                     </button>
-                    <button on:click={() => {
-                        reportPlotId = id
-                        showReportModal = true
-                    }} class="relative w-4 h-4 group">
-                        <img src="/report.svg" alt="report">
-                        <span class="plot-option-tag">Report</span>
-                    </button>
+                    {#if minted}
+                        <button on:click={() => {
+                            reportPlotId = id
+                            showReportModal = true
+                            refs.disabled = true
+                        }} class="relative w-4 h-4 select-none group">
+                            <img src="/report.svg" alt="report">
+                            <span class="plot-option-tag">Report</span>
+                        </button>
+                    {/if}
                 </div>
             </div>
             <div class="text-xs opacity-70">id: {id}</div>
@@ -421,7 +424,10 @@
 </div>
 
 {#if showReportModal}
-    <ReportModal bind:plotId={reportPlotId} on:close={() => showReportModal = false}/>
+    <ReportModal bind:plotId={reportPlotId} on:close={() => {
+        showReportModal = false
+        refs.disabled = false
+    }}/>
 {/if}
 
 {#if showSettingsModal}
@@ -448,7 +454,7 @@
 
     .plot-option-tag {
 
-        @apply absolute text-xs font-semibold transition-opacity opacity-0 pointer-events-none select-none w-max bottom-0 -translate-x-1/2 translate-y-full left-1/2 group-hover:opacity-100;
+        @apply absolute text-xs font-semibold transition-opacity opacity-0 pointer-events-none select-none w-max bottom-0 -translate-x-1/2 -translate-y-full mb-0.5 left-1/2 group-hover:opacity-100;
 
     }
 

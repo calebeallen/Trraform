@@ -6,7 +6,7 @@
 
     body {
 
-        @apply bg-black overflow-x-hidden touch-pan-y overscroll-none text-white font-sans;        
+        @apply bg-black overflow-x-hidden touch-pan-y overscroll-none text-white text-left font-sans;        
         color-scheme: dark;
 
     }

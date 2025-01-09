@@ -1,0 +1,6 @@
+<svg viewBox="10 10 80 80" xml:space="preserve">
+    <polygon style="fill:#FFFFFF" points="50,45.7 32.2,56 50,66.2 67.8,56"/>
+    <polygon style="fill:#EDEDED" points="67.8,56 67.8,76.5 50,86.8 32.2,76.5 32.2,56 32.2,56 50,45.7 67.8,56"/>
+    <polygon style="fill:#E2E2E2" points="50,66.2 32.2,55.9 32.2,76.5 50,86.7"/>
+    <path style="fill:#FFFFFF" d="M57.2,30.1L50,43.3l-7.2-13.2h2.8V14.6c0-0.8,0.6-1.4,1.4-1.4H53c0.8,0,1.4,0.6,1.4,1.4v15.6H57.2z"/>
+</svg>

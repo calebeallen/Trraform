@@ -109,7 +109,7 @@ export async function POST({ request, platform }) {
 
     }
 
-    try {
+    // try {
 
         plotData = decodePlotData( new Uint8Array( await plotData.arrayBuffer() ), plotId.depth(), true )
         plotData.rEnd = restrictionEndTime
@@ -142,16 +142,18 @@ export async function POST({ request, platform }) {
             msg: "Success"
         })
 
-    } catch(e) {
+    // } catch(e) {
 
-        await logApiErrorDiscord(env, "update-plot", payload, e)
+    //     console.log(e)
 
-        return apiRes({
-            err: true,
-            code: 500,
-            msg: "An unknown error occurred."
-        })
+    //     await logApiErrorDiscord(env, "update-plot", null, e)
+
+    //     return apiRes({
+    //         err: true,
+    //         code: 500,
+    //         msg: "An unknown error occurred."
+    //     })
         
-    }
+    // }
 
 }

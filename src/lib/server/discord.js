@@ -6,7 +6,7 @@ async function logApiErrorDiscord(env, apiName, payload, error){
     const { DISCORD_API_ERRORS_CHANNEL_ID, DISCORD_BOT_TOKEN } = env
     
     const errorStack = error.stack ? error.stack : error.toString()
-    const content = `================================================================\n\nError in **${apiName}** on **${new Date().toString()}**:\n\n\`\`\`js\n${errorStack}\n\`\`\`\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n================================================================`
+    const content = `================================================================\n\nError in **${apiName}** on **${new Date().toString()}**:\n\n\`\`\`js\n${errorStack}\n\`\`\`\`\`\`json\n${JSON.stringify(payload ?? {}, null, 2)}\n\`\`\`\n================================================================`
     
     await fetch(`https://discord.com/api/channels/${DISCORD_API_ERRORS_CHANNEL_ID}/messages`, { 
         method: "POST", 

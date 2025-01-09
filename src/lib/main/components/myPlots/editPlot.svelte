@@ -81,6 +81,12 @@
 
             }
 
+            console.log(isSameBuild(buildData, _buildData))
+
+            if(isSameBuild(buildData, _buildData))
+
+                return
+
             const maxbs = MAX_BUILD_SIZES[editingPlot.id.depth()]
             const bs = _buildData[1]
 
@@ -106,6 +112,22 @@
             pushNotification(notification, "Error Uploading Build", "An unknown error occured.")
 
         }
+
+    }
+
+    function isSameBuild(b1, b2){
+
+        if(!(b1 instanceof Uint16Array) || !(b2 instanceof Uint16Array) || b1.length !== b2.length)
+
+            return false
+
+        for(let i = 0; i < b1.length; i++)
+
+            if(b1[i] !== b2[i])
+
+                return false
+
+        return true
 
     }
 
@@ -135,7 +157,7 @@
     $:{
 
         smpChanged = smp != origSmp
-        changed = name !== editingPlot.name || desc !== editingPlot.desc || link !== editingPlot.link || buildData !== editingPlot.buildData || linkLabel !== editingPlot.linkLabel
+        changed = name !== editingPlot.name || desc !== editingPlot.desc || link !== editingPlot.link || linkLabel !== editingPlot.linkLabel || buildData !== editingPlot.buildData
         errors = []
         validUrl = validSmp = true
 
@@ -210,7 +232,7 @@
                 })
                 payload.append("plotData", new Blob([encoded]))
 
-                if(buildData){
+                if(buildData !== editingPlot.buildData){
 
                     const p = preprocessPNG(await MyPlot.getMesh(buildData))
                     payload.append("png", new Blob([p]))
@@ -249,7 +271,6 @@
 
         } catch(e) {
 
-            console.log(e)
             pushNotification(notification, "Something went wrong..", `Plot ${id} could not be updated.`)
             
         }
@@ -266,10 +287,10 @@
 <div class="w-full h-full overflow-x-hidden overflow-y-scroll hide-scrollbar">
     <div class="flex flex-row flex-wrap justify-center gap-3 px-1 py-3">
         <div class="relative flex-none overflow-hidden w-60 h-80 rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
-            <img src={editingPlot.imgUrl} alt="build"/> 
+            <img src={imgUrl} alt="build"/> 
             <div class="absolute bottom-0 flex flex-col w-full gap-0.5 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <PlotWidgetOption on:click={loadFromEditor} src="/floppy.svg" alt="load" text="Load from editor"/>
-                <PlotWidgetOption on:click={buildInput.click} src="/upload.svg" alt="upload" text="Upload build file"/>
+                <PlotWidgetOption on:click={() => buildInput.click()} src="/upload.svg" alt="upload" text="Upload build file"/>
                 <PlotWidgetOption on:click={download} src="/download.svg" alt="download" text="Download"/>
             </div>
         </div>

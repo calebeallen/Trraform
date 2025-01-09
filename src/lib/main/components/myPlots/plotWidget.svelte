@@ -69,7 +69,7 @@
                 </div>
             {/if}   
         </div>
-        <img src={plotData.imgUrl} alt="build"/> 
+        <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
         <div class="absolute bottom-0 flex flex-col w-full gap-0.5 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <PlotWidgetOption on:click={() => goto(plotData.id)} src="/navigate.svg" alt="navigate" text="Go to plot"/>
             {#if !plotData.banned}

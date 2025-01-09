@@ -8,7 +8,6 @@
     import { TransformableGlb } from "$lib/editor/transform"
 	import { Euler, Vector3 } from "three";
     import Tool from "$lib/editor/components/utils/tool.svelte";
-    import { RotatePositiveXSVG, RotateNegativeXSVG, RotatePositiveYSVG, RotateNegativeYSVG, DuplicateSVG, SnapToGridSVG, SnapToTopSVG } from "@packages/ui";
 
     let last, tranX, tranY, tranZ, rotX, rotY, rotZ, scale
 
@@ -138,7 +137,7 @@
 
         }
 
-        scale = scale < 0 ? 0 : scale > 4 ? 4 : scale
+        scale = scale < 0 ? 0 : scale > 10 ? 10 : scale
 
         addEvent( [ REFS.transform.updateScaleFromUi(scale) ], $MODE )
 
@@ -262,7 +261,7 @@
 </script>
 
 
-<div transition:fly={{x: 300, duration: 150}} class="absolute space-y-2 transition-all right-2 panel-container bottom-2">
+<div transition:fly={{x: 300, duration: 150}} class="absolute space-y-2 transition-all select-none right-2 panel-container bottom-2">
     <div class="text-sm font-semibold">Transform</div>
     <div class="container">
         <div class="my-auto text-xs">Translate X</div>
@@ -326,8 +325,8 @@
             <div class="text-sm font-semibold">Converting...</div>
             <div class="text-xs">{$FACES_CONVERTED.toLocaleString()} of {$TOTAL_CONVERT.toLocaleString()} faces proccesed</div>
         </div>
-        <div class="absolute bottom-0 left-0 w-full h-1 overflow-hidden">
-            <div class="absolute bottom-0 left-0 w-full h-full -translate-x-full bg-blue-600" style="left: {Math.floor(($FACES_CONVERTED / $TOTAL_CONVERT) * 100)}%"></div>
+        <div class="absolute bottom-0 left-0 w-full h-4 overflow-hidden rounded-xl">
+            <div class="absolute bottom-0 left-0 w-full h-1 -translate-x-full bg-blue-600" style="left: {Math.floor(($FACES_CONVERTED / $TOTAL_CONVERT) * 100)}%"></div>
         </div>
     {:else}
         <div class="flex gap-2">

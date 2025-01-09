@@ -1,12 +1,11 @@
 
 <script>
 
-    import Modal from "./modal.svelte"
-    import { DiscordSVG } from "@packages/ui";
+    import Modal from "$lib/common/components/modal.svelte"
 
 </script>
 
-<Modal header="Documentation" addedClasses="max-w-screen-lg" on:close>
+<Modal class="max-w-screen-lg" header="Documentation" on:close>
     <div class="px-4 flex flex-col gap-3 overflow-y-scroll max-h-[calc(100vh-200px)]">
         <h2>Camera Controls</h2>
         <section>
@@ -89,9 +88,7 @@
         </section>
         <a href="/" class="mx-auto documentation-note">
             <h2>Have Questions? Feel free to ask on our Discord!</h2>
-            <div class="w-8 h-8 mx-auto">
-                <DiscordSVG/>
-            </div>
+            <img class="w-8 h-8 mx-auto" src="/discord.svg" alt="discord">
         </a>
     </div>
 </Modal>

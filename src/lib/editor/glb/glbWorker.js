@@ -147,7 +147,6 @@ onmessage = e => {
 
     postMessage( { position, color, chunk: chunk, faceCount }, transferable )
 
-    //remove reference to free memory when worker is idle
     position = []
     color = []
     chunk = null
@@ -156,7 +155,7 @@ onmessage = e => {
 
 function processFace(){
 
-    normal.copy(V2).sub(V1).cross( V3.clone().sub(V1) )
+    normal.copy(V2).sub(V1).cross( V3.clone().sub(V1) ).normalize()
 
     max.copy(V1).max(V2).max(V3)
     min.copy(V1).min(V2).min(V3)
@@ -170,12 +169,14 @@ function processFace(){
 
     //start each block at its border position relative to the bounding box of the face
     //project blocks in xy plane onto face
+
     for(var x = 0; x < dimensions.x; x++)
     for(var y = 0; y < dimensions.y; y++){
 
         projectBlock( x, y, 0, kh )
 
     }
+
 
     //project blocks in yz plane onto face
     for(var y = 0; y < dimensions.y; y++)
@@ -184,6 +185,7 @@ function processFace(){
         projectBlock(  0, y, z, ih )
 
     }
+    
 
     //project blocks in xz plane onto face
     for(var z = 0; z < dimensions.z; z++)
@@ -192,6 +194,7 @@ function processFace(){
         projectBlock(  x, 0, z, jh )
 
     }
+
 
 }
 
@@ -302,6 +305,11 @@ function drawBlock(){
             uv.multiplyScalar(r).floor()
 
             const i = ( uv.y * r + uv.x ) * 4
+
+            //handle alpha channel
+            if(t[i+3] < 0.5)
+
+                return
 
             for(let j = 0; j < 3; j++)
                 color.push(t[i+j] / 255)

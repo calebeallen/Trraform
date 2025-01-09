@@ -1,10 +1,9 @@
 
 <script>
     
-	import { GRID_SIZING, NEW_BUILD_MODAL, NOTIFICATION, REFS } from "../../store";
-	import { verifyBuild, pushNotification } from "@packages/global/functions";
-    import { PlusSVG, UploadSVG } from "@packages/ui";
-    import Modal from "./modal.svelte";
+	import { GRID_SIZING, NEW_BUILD_MODAL, NOTIFICATION, REFS } from "$lib/editor/store";
+	import { verifyBuild, pushNotification } from "$lib/common/utils";
+    import Modal from "$lib/common/components/modal.svelte"
 
     let importInput
 
@@ -56,19 +55,15 @@
 </script>
 
 <input bind:this={importInput} on:change={importFile} type="file" class="hidden">
-<Modal header="New Build" addedClasses="max-w-xs" on:close={() => $NEW_BUILD_MODAL = false}>
+<Modal class="max-w-xs" header="New Build" on:close={() => $NEW_BUILD_MODAL = false}>
     <p class="text-sm">You cannot undo this, be sure to download your current build.</p>
     <div class="flex w-full gap-4 mt-3">
         <button on:click={newBuild} class="option group">
-            <div class="option-svg">
-                <PlusSVG/>
-            </div>
+            <img class="option-svg" src="/plus.svg" alt="plus">
             <span class="option-text">New</span>
         </button>
         <button on:click={() => importInput.click()} class="option group">
-            <div class="option-svg">
-                <UploadSVG/>
-            </div>
+            <img class="option-svg" src="/upload.svg" alt="upload">
             <span class="option-text">Import File</span>
         </button>
     </div>

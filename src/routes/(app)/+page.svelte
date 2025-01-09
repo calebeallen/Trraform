@@ -71,7 +71,7 @@
         <nav class="w-full mt-4 space-y-3">
             <a class="nav-option" href="/0x00">Explore</a>
             {#if !$isMobileBrowser}
-                <a class="nav-option" target="_blank" href="/editor">Build</a>
+                <a class="nav-option" href="/editor">Build</a>
             {/if}
         </nav>
     </div>
@@ -94,8 +94,8 @@
                     <div transition:fly={{ x: 50, duration: 500 }} class="text-blue-500 section-tag">Create and Explore</div>
                     <h1 transition:fly={{ x: 50, duration: 500, delay: 100 }}>Build Your World</h1>
                     <div transition:fly={{ x: 50, duration: 500, delay: 200 }} class="w-full pr-2 space-y-1 sm:max-w-md sm:space-y-2">
-                        <p>Create <b class="text-lime-300">worlds within worlds</b>, and bring your unique creations to life alongside <b class="text-lime-300">millions</b> of others.</p>
-                        <p>With <b class="text-lime-300">unmatched innovation</b>, Trraform offers a truly unique approach to crypto—an experience tailored not only to holders, but to <b class="text-lime-300">everyone</b>.</p>
+                        <p>Each block houses a plot that you can purchase and use to build anything you want. These plots have subplots that can hold their own builds, and those subplots have subplots! The possiblities of what you can create are truly endless. Bring your unique creations to life alongside <b class="text-lime-300">millions</b> of others.</p>
+                        <p>With <b class="text-lime-300">unmatched innovation</b>, Trraform offers a truly unique approach to crypto—a project tailored not only to holders, but to <b class="text-lime-300">everyone</b>.</p>
                     </div>
                 </div>
                 <div transition:fly={{ y: 120, duration: 500 }} class="relative hidden mr-2 w-72 md:w-96 shrink-0 sm:block aspect-square bg-radial-gradient">
@@ -132,6 +132,9 @@
     </section>
     <section bind:this={s2}>
         {#if renderS2}
+            <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 opacity-10">
+                <img class="rotate-12 w-[50vw] max-w-screen-md min-w-[500px]" src="eth.svg" alt="eth">
+            </div>
             <div class="accent-container"> 
                 <div class="accent-circle-container">
                     <div transition:fade={{ duration: 200 }} class="accent-circle outline-blue-500"></div>
@@ -140,7 +143,7 @@
                     <div transition:fly={{ y: -1000, duration: 800 }} class="accent-line from-blue-500 to-cyan-500"></div>
                 </div>
                 <div class="-translate-y-2">
-                    <div in:fade={{ duration: 200, delay: 800  }} out:fade={{ duration: 200 }} class="{renderS2 ? "" : "opacity-0"} delay-500 accent-circle outline-cyan-500"></div>
+                    <div in:fade={{ duration: 200, delay: 800 }} out:fade={{ duration: 200 }} class="{renderS2 ? "" : "opacity-0"} delay-500 accent-circle outline-cyan-500"></div>
                 </div>
             </div>
             <div>
@@ -210,10 +213,6 @@
             </div>
         </div>
     </footer>
-    <!-- eth svg -->
-    <div class="absolute -translate-y-1/2 translate-x-32 right-0 bottom-[35%] opacity-10 -z-10">
-        <img class="rotate-12 w-[50vw] max-w-screen-md min-w-[500px] aspect-square" src="eth.svg" alt="eth">
-    </div>
 </div>
 
 
@@ -240,7 +239,7 @@
 
     section {
 
-        @apply flex items-stretch min-h-64 w-full;
+        @apply relative flex items-stretch min-h-64 w-full;
 
     }
 

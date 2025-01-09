@@ -1,4 +1,4 @@
-<svg viewBox="10 10 80 80">
+<svg viewBox="10 10 80 80" xmlns="http://www.w3.org/2000/svg">
     <polygon fill="#EDEDEE" points="50.1,32.5 50.1,55.8 29.8,67.6 9.5,55.8 9.5,32.5 9.5,32.5 29.8,20.8"/>
     <polygon fill="#FFF" points="29.8,20.8 9.5,32.5 29.8,44.1 50.1,32.5"/>
     <polygon fill="#E2E3E4" points="29.8,44.1 9.5,32.4 9.5,55.8 29.8,67.4"/>

@@ -52,22 +52,6 @@ const REFS = {
 
 }
 
-let notifTimeout = null
-
-function pushNotification( { header = "", content = "", icon = "", href = "", hrefTarget = "", duration = 3000 } = {} ){
-
-    if(notifTimeout)
-
-        clearTimeout(notifTimeout)
-
-    NOTIFICATION.set({ header, content, icon, href, hrefTarget })
-
-    // if(duration !== null)
-
-    //     notifTimeout = setTimeout(() => NOTIFICATION.set(null), duration)
-
-}
-
 function addEvent( events, modeBefore, modeAfter = modeBefore ){
 
     REFS.eventIndex++
@@ -132,4 +116,4 @@ class ConvertEvent {
 
 }
 
-export { BUILD_SIZE, LOADING, EDITOR_VERSION, GRID_SIZING, MODE, COLOR_INDEX, EYEDROP, OBJECT_SELECT, COLOR_SELECT, OVERLAP, SELECTED_PLOT, SHOW_BLOCK_PANEL, PLOTS_PLACED, CONVERTING, SELECTED, DOWNLOAD_MODAL, NEW_BUILD_MODAL, REFS, FACES_CONVERTED, TOTAL_CONVERT, NOTIFICATION, SHOW_DOCUMENTATION, SHOW_ONBOARDING_MODAL, updateTransformUi, pushNotification, addEvent, ModifyEvent, InitTransformable, TransformEvent, EndTransformable, ConvertEvent }
+export { BUILD_SIZE, LOADING, EDITOR_VERSION, GRID_SIZING, MODE, COLOR_INDEX, EYEDROP, OBJECT_SELECT, COLOR_SELECT, OVERLAP, SELECTED_PLOT, SHOW_BLOCK_PANEL, PLOTS_PLACED, CONVERTING, SELECTED, DOWNLOAD_MODAL, NEW_BUILD_MODAL, REFS, FACES_CONVERTED, TOTAL_CONVERT, NOTIFICATION, SHOW_DOCUMENTATION, SHOW_ONBOARDING_MODAL, updateTransformUi, addEvent, ModifyEvent, InitTransformable, TransformEvent, EndTransformable, ConvertEvent }

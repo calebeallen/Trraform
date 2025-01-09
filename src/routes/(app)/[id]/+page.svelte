@@ -382,7 +382,7 @@
         <div>
             <div class="flex items-center justify-between gap-1">
                 <h3 class="max-w-full break-all w-max">{name}</h3>
-                <div>
+                <div class="select-none">
                     <button on:click={() => {
                         sharePlotId = id
                         showShareModal = true

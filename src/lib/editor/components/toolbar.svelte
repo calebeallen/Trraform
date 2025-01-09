@@ -379,7 +379,7 @@
 />
 
 <input bind:this={importInput} on:change={importInputChange} type="file" class="hidden">
-<div transition:fly={{x: -50, duration: 200}} class="fixed p-1 space-y-1 -translate-y-1/2 left-2 top-1/2 panel-container {$CONVERTING ? "pointer-events-none" : ""}">
+<div transition:fly={{x: -50, duration: 200}} class="fixed select-none p-1 space-y-1 -translate-y-1/2 left-2 top-1/2 panel-container {$CONVERTING ? "pointer-events-none" : ""}">
     <Tool on:click={() => $NEW_BUILD_MODAL = true} tipHeader="New Build">
         <img src="/plus.svg" alt="plus" slot="icon">
     </Tool>

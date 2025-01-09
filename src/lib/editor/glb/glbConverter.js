@@ -72,7 +72,7 @@ export default class GLBConverter {
     }
 
     load( file ){
-
+        
         return new Promise( ( resolve, reject ) => {
 
             const fr = new FileReader()
@@ -146,7 +146,7 @@ export default class GLBConverter {
                             TOTAL_CONVERT.update(x => x + position.length / 9)
 
                         const map = mesh.material.map
-                        
+                        console.log(chunk.texture)
                         //categorize chunk
                         if(map){
 
@@ -164,14 +164,14 @@ export default class GLBConverter {
 
                             newGeom.setAttribute( "uv", geom.attributes.uv )
 
-                            material = new MeshBasicMaterial( { map: mesh.material.map, side: DoubleSide } )
+                            material = new MeshBasicMaterial( { map: mesh.material.map, side: DoubleSide, transparent: true } )
         
                         }else if(mesh.material.color){
 
                             chunk.type = 'material'
                             chunk.color = mesh.material.color
 
-                            material = new MeshBasicMaterial( { color: mesh.material.color, side: DoubleSide } )
+                            material = new MeshBasicMaterial( { color: mesh.material.color, side: DoubleSide, transparent: true  } )
         
                         }else if(color){
         
@@ -180,14 +180,14 @@ export default class GLBConverter {
 
                             newGeom.setAttribute( "color", geom.attributes.color )
 
-                            material = new MeshBasicMaterial( { vertexColors: true, side: DoubleSide } )
+                            material = new MeshBasicMaterial( { vertexColors: true, side: DoubleSide, transparent: true  } )
         
                         } else {
 
                             chunk.type = 'material'
                             chunk.color = new Color(0xffffff)
 
-                            material = new MeshBasicMaterial( { color: chunk.color, side: DoubleSide } )
+                            material = new MeshBasicMaterial( { color: chunk.color, side: DoubleSide, transparent: true  } )
 
                         }
 

@@ -1,10 +1,9 @@
 
 <script>
 
-    import { SHOW_DOCUMENTATION } from "../../store";
-    import Modal from "./modal.svelte"
-    import { ArrowRightDown } from "@packages/ui"
-    import { createEventDispatcher } from "svelte";
+    import { SHOW_DOCUMENTATION } from "$lib/editor/store"
+    import Modal from "$lib/common/components/modal.svelte"
+    import { createEventDispatcher } from "svelte"
 
     const dispatch = createEventDispatcher()
 
@@ -17,7 +16,7 @@
 
 </script>
 
-<Modal addedClasses="max-w-lg" header="Trraform Editor" on:close>
+<Modal class="max-w-lg" header="Trraform Editor" on:close>
     <div class="space-y-3">
         <div class="flex items-center gap-2 justify-evenly">
             <div class="flex-1 h-px bg-zinc-600"></div>
@@ -34,15 +33,11 @@
         <div class="space-y-2">
             <button class="option" on:click={showDocs}> 
                 <span>Read the docs</span>
-                <div class="w-5 h-5">
-                    <ArrowRightDown/>
-                </div>
+                <img class="w-5 h-5" src="./arrowRightDown.svg" alt="right arrow down">
             </button>
             <button class="option" on:click={() => {}}>
                 <span>Join the Discord</span>
-                <div class="w-5 h-5">
-                    <ArrowRightDown/>
-                </div>
+                <img class="w-5 h-5" src="./arrowRightDown.svg" alt="right arrow down">
             </button>
         </div>
     </div>

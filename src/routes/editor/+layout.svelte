@@ -47,7 +47,7 @@
 {:else}
     <GridSizing/>
 {/if}
-<a href="/" class="fixed w-7 h-7 opacity-50 top-2 left-2">
+<a href="/" class="fixed m-2 opacity-50 w-7 h-7 top-2 left-2">
     <img src="/logo.svg" alt="Logo">
 </a>
 
@@ -63,4 +63,4 @@
     <Loading/>
 {/if}
 
-<Notification notifStore={NOTIFICATION}/>
+<Notification store={NOTIFICATION}/>

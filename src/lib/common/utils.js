@@ -165,6 +165,7 @@ function disposeMesh( mesh ){
 //YOU CHANGED THIS
 function condense(buildData, buildSize){
 
+    console.log(buildSize)
     const condensed = [0, buildSize] //editor version 0
 
     const MB15 = 0x7fff

@@ -87,14 +87,8 @@ export default class Plot extends PlotData {
 
                 try {
 
-                    const encodedBuffer = await this.id.fetch()
-                    if(encodedBuffer === null) 
-                        
-                        throw new Error()
-
-                    const encoded = new Uint8Array(encodedBuffer)
                     const task = new Task("generate-plot", {
-                        encoded,
+                        id: this.id.id,
                         depth: this.id.depth()
                     })
                     const data = await task.run()

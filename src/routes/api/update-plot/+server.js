@@ -104,19 +104,18 @@ export async function POST({ request, platform }) {
         return apiRes({
             err: true,
             code: 400,
-            msg: "Cannot update restricted plot."
+            msg: e.message
         })
 
     }
 
-    // try {
+    try {
 
         plotData = decodePlotData( new Uint8Array( await plotData.arrayBuffer() ), plotId.depth(), true )
         plotData.rEnd = restrictionEndTime
 
         //update plot data
         await PLOTS.put(plotId.string(), encodePlotData(plotData), { httpMetadata: { contentType : "application/octet-stream" } })
-        const purgeUrls = [plotId.getUrl()]
 
         //update image
         const pPngData = data.get("png")
@@ -131,29 +130,28 @@ export async function POST({ request, platform }) {
             const pngBuffer = PNG.sync.write(png)
             
             await IMAGES.put(`${plotId.string()}.png`, pngBuffer.buffer, { httpMetadata: { contentType : "image/png" } })
-            purgeUrls.push(plotId.getImgUrl())
 
         }
 
-        await cachePurgeFiles(env, purgeUrls)
+        await cachePurgeFiles(env, [plotId.getUrl()])
 
         return apiRes({
             code: 200,
             msg: "Success"
         })
 
-    // } catch(e) {
+    } catch(e) {
 
-    //     console.log(e)
+        console.log(e)
 
-    //     await logApiErrorDiscord(env, "update-plot", null, e)
+        await logApiErrorDiscord(env, "update-plot", null, e)
 
-    //     return apiRes({
-    //         err: true,
-    //         code: 500,
-    //         msg: "An unknown error occurred."
-    //     })
+        return apiRes({
+            err: true,
+            code: 500,
+            msg: "An unknown error occurred."
+        })
         
-    // }
+    }
 
 }

@@ -6,6 +6,7 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
     import PlotWidgetOption from "./plotWidgetOption.svelte";
+    import { CONTRACT_ADDRESS } from "$lib/common/constants"
 
     export let editingPlot
     export let plot
@@ -50,7 +51,7 @@
 
 </script>
 
-<div class="relative flex-none overflow-hidden transition-colors w-60 h-80 rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
+<div class="relative flex-none overflow-hidden transition-colors w-60 aspect-[0.75] rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
     {#if loading}
         <div class="w-full h-full animate-pulse bg-zinc-900">
             <div class="head-container">
@@ -75,7 +76,7 @@
             {#if !plotData.banned}
                 <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
             {/if} 
-            <PlotWidgetOption text="Sell"/>
+            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://testnets.opensea.io/assets/sepolia/${CONTRACT_ADDRESS}/${plot?.id?.id}`)}/>
         </div>
     {/if}
 </div>

@@ -91,7 +91,7 @@ export default class RenderManager{
 
         if(seconds != this.throttleSeconds){
 
-            this.throttle = 20
+            this.throttle = 10
             this.throttleSeconds = seconds
 
         }

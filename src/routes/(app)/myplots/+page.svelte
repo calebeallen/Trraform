@@ -55,6 +55,26 @@
 
 </script>
 
+<svelte:head>
+    
+    <!-- HTML Meta Tags -->
+    <title>Trraform</title>
+    <meta name="description" content="Millions of worlds powered by Ethereum.">
+
+    <!-- Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://trraform.com">
+    <meta property="og:title" content="Trraform">
+    <meta property="og:image" content="https://trraform.com/ogImage.png">
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="trraform.com">
+    <meta property="twitter:url" content="https://trraform.com">
+    <meta name="twitter:title" content="Trraform">
+    <meta name="twitter:image" content="https://trraform.com/ogImage.png">
+
+</svelte:head>
 
 <div transition:fade class="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50">
     {#if connected}

@@ -123,7 +123,7 @@ export default class Task{
 
             case "generate-plot":
 
-                transferable = [this.params.encoded.buffer]
+                transferable = []
                 break
 
             case "merge-geometries":

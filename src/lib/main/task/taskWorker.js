@@ -5,6 +5,7 @@ import { Vector3 } from "three"
 import { ColorLibrary } from "../../common/colorLibrary"
 import { PLOT_COUNT, LOW_RES, CHUNK_SIZE } from "../../common/constants"
 import { I2P, P2I, backFace, bottomFace, expand, frontFace, getVertexIndicies, leftFace, rightFace, topFace, decodePlotData } from "../../common/utils"
+import PlotId from "../../common/plotId"
 
 postMessage("loaded")
 
@@ -32,7 +33,7 @@ onmessage = async e => {
 
             case "generate-plot":
 
-                [response, transferable] = generatePlot(data.encoded, data.depth)
+                [response, transferable] = await generatePlot(data.id)
                 break
 
             case "merge-geometries":
@@ -45,8 +46,6 @@ onmessage = async e => {
         response.err = false
 
     } catch(e) {
-
-        console.log(e)
 
         response = { err: true, msg: e }
 
@@ -68,10 +67,16 @@ onmessage = async e => {
 
 /* one function that does everything, should reduce overhead */
 
-function generatePlot(buffer, depth){
+async function generatePlot(id){
 
-    //decode
-    const decoded = decodePlotData(buffer, depth, true)
+    const plotId = new PlotId(id)
+    const encodedBuffer = await plotId.fetch()
+    if(encodedBuffer === null) 
+        
+        throw new Error()
+
+    const encoded = new Uint8Array(encodedBuffer)
+    const decoded = decodePlotData(encoded, plotId.depth(), true)
     const buildData = decoded.buildData
 
     if(buildData === null)

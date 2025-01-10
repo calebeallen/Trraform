@@ -6,11 +6,11 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
 	kit: { adapter: adapter({
         platformProxy : {
-            configPath: 'wrangler.toml',
+            configPath: './wrangler.toml',
             environment: undefined,
             experimentalJsonConfig: false,
             persist: false
-        }
+        },
     }) },
 	preprocess: [ vitePreprocess() ]
 };

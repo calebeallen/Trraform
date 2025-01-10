@@ -9,7 +9,7 @@
 
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
-    import { WebGLRenderer, Scene, Color, LineSegments, MeshBasicMaterial, Vector3, LinearSRGBColorSpace, Vector2, Spherical, Raycaster } from "three";
+    import { WebGLRenderer, Scene, Color, LineSegments, MeshBasicMaterial, Vector3, LinearSRGBColorSpace, Vector2, Spherical, Raycaster, Sphere } from "three";
     import { BUILD_SIZE, COLOR_INDEX, COLOR_SELECT, EYEDROP, GRID_SIZING, MODE, ModifyEvent, OBJECT_SELECT, OVERLAP, REFS, addEvent, LOADING, SHOW_ONBOARDING_MODAL } from "$lib/editor/store";
     import { GridGeometry } from "$lib/editor/geometries/gridGeometry" 
     import Build from "$lib/editor/build"
@@ -45,7 +45,7 @@
         REFS.renderer.outputColorSpace = LinearSRGBColorSpace
         REFS.renderer.setAnimationLoop(renderloop)
 
-        REFS.camera = new Camera()
+        REFS.camera = new Camera(70, new Sphere(new Vector3(0,0,0), 800))
         REFS.camera.update = REFS.camera.orbit
         REFS.camera.angularVelocityDamping = 1e-11
         REFS.camera.position.setFromSphericalCoords(1, Math.PI * 2/5, Math.PI / 4)

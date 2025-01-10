@@ -21,8 +21,9 @@
     import Plot from "$lib/main/plot/plot"
     import MenuOption from "./menuOption.svelte";
     import { formatEther } from "viem";
+    import ShareModal from "$lib/main/components/share/shareModal.svelte";
 
-
+    export let data 
     let menuExpanded = false
     let searchValue = ""
     let searchFocused = false
@@ -41,15 +42,11 @@
 
     function keydown(e){
 
-        if(refs.disabled)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal)
 
             return
 
         const key = e.key.toLowerCase()
-
-        if(key === "w" || key === "a" || key === "s" || key === "d")
-
-            refs.camera.update = refs.camera.standard
 
         if(searchFocused){
 
@@ -60,6 +57,10 @@
             return
 
         }
+
+        if(key === "w" || key === "a" || key === "s" || key === "d" || key === " " || key === "control")
+
+            refs.camera.update = refs.camera.standard
 
         switch(key){
 
@@ -81,6 +82,21 @@
             case "a":
 
                 refs.camera.left = true
+                break
+
+            case " ":
+
+                refs.camera.upward = true
+                break
+
+            case "control":
+
+                refs.camera.downward = true
+                break
+            
+            case "shift":   
+                
+                refs.camera.accelerationMultiplier = 4
                 break
 
         }
@@ -113,21 +129,39 @@
                 refs.camera.left = false
                 break
 
+            case " ":
+
+                refs.camera.upward = false
+                break
+
+            case "control":
+
+                refs.camera.downward = false
+                break
+
+            case "shift":
+
+                refs.camera.accelerationMultiplier = 1
+                break
+
         }
 
     }
 
     function cancelKeyEvent(){
 
-        if(refs.camera)
+        if(refs.camera){
 
-            refs.camera.forward = refs.camera.backward = refs.camera.right = refs.camera.left = false
+            refs.camera.forward = refs.camera.backward = refs.camera.right = refs.camera.left = refs.camera.upward = refs.camera.downward = false
+            refs.camera.accelerationMultiplier = 1
+
+        }
 
     }
 
     function mousewheel(e){
         
-        if(refs.disabled)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal)
 
             return
 
@@ -137,7 +171,7 @@
 
     function touchevent(e){ 
 
-        if(refs.disabled || refs.camera.update === refs.camera.standard)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || refs.camera.update === refs.camera.standard)
 
             return
 
@@ -337,6 +371,27 @@
 
 </script>
 
+<svelte:head>
+    
+    <!-- HTML Meta Tags -->
+    <title>Trraform</title>
+    <meta name="description" content="Millions of worlds powered by Ethereum.">
+
+    <!-- Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com"}>
+    <meta property="og:title" content={data?.ogTitle ?? "Trraform"}>
+    <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="trraform.com">
+    <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com"}>
+    <meta name="twitter:title" content={data?.ogTitle ?? "Trraform"}>
+    <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
+
+</svelte:head>
+
 <svelte:window
     on:blur={cancelKeyEvent}
     on:contextmenu={cancelKeyEvent}
@@ -394,7 +449,6 @@
                         <button on:click={() => {
                             reportPlotId = id
                             showReportModal = true
-                            refs.disabled = true
                         }} class="relative w-4 h-4 select-none group">
                             <img src="/report.svg" alt="report">
                             <span class="plot-option-tag">Report</span>
@@ -423,11 +477,12 @@
     {/await}
 </div>
 
+{#if showShareModal}
+    <ShareModal bind:plotIdStr={sharePlotId} on:close={() => showShareModal = false}/>
+{/if}
+
 {#if showReportModal}
-    <ReportModal bind:plotId={reportPlotId} on:close={() => {
-        showReportModal = false
-        refs.disabled = false
-    }}/>
+    <ReportModal bind:plotId={reportPlotId} on:close={() => showReportModal = false}/>
 {/if}
 
 {#if showSettingsModal}
@@ -435,8 +490,8 @@
 {/if}
 
 {#if showConnectModal}
-    <ConnectWalletModal on:cancel={() => showConnectModal = false} on:success={mint}/>
-{/if}   
+    <ConnectWalletModal on:success={mint} on:cancel={() => showConnectModal = false}/>
+{/if}
 
 <style lang="postcss">
 

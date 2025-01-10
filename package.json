@@ -22,7 +22,6 @@
 	"dependencies": {
 		"@wagmi/connectors": "^5.7.1",
 		"@wagmi/core": "^2.16.1",
-		"axios": "^1.7.9",
 		"ethers": "^6.13.4",
 		"mobile-detect": "^1.4.5",
 		"pngjs": "^7.0.0",

@@ -5,9 +5,11 @@ const PI2 = Math.PI * 2
 
 export default class Camera extends PerspectiveCamera{
 
-    constructor(fov = 70){
+    constructor(fov = 70, worldBounds){
         
         super(fov, window.innerWidth / window.innerHeight, 0.0000001, 1000)
+
+        this.worldBounds = worldBounds
 
         this.up.set(0,1,0)
 
@@ -18,6 +20,7 @@ export default class Camera extends PerspectiveCamera{
         this.upward = false
         this.downward = false
 
+        this.accelerationMultiplier = 1
         this.accelerationMagnitude = 1
         this.velocity = new Vector3()
         this.velocityDamping = 1e-6
@@ -156,7 +159,7 @@ export default class Camera extends PerspectiveCamera{
 
     }
 
-    standard(dt){
+    standard1(dt){
 
         //calculate change in angles
         const dTheta = this.angularVelocity.theta * dt
@@ -174,12 +177,10 @@ export default class Camera extends PerspectiveCamera{
         this.lookAt(new Vector3().setFromSpherical(this.sphere).add(this.position))
 
         //compute linear acceleration
-        const acceleration = new Vector3( (this.right ? 1 : 0) + (this.left ? -1 : 0), 0, (this.backward ? 1 : 0) + (this.forward ? -1 : 0))
-        const rotMatrix = new Matrix4()
-        rotMatrix.makeRotationFromQuaternion(this.quaternion)
-        acceleration.applyMatrix4(rotMatrix)
+        const acceleration = new Vector3( (this.right ? -1 : 0) + (this.left ? 1 : 0), 0, (this.backward ? -1 : 0) + (this.forward ? 1 : 0)).normalize()
+        acceleration.applyAxisAngle(this.up, this.sphere.theta)
         acceleration.y += (this.upward ? 1 : 0) + (this.downward ? -1 : 0)
-        acceleration.normalize().multiplyScalar(dt * this.accelerationMagnitude)
+        acceleration.multiplyScalar(dt * this.accelerationMagnitude * this.accelerationMultiplier)
 
         //adjust linear velocity
         this.velocity.add(acceleration)
@@ -187,6 +188,45 @@ export default class Camera extends PerspectiveCamera{
         //adjust camera position
         this.position.add(this.velocity.clone().multiplyScalar(dt))
         
+        this._update(dt)
+
+    }
+
+
+    standard(dt){
+
+        //calculate change in angles
+        const dTheta = this.angularVelocity.theta * dt
+        const dPhi = this.angularVelocity.phi * dt
+
+        //apply changes
+        this.sphere.theta += dTheta
+        this.sphere.phi += dPhi
+
+        //clamp angles
+        this.sphere.theta %= PI2
+        this.sphere.makeSafe()
+
+        //adjust camera orientation
+        // const pitchAdjusted = this.sphere.clone()
+        // pitchAdjusted.phi -= 0.35
+        // pitchAdjusted.makeSafe()
+        // this.lookAt(new Vector3().setFromSpherical(pitchAdjusted).add(this.position))
+        this.lookAt(new Vector3().setFromSpherical(this.sphere).add(this.position))
+
+        //compute linear acceleration
+        const acceleration = new Vector3( (this.right ? 1 : 0) + (this.left ? -1 : 0), 0, (this.backward ? 1 : 0) + (this.forward ? -1 : 0)).normalize()
+        const rotMatrix = new Matrix4()
+        rotMatrix.makeRotationFromQuaternion(this.quaternion)
+        acceleration.applyMatrix4(rotMatrix)
+        acceleration.multiplyScalar(dt * this.accelerationMagnitude * this.accelerationMultiplier)
+
+        //adjust linear velocity
+        this.velocity.add(acceleration)
+
+        //adjust camera position
+        this.position.add(this.velocity.clone().multiplyScalar(dt))
+
         this._update(dt)
 
     }
@@ -225,6 +265,15 @@ export default class Camera extends PerspectiveCamera{
     }
 
     _update(dt){
+
+        const toBoundsCenter = this.position.clone().sub(this.worldBounds.center)
+        const len = toBoundsCenter.length()
+        if(len > this.worldBounds.radius){
+
+            toBoundsCenter.multiplyScalar(this.worldBounds.radius / len).add(this.worldBounds.center)
+            this.position.copy(toBoundsCenter)
+
+        }
 
         this.velocity.multiplyScalar(Math.pow(this.velocityDamping, dt))
 

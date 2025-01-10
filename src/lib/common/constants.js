@@ -4,7 +4,7 @@ const EDITOR_VERSION = "1.0"
 const MAIN_VERSION = "1.0"
 
 const ALLOWED_ORIGINS = "*"
-const CACHE_PURGE_ORIGIN = "http://localhost:5173"
+const CACHE_PURGE_ORIGIN = "https://trraform.com"
 const PLOT_DATA_BUCKET_URL = "https://plots.trraform.com"
 const TOKEN_METADATA_BUCKET_URL = "https://token-metadata.trraform.com"
 const IMAGES_BUCKET_URL = "https://images.trraform.com"

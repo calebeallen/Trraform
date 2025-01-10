@@ -3,6 +3,7 @@ import ShellGeometry from "$lib/editor/geometries/shellGeometry"
 import { P2I, disposeMesh } from "$lib/common/utils"
 import { ConvertEvent, ModifyEvent, OVERLAP, REFS, TransformEvent } from "$lib/editor/store"
 import { get } from "svelte/store"
+import { condense } from "../common/utils"
 
 const basicMaterial = new MeshBasicMaterial({ vertexColors: true })
 const xMaterial = new MeshBasicMaterial({ color: 0xff0000 })
@@ -669,6 +670,73 @@ function transformControls( translation = true, rotation = true ){
     }
 
     return group
+
+}
+
+function getTopFaceCount(blocks){
+
+    //4.105768 scale for 50000 top faces
+
+    const posSet = new Set()
+
+    for(const [color, vect] of blocks){
+
+        const key = `${vect.x}.${vect.y}.${vect.z}`
+        posSet.add(key)
+
+    }
+
+    let count = 0
+
+    for(const [color, vect] of blocks){
+
+        const key = `${vect.x}.${vect.y + 1}.${vect.z}`
+        if(!posSet.has(key))
+
+            count++
+
+    }
+
+    console.log(count)
+
+    const min = new Vector3()
+    const max = new Vector3()
+
+    for(const [color, vect] of blocks){
+
+        min.min(vect)
+        max.max(vect)
+
+    }
+
+    max.sub(min)
+
+    console.log(max)
+    const size = Math.max(max.x, Math.max(max.y, max.z))
+    console.log(size)
+    const expanded = new Uint16Array(size**3)
+
+    for(const [color, vect] of blocks){
+
+        const ind = P2I(vect.clone().sub(min), size)
+        expanded[ind] = color
+
+    }
+
+    const blob = new Blob([condense(expanded, size)])
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+
+    a.href = url
+    a.download = "0x00.trra"
+
+    document.body.appendChild(a)
+
+    a.click()
+
+    document.body.removeChild(a)
+
+    URL.revokeObjectURL(url)
 
 }
 

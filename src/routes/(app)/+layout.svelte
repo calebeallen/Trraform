@@ -9,7 +9,7 @@
     //add mobile controls
 
     import "../../main.css"
-	import { LinearSRGBColorSpace, Scene, Spherical, Vector3, Vector4, WebGLRenderer } from "three"
+	import { LinearSRGBColorSpace, Scene, Sphere, Spherical, Vector3, Vector4, WebGLRenderer } from "three"
     import MobileDetect from "mobile-detect"
 	import { onMount } from "svelte"
     import { page } from "$app/stores"
@@ -45,7 +45,7 @@
         /* set up scene */  
         refs.scene = new Scene()
         refs.scene.add(stars())
-        refs.camera = new Camera(settings.general.fov)
+        refs.camera = new Camera(settings.general.fov, new Sphere(new Vector3(65,65,65), 800))
         
         tagCtx = tagCanvas.getContext("2d")
 
@@ -62,7 +62,7 @@
         await refs.renderManager.renderStatic(rootPlot)
 
         //set initial position
-        refs.camera.position.setFromSphericalCoords(rootPlot.boundingSphere.radius * 2,  Math.PI * 0.4, 0).add(rootPlot.boundingSphere.center)
+        refs.camera.position.setFromSphericalCoords(rootPlot.boundingSphere.radius * 2,  Math.PI * 0.5, 0).add(rootPlot.boundingSphere.center)
         refs.camera.target.copy(rootPlot.boundingSphere.center)
         refs.camera.lookAt(rootPlot.boundingSphere.center)
         refs.camera.updateSphere()
@@ -144,16 +144,18 @@
             
             } else {
 
-                if(inside !== $insideOf)
+                if(inside !== $insideOf){
                 
                     $insideOf = inside   
 
-                //update page route if there was a change
-                const pagePlotId = PlotId.fromHexString($page.params.id)
+                    //update page route if there was a change
+                    const pagePlotId = PlotId.fromHexString($page.params.id)
 
-                if(!pagePlotId.equals(inside.id))
+                    if(!pagePlotId.equals(inside.id))
 
-                    goto(inside.id.string())
+                        goto(inside.id.string())
+
+                }
             
             }
             
@@ -309,7 +311,7 @@
             const v1 = refs.camera.position.clone().sub(center)
 
             const s1 = new Spherical().setFromVector3(v1)
-            const s2 = new Spherical(plot.boundingSphere.radius * 2, Math.PI * 0.4, s1.theta)
+            const s2 = new Spherical(plot.boundingSphere.radius * 2, Math.PI * 0.5, s1.theta)
 
             refs.camera.moveTo(s1, s2, center, center, refs.camera.autoRotate, 1, 6)
 

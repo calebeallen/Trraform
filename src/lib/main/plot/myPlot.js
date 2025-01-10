@@ -32,10 +32,10 @@ export default class MyPlot extends PlotData{
 
     }
 
-    static async imgUrl(buildData){
+    static async imgUrl(buildData, w = 240, h = 320){
 
         const mesh = await MyPlot.getMesh(buildData)
-        const url = buildImageUrl(240, 320, mesh)
+        const url = buildImageUrl(w, h, mesh)
 
         mesh.geometry.dispose()
         mesh.material.dispose()

@@ -47,7 +47,7 @@
 {:else}
     <GridSizing/>
 {/if}
-<a href="/" class="fixed m-2 opacity-50 w-7 h-7 top-2 left-2">
+<a href="/" target="_self" class="fixed m-2 opacity-50 w-7 h-7 top-2 left-2">
     <img src="/logo.svg" alt="Logo">
 </a>
 

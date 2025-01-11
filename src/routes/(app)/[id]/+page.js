@@ -21,7 +21,7 @@ export async function load({params, fetch}) {
     
         return {
             ogUrl: `https://trraform.com/${plotId.string()}`,
-            ogTitle: `Plot ${plotId.string()}`,
+            ogTitle: `Trraform | Plot ${plotId.string()}`,
             ogImage: plotId.getImgUrl()
         }
 

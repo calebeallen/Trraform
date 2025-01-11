@@ -93,7 +93,7 @@
             <nav class="w-full mt-4 space-y-3">
                 <a class="nav-option" href="/0x00">Explore</a>
                 {#if !$isMobileBrowser}
-                    <a class="nav-option" href="/editor">Build</a>
+                    <a class="nav-option" target="_self" href="/editor">Build</a>
                 {/if}
             </nav>
         </div>
@@ -120,7 +120,7 @@
                         </div>
                     </div>
                     <div transition:fly={{ y: 120, duration: 500 }} class="relative hidden mr-2 w-72 md:w-96 shrink-0 sm:block aspect-square bg-radial-gradient">
-                        <img src="/buildExample.png" alt="example build" loading="lazy">
+                        <img src="/buildExample.png" alt="example build">
                         <div class="absolute w-56 bottom-1 right-1 container0 space-y-0.5 scale-75 md:scale-100 shadow-xl hover:shadow-2xl transition-shadow">
                             <div class="text-xs opacity-70">id: 0xa124b1c4</div>
                             <div class="max-w-full font-bold">Japanese Farmhouse 民家</div>
@@ -221,8 +221,8 @@
                         <h1 transition:fly={{ x: 50, duration: 500 }} class="text-right">Trraform Editor</h1>
                         <h2 transition:fly={{ x: 50, duration: 500, delay: 100 }} class="text-right text-zinc-300">With 3D Model Conversion</h2>
                     </div>
-                    <a transition:fly={{ y: 50, duration: 500, delay: 200 }} target="_blank" href="/editor" class="block px-2 mt-8 translate-x-8 sm:mt-10 sm:translate-x-10">
-                        <img class="aspect-[16/9] w-full sm:rounded-2xl rounded-xl outline outline-1 shadow-2xl outline-zinc-600" src="/editor.png" alt="" loading="lazy">
+                    <a transition:fly={{ y: 50, duration: 500, delay: 200 }} target="_self" href="/editor" class="block px-2 mt-8 translate-x-8 sm:mt-10 sm:translate-x-10">
+                        <img class="aspect-[16/9] w-full sm:rounded-2xl rounded-xl outline outline-1 shadow-2xl outline-zinc-600" src="/editor.png" alt="">
                     </a>
                 </div>
             {/if}

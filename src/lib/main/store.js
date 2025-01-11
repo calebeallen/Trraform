@@ -46,10 +46,5 @@ const defaultSettings = {
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
-function setNotification(header, text, icon = null, href = "", hrefTargert = "", duration = 5000) {
 
-    notification.set({header, text, icon, href, hrefTargert, duration})
-
-}
-
-export { defaultSettings, settings, myPlots, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, setNotification, newPlots, loadScreenOpacity }
+export { defaultSettings, settings, myPlots, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, newPlots, loadScreenOpacity }

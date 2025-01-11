@@ -4,20 +4,27 @@ import { createConfig, getConnectors, getWalletClient, getPublicClient } from "@
 import { mainnet, sepolia } from "@wagmi/core/chains"
 import { parseAbi } from 'abitype'
 import { parseEther, http } from "viem"
-import { CONTRACT_ADDRESS, D0_MINT_PRICE, DEFAULT_SMP, MAX_DEPTH } from "../common/constants"
-import { myPlots, setNotification, walletAddress } from "./store"
+import { DATA_CONTRACT_ADDRESS, WRAPPER_CONTRACT_ADDRESS, D0_MINT_PRICE, DEFAULT_SMP, MAX_DEPTH } from "../common/constants"
+import { myPlots, walletAddress } from "./store"
 import PlotId from "../common/plotId"
 import MyPlot from "./plot/myPlot"
 
 const COINBASE_ICON = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTI4IDU2YzE1LjQ2NCAwIDI4LTEyLjUzNiAyOC0yOFM0My40NjQgMCAyOCAwIDAgMTIuNTM2IDAgMjhzMTIuNTM2IDI4IDI4IDI4WiIgZmlsbD0iIzFCNTNFNCIvPjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNyAyOGMwIDExLjU5OCA5LjQwMiAyMSAyMSAyMXMyMS05LjQwMiAyMS0yMVMzOS41OTggNyAyOCA3IDcgMTYuNDAyIDcgMjhabTE3LjIzNC02Ljc2NmEzIDMgMCAwIDAtMyAzdjcuNTMzYTMgMyAwIDAgMCAzIDNoNy41MzNhMyAzIDAgMCAwIDMtM3YtNy41MzNhMyAzIDAgMCAwLTMtM2gtNy41MzNaIiBmaWxsPSIjZmZmIi8+PC9zdmc+"
-const ABI = parseAbi([
-    "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
-    "function mint(uint tokenId) public payable",
-    "function getSmp(uint tokenId) public view returns (uint)",
+
+const DATA_CONTRACT_ABI = parseAbi([
     "function setSmp(uint tokenId, uint amount) public",
+    "function smp(uint tokenId) public view returns (uint)",
     "function balanceOf(address owner) public view returns (uint256)",
-    "function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256)"
+    "function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256)",
+    "function ownerOf(uint256 tokenId) public view returns (address)",
+    "function tempLock(uint tokenId) public view returns (uint)"
 ])
+
+const WRAPPER_CONTRACT_ABI = parseAbi([
+    "function mint(uint tokenId, bool useTempLock) public payable",
+    "function setSmp(uint tokenId, uint amount) public",
+])
+
 
 const hardhat = {
     id: 31337, // Hardhat's chain ID
@@ -199,23 +206,6 @@ export default class WalletConnection {
 
     }
 
-    static async mint(plotId, _mintPrice = null) {
-
-        const { walletCli, addresses, addressIndex } = this.connection
-        const parentId = plotId.getParent()
-        const mintPrice = _mintPrice || await this.getSmp(parentId)
-
-        return await walletCli.writeContract({
-            address: CONTRACT_ADDRESS,
-            abi: ABI,
-            account: addresses[addressIndex],
-            functionName: 'mint',   
-            args: [plotId.bigInt()],
-            value: mintPrice,
-        })
-
-    }
-
     static async txSuccess(hash){
 
         const { publicCli } = this.connection
@@ -224,6 +214,54 @@ export default class WalletConnection {
         if(receipt.status !== "success")
 
             throw new Error("Transaction failed")
+
+    }
+
+    static async refreshPlotCount(){
+
+        this.plotCount = await this.getPlotCount()
+
+    }
+
+    static async getSignature(message){
+
+        const { walletCli, addresses, addressIndex } = this.connection
+
+        return await walletCli.signMessage({
+            message: message,
+            account: addresses[addressIndex]
+        })
+    
+    }
+
+    static async mint(plotId, useMintLock, mintPrice) {
+
+        const { walletCli, addresses, addressIndex } = this.connection
+
+        return await walletCli.writeContract({
+            address: WRAPPER_CONTRACT_ADDRESS,
+            abi: WRAPPER_CONTRACT_ABI,
+            account: addresses[addressIndex],
+            functionName: 'mint',   
+            args: [plotId.bigInt(), useMintLock],
+            value: mintPrice,
+        })
+
+    }
+
+    static async setSmp(plotId, smp){
+
+        const { walletCli, addresses, addressIndex } = this.connection
+        const tokenId = plotId.bigInt()
+        const smpWei = parseEther(smp.toString())
+
+        await walletCli.writeContract({
+            address: WRAPPER_CONTRACT_ADDRESS,
+            abi: WRAPPER_CONTRACT_ABI,
+            account: addresses[addressIndex],
+            functionName: 'setSmp',
+            args: [tokenId, smpWei]
+        })
 
     }
 
@@ -237,29 +275,13 @@ export default class WalletConnection {
         const tokenId = plotId.bigInt()
 
         const smp = await publicCli.readContract({
-            address: CONTRACT_ADDRESS,
-            abi: ABI,
-            functionName: 'getSmp',
+            address: DATA_CONTRACT_ADDRESS,
+            abi: DATA_CONTRACT_ABI,
+            functionName: 'smp',
             args: [tokenId]
         })
 
         return smp == 0n ? parseEther(DEFAULT_SMP.toString()) : smp
-
-    }
-
-    static async setSmp(plotId, smp){
-
-        const { walletCli, addresses, addressIndex } = this.connection
-        const tokenId = plotId.bigInt()
-        const smpWei = parseEther(smp.toString())
-
-        await walletCli.writeContract({
-            address: CONTRACT_ADDRESS,
-            abi: ABI,
-            account: addresses[addressIndex],
-            functionName: 'setSmp',
-            args: [tokenId, smpWei]
-        })
 
     }
 
@@ -268,19 +290,13 @@ export default class WalletConnection {
         const { publicCli, addresses, addressIndex } = this.connection
 
         const count = await publicCli.readContract({
-            address: CONTRACT_ADDRESS,
-            abi: ABI,
+            address: DATA_CONTRACT_ADDRESS,
+            abi: DATA_CONTRACT_ABI,
             functionName: 'balanceOf',
             args: [addresses[addressIndex]]
         })
 
         return Number(count)
-
-    }
-
-    static async refreshPlotCount(){
-
-        this.plotCount = await this.getPlotCount()
 
     }
 
@@ -294,8 +310,8 @@ export default class WalletConnection {
         while(this.plotIterator < range){
 
             const tokenId = publicCli.readContract({
-                address: CONTRACT_ADDRESS,
-                abi: ABI,
+                address: DATA_CONTRACT_ADDRESS,
+                abi: DATA_CONTRACT_ABI,
                 functionName: 'tokenOfOwnerByIndex',
                 args: [addresses[addressIndex], BigInt(this.plotIterator)]
             }).then(tokenId => {
@@ -319,28 +335,70 @@ export default class WalletConnection {
 
     }
 
-    static async getSignature(message){
+    static async getPlotAvailability(plotId){
 
-        const { walletCli, addresses, addressIndex } = this.connection
+        const { publicCli, addresses, addressIndex } = this.connection
+        const tokenId = plotId.bigInt()
 
-        return await walletCli.signMessage({
-            message: message,
-            account: addresses[addressIndex]
-        })
-    
-    }
+        try{
 
-    async getSmp(){
+            await publicCli.readContract({
+                address: DATA_CONTRACT_ADDRESS,
+                abi: DATA_CONTRACT_ABI,
+                functionName: 'ownerOf',
+                args: [tokenId]
+            })
 
-        if(!WalletConnection.isConnected)
+            return {
+                available: false,
+                status: "Already minted"
+            }
 
-            return null
+        } catch {
 
-        if(this._gettingSmp === null)
+            if(plotId.depth() > 0){
 
-            this._gettingSmp = WalletConnection.getSmp(this.id)
+                const parentTokenId = plotId.getParent().bigInt()
+                const parentOwner = await publicCli.readContract({
+                    address: DATA_CONTRACT_ADDRESS,
+                    abi: DATA_CONTRACT_ABI,
+                    functionName: 'ownerOf',
+                    args: [parentTokenId]
+                })
 
-        return this._gettingSmp
+                //if user address does not own the parent plot, then check for mint locked
+                if( addresses[addressIndex] != parentOwner ){
+                    
+                    const lockedTime = await publicCli.readContract({
+                        address: DATA_CONTRACT_ADDRESS,
+                        abi: DATA_CONTRACT_ABI,
+                        functionName: 'tempLock',
+                        args: [parentTokenId]
+                    })
+
+                    const currentTime = Math.floor(Date.now() / 1000)
+                
+                    if(currentTime < lockedTime){
+
+                        const dt = Math.floor(lockedTime - currentTime / 60)
+                        return {
+                            available: false,
+                            status: `Locked for ${dt} minutes`
+                        }
+
+                    }
+                    
+                } 
+
+            }
+
+            return {
+                available: true,
+                status: "Still available"
+            }
+
+        }
+
 
     }
 

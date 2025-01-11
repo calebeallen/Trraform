@@ -22,6 +22,7 @@
     import MenuOption from "./menuOption.svelte";
     import { formatEther } from "viem";
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
+    import MintModal from "$lib/main/components/mintModal.svelte";
 
     export let data 
     let menuExpanded = false
@@ -29,8 +30,8 @@
     let searchFocused = false
     let lastTouches = []
     
-    let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false
-    let reportPlotId = null, sharePlotId = null
+    let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showMintModal = false
+    let reportPlotId = null, sharePlotId = null, mintPlot = null
     let profile = null
     let showProfile = false
 
@@ -232,47 +233,51 @@
 
     }
 
-    async function mint(){
+    async function prepMint(){
 
         if (WalletConnection.isConnected || await WalletConnection.reconnect()) {
-        
+
             showConnectModal = false
-            $loadScreenOpacity = 50
+            mintPlot = $insideOf
+            showMintModal = true
+        
+            // showConnectModal = false
+            // $loadScreenOpacity = 50
 
-            try {
+            // try {
 
-                const plot = $insideOf
-                const mintPrice = await plot.getSmp()
-                const hash = await WalletConnection.mint(plot.id, mintPrice)
+            //     const plot = $insideOf
+            //     const mintPrice = await plot.getSmp()
+            //     const hash = await WalletConnection.mint(plot.id, mintPrice)
 
-                pushNotification(notification, `We're processing your transaction.`, "This may take a minute..")
+            //     pushNotification(notification, `We're processing your transaction.`, "This may take a minute..")
 
-                await WalletConnection.txSuccess(hash)
+            //     await WalletConnection.txSuccess(hash)
 
-                $myPlots.unshift(new MyPlot(plot.id, true))
+            //     $myPlots.unshift(new MyPlot(plot.id, true))
             
-                plot.minted = true
+            //     plot.minted = true
 
-                if (plot.id.depth() < MAX_DEPTH)
+            //     if (plot.id.depth() < MAX_DEPTH)
 
-                    plot.createChildPlots(...Plot.defaultChildPlots(plot.buildSize))
+            //         plot.createChildPlots(...Plot.defaultChildPlots(plot.buildSize))
                     
-                profile = getProfile(plot)
+            //     profile = getProfile(plot)
                 
-                setTimeout(() => {
-                    confetti(plot.pos, plot.parent.blockSize)
-                    pushNotification(notification, `Plot ${plot.id.string()} minted!`, 'Go to the "My Plots" tab to view your new plot!', () => goto("/myplots"))
-                }, 1000)
+            //     setTimeout(() => {
+            //         confetti(plot.pos, plot.parent.blockSize)
+            //         pushNotification(notification, `Plot ${plot.id.string()} minted!`, 'Go to the "My Plots" tab to view your new plot!', () => goto("/myplots"))
+            //     }, 1000)
                 
 
-            } catch(e) {
+            // } catch(e) {
 
-                console.log(e)
-                pushNotification(notification, "Minting failed", "This transaction could not be completed on chain.")
+            //     console.log(e)
+            //     pushNotification(notification, "Minting failed", "This transaction could not be completed on chain.")
                 
-            }
+            // }
 
-            $loadScreenOpacity = 0   
+            // $loadScreenOpacity = 0   
 
         } else 
 
@@ -472,7 +477,7 @@
                 </a>
             {/if}
         {:else}
-            <button class="w-full mt-1 button0" on:click={mint}>Mint {#if mintPrice !== null}for {mintPrice} ETH {/if}</button>
+            <button class="w-full mt-1 button0" on:click={prepMint}>Mint {#if mintPrice !== null}for {mintPrice} ETH {/if}</button>
         {/if}
     {/await}
 </div>
@@ -482,7 +487,7 @@
 {/if}
 
 {#if showReportModal}
-    <ReportModal bind:plotId={reportPlotId} on:close={() => showReportModal = false}/>
+    <ReportModal bind:plotIdStr={reportPlotId} on:close={() => showReportModal = false}/>
 {/if}
 
 {#if showSettingsModal}
@@ -490,7 +495,16 @@
 {/if}
 
 {#if showConnectModal}
-    <ConnectWalletModal on:success={mint} on:cancel={() => showConnectModal = false}/>
+    <ConnectWalletModal on:success={prepMint} on:cancel={() => showConnectModal = false}/>
+{/if}
+
+{#if showMintModal}
+    <MintModal bind:plot={mintPlot} on:close={() => showMintModal = false} on:success={e => {
+        const plot = e.detail
+        showMintModal = false
+        confetti(plot.pos, plot.parent.blockSize)
+        profile = getProfile(plot)
+    }}/>
 {/if}
 
 <style lang="postcss">

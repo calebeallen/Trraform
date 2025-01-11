@@ -37,7 +37,7 @@
 </script>
 
 <div transition:fade={{duration: 150}} class="fixed top-0 left-0 grid w-full h-full px-2 overflow-auto bg-black bg-opacity-50 place-items-center">
-    <div on:click_outside={() => dispatch("close")} transition:fly={{duration: 150, y: 50}} class="w-full p-4 bg-zinc-800 outline outline-1 outline-zinc-700 rounded-2xl {addedClasses}">
+    <div on:click_outside={() => dispatch("close")} transition:fly={{duration: 150, y: 50}} class="w-full p-4 bg-zinc-800 outline outline-1 outline-zinc-700 rounded-2xl shadow-2xl shadow-black {addedClasses}">
         <div class="flex items-baseline justify-between w-full mb-2">
             <h1 class="text-lg font-bold">{header}</h1>
             <button on:click={() => dispatch("close")} class="w-5 h-5 transition-opacity active:opacity-60">

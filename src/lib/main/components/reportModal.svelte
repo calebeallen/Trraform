@@ -8,7 +8,7 @@
 
     const dispatch = createEventDispatcher()
 
-    export let plotId
+    export let plotIdStr
     let message = ""
     let charCount
 
@@ -22,7 +22,7 @@
 
             await fetch( `/api/report-plot`, { 
                 method: "POST",
-                body: JSON.stringify({ plotId, message }),
+                body: JSON.stringify({ plotId: plotIdStr, message }),
                 headers: { "Content-Type" : "application/json" }
             })
 
@@ -43,7 +43,7 @@
 </script>
 
 
-<Modal class="max-w-screen-sm" header="Report Plot {plotId}?" on:close>
+<Modal class="max-w-screen-sm" header="Report Plot {plotIdStr}?" on:close>
     <div class="space-y-3 text-sm">
         <p>We appreciate your help with make Trraform a better place for everyone. <b>We do not take actions on reports unless they are highly serious. </b>Spam and abuse of our report system will be automatically filtered.</p>
         <p>Describe your report in detail. If this report involves your personal information, please provide your Discord username.</p>

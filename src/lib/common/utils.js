@@ -1,7 +1,6 @@
 
 import { ColorLibrary } from "./colorLibrary"
 import { DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, PLOT_VERSION } from "./constants"
-import PlotId from "./plotId"
 
 function P2I( pos, size ){
 
@@ -369,11 +368,11 @@ function decodePlotData(bytes, depth = 0, validateBuildSize = false){
 
     return {
         ver,
-        name : substring(name || "", NAME_FIELD_MAXLEN),
-        desc : substring(desc || "", DESC_FIELD_MAXLEN),
-        link : (link || "").substring(0, LINK_FIELD_MAXLEN),
-        linkLabel : substring(linkLabel || "", LINK_LABEL_FIELD_MAXLEN),
-        rEnd : parseInt(rEnd || 0),
+        name : substring(name ?? "", NAME_FIELD_MAXLEN),
+        desc : substring(desc ?? "", DESC_FIELD_MAXLEN),
+        link : (link ?? "").substring(0, LINK_FIELD_MAXLEN),
+        linkLabel : substring(linkLabel ?? "", LINK_LABEL_FIELD_MAXLEN),
+        rEnd : parseInt(rEnd ?? 0),
         buildData
     }   
 
@@ -386,11 +385,11 @@ function encodePlotData({ name, desc, link, linkLabel, rEnd, buildData = null } 
 
     const json = {
         ver : PLOT_VERSION,
-        name : substring(name || "", NAME_FIELD_MAXLEN),
-        desc : substring(desc || "", DESC_FIELD_MAXLEN),
-        link : (link || "").substring(0, LINK_FIELD_MAXLEN),
-        linkLabel : substring(linkLabel || "", LINK_LABEL_FIELD_MAXLEN),
-        rEnd : parseInt(rEnd || 0)
+        name : substring(name ?? "", NAME_FIELD_MAXLEN),
+        desc : substring(desc ?? "", DESC_FIELD_MAXLEN),
+        link : (link ?? "").substring(0, LINK_FIELD_MAXLEN),
+        linkLabel : substring(linkLabel ?? "", LINK_LABEL_FIELD_MAXLEN),
+        rEnd : parseInt(rEnd ?? 0)
     }   
 
     const parts = []

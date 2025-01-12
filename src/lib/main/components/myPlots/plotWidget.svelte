@@ -6,7 +6,7 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
     import PlotWidgetOption from "./plotWidgetOption.svelte";
-    import { CONTRACT_ADDRESS } from "$lib/common/constants"
+    import { DATA_CONTRACT_ADDRESS } from "$lib/common/constants"
 
     export let editingPlot
     export let plot
@@ -76,7 +76,7 @@
             {#if !plotData.banned}
                 <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
             {/if} 
-            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://testnets.opensea.io/assets/sepolia/${CONTRACT_ADDRESS}/${plot?.id?.id}`)}/>
+            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://testnets.opensea.io/assets/sepolia/${DATA_CONTRACT_ADDRESS}/${plot?.id?.id}`)}/>
         </div>
     {/if}
 </div>

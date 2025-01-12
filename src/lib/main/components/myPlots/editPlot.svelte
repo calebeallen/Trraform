@@ -271,6 +271,8 @@
 
         } catch(e) {
 
+            console.log(e)
+
             pushNotification(notification, "Something went wrong..", `Plot ${id} could not be updated.`)
             
         }

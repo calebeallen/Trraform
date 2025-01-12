@@ -4,8 +4,7 @@ import { PNG } from "pngjs/browser"
 import PlotId from "$lib/common/plotId"
 import { decodePlotData, encodePlotData } from "$lib/common/utils"
 import { apiRes, cachePurgeFiles } from "$lib/server/utils"
-import { CONTRACT_ADDRESS } from "$lib/common/constants"
-import { mainnet, sepolia } from "viem/chains"
+import { CHAIN, DATA_CONTRACT_ADDRESS } from "$lib/common/constants"
 import { createPublicClient, http, recoverMessageAddress, parseAbi } from "viem"
 import { logApiErrorDiscord } from "$lib/server/discord"
 
@@ -61,13 +60,13 @@ export async function POST({ request, platform }) {
             signature  
         })
         const pubCli = createPublicClient({
-            chain: sepolia,
+            chain: CHAIN,
             transport: http()
         }) 	
 
         //get token owner from contract
         const tokenOwner = await pubCli.readContract({
-            address: CONTRACT_ADDRESS,
+            address: DATA_CONTRACT_ADDRESS,
             abi: ABI,
             functionName: "ownerOf",
             args: [plotId.bigInt()]

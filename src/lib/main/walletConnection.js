@@ -97,6 +97,13 @@ export default class WalletConnection {
 
     }
 
+    static getCurrentAddress(){
+
+        const { addresses, addressIndex } = this.connection
+        return addresses[addressIndex]
+
+    }
+
     static async reconnect() {
 
         const connectors = getConnectors(wagmiConfig)
@@ -369,18 +376,19 @@ export default class WalletConnection {
                 //if user address does not own the parent plot, then check for mint locked
                 if( addresses[addressIndex] != parentOwner ){
                     
-                    const lockedTime = await publicCli.readContract({
+                    const lockedTimeBigInt = await publicCli.readContract({
                         address: DATA_CONTRACT_ADDRESS,
                         abi: DATA_CONTRACT_ABI,
                         functionName: 'tempLock',
                         args: [parentTokenId]
                     })
 
+                    const lockedTime = parseInt(lockedTimeBigInt.toString())
                     const currentTime = Math.floor(Date.now() / 1000)
                 
                     if(currentTime < lockedTime){
 
-                        const dt = Math.floor(lockedTime - currentTime / 60)
+                        const dt = Math.floor((lockedTime - currentTime) / 60)
                         return {
                             available: false,
                             status: `Locked for ${dt} minutes`

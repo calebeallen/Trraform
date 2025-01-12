@@ -32,7 +32,7 @@
     
     let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showMintModal = false
     let reportPlotId = null, sharePlotId = null, mintPlot = null
-    let profile = null
+    let profile = {}
     let showProfile = false
 
     onMount(() => {
@@ -43,7 +43,7 @@
 
     function keydown(e){
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal)
 
             return
 
@@ -84,16 +84,6 @@
 
                 refs.camera.left = true
                 break
-
-            case " ":
-
-                refs.camera.upward = true
-                break
-
-            case "control":
-
-                refs.camera.downward = true
-                break
             
             case "shift":   
                 
@@ -130,16 +120,6 @@
                 refs.camera.left = false
                 break
 
-            case " ":
-
-                refs.camera.upward = false
-                break
-
-            case "control":
-
-                refs.camera.downward = false
-                break
-
             case "shift":
 
                 refs.camera.accelerationMultiplier = 1
@@ -153,7 +133,7 @@
 
         if(refs.camera){
 
-            refs.camera.forward = refs.camera.backward = refs.camera.right = refs.camera.left = refs.camera.upward = refs.camera.downward = false
+            refs.camera.forward = refs.camera.backward = refs.camera.right = refs.camera.left = false
             refs.camera.accelerationMultiplier = 1
 
         }
@@ -241,44 +221,6 @@
             mintPlot = $insideOf
             showMintModal = true
         
-            // showConnectModal = false
-            // $loadScreenOpacity = 50
-
-            // try {
-
-            //     const plot = $insideOf
-            //     const mintPrice = await plot.getSmp()
-            //     const hash = await WalletConnection.mint(plot.id, mintPrice)
-
-            //     pushNotification(notification, `We're processing your transaction.`, "This may take a minute..")
-
-            //     await WalletConnection.txSuccess(hash)
-
-            //     $myPlots.unshift(new MyPlot(plot.id, true))
-            
-            //     plot.minted = true
-
-            //     if (plot.id.depth() < MAX_DEPTH)
-
-            //         plot.createChildPlots(...Plot.defaultChildPlots(plot.buildSize))
-                    
-            //     profile = getProfile(plot)
-                
-            //     setTimeout(() => {
-            //         confetti(plot.pos, plot.parent.blockSize)
-            //         pushNotification(notification, `Plot ${plot.id.string()} minted!`, 'Go to the "My Plots" tab to view your new plot!', () => goto("/myplots"))
-            //     }, 1000)
-                
-
-            // } catch(e) {
-
-            //     console.log(e)
-            //     pushNotification(notification, "Minting failed", "This transaction could not be completed on chain.")
-                
-            // }
-
-            // $loadScreenOpacity = 0   
-
         } else 
 
             showConnectModal = true
@@ -355,22 +297,22 @@
 
         }
 
-        //format mint price
-        let mintPrice = await plot.parent.getSmp()
-
-        if(mintPrice !== null)
-
-            mintPrice = formatEther(mintPrice)
-
         return { 
             minted : plot.minted, 
             id : idStr,
             name : plot.name || `Plot ${idStr}`, 
             desc : plot.desc,
             link,
-            linkLabel : plot.linkLabel || "link",
-            mintPrice
+            linkLabel : plot.linkLabel || "link"
         }
+
+    }
+
+    function refresh(){
+
+        refs.renderManager.unrenderChunkById($insideOf.chunk.id)
+        $insideOf.clear()
+        profile = getProfile($insideOf)
 
     }
 
@@ -433,16 +375,20 @@
 </header>
 
 <div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    {#await profile || new Promise(() => {})}
+    {#await profile}
         <div class="w-full h-20 animate-pulse">
             <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
             <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
         </div>
-    {:then { id, minted, name, desc, link, linkLabel, mintPrice } }
+    {:then { id, minted, name, desc, link, linkLabel } }
         <div>
             <div class="flex items-center justify-between gap-1">
                 <h3 class="max-w-full break-all w-max">{name}</h3>
                 <div class="select-none">
+                    <button on:click={refresh} class="relative w-4 h-4 select-none group">
+                        <img src="/refresh.svg" alt="report">   
+                        <span class="plot-option-tag">Refresh</span>
+                    </button>
                     <button on:click={() => {
                         sharePlotId = id
                         showShareModal = true
@@ -477,7 +423,7 @@
                 </a>
             {/if}
         {:else}
-            <button class="w-full mt-1 button0" on:click={prepMint}>Mint {#if mintPrice !== null}for {mintPrice} ETH {/if}</button>
+            <button class="w-full mt-1 button0" on:click={prepMint}>Mint</button>
         {/if}
     {/await}
 </div>

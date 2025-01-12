@@ -35,6 +35,7 @@ const material = new MeshBasicMaterial({vertexColors: true})
 //     }
 // });
 
+const dt_LOAD = 0.5
 const dt_CLEAN = 0.1
 const dt_REFRESH = 0.5
 
@@ -51,6 +52,7 @@ export default class RenderManager{
         this.renderedChunks = {}
         
         this.totalTimeElapsed = 0
+        this.lastLoadTimeStamp = 0
         this.lastCleanUpTimeStamp = 0
         this.lastRefreshTimeStamp = 0
 
@@ -89,10 +91,10 @@ export default class RenderManager{
 
         const seconds = Math.floor(this.totalTimeElapsed)
 
-        if(seconds != this.throttleSeconds){
+        if(this.totalTimeElapsed - this.lastLoadTimeStamp >= dt_LOAD){
 
             this.throttle = 10
-            this.throttleSeconds = seconds
+            this.lastLoadTimeStamp = this.totalTimeElapsed
 
         }
 
@@ -406,6 +408,18 @@ export default class RenderManager{
         if(chunk)
 
             this._unrender(chunk)
+
+    }
+
+    unrenderChunkById(chunkId){
+        
+        const chunk = this.renderedChunks[chunkId]
+
+        if(!chunk)
+
+            return
+        
+        this._unrender(chunk)
 
     }
 

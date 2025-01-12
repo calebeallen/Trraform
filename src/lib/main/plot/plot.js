@@ -56,7 +56,6 @@ export default class Plot extends PlotData {
 
         this.geometryData = null
         this.hasGeometry = false
-        this._gettingSmp = null
 
     }
 
@@ -245,20 +244,6 @@ export default class Plot extends PlotData {
                 found.push(child)
 
         return found
-
-    }
-
-    async getSmp(){
-
-        if(!WalletConnection.isConnected)
-
-            return null
-
-        if(this._gettingSmp === null)
-
-            this._gettingSmp = WalletConnection.getSmp(this.id)
-
-        return this._gettingSmp
 
     }
 

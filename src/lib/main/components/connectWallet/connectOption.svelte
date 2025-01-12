@@ -31,7 +31,7 @@
                     <LogoAnimated/> 
                 </div>
             {:else if isLastConnected}
-                <div class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full">Last Connected</div>
+                <div class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full">Last connected</div>
             {/if}
         </div>
     </button>

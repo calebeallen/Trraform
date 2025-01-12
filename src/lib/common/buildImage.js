@@ -230,154 +230,160 @@ function preprocessPNG(mesh, resolution = 1000){
 
     }
    
-    //depth sorting
-    faces.sort( (a, b) => a.depth - b.depth )
-
-    const imgBounds = { min: Object.assign({}, faces[0].verticies[0]), max: Object.assign({}, faces[0].verticies[0]) }
-    const grid = new Uint8Array(resolution ** 2)
+    let dx = 0
+    let dy = 0
 
     const processedFaces = []
 
-    for(const face of faces){
+    if(faces.length > 0 ){
 
-        let drawn = false
+        //depth sorting
+        faces.sort( (a, b) => a.depth - b.depth )
+        const imgBounds = { min: Object.assign({}, faces[0].verticies[0]), max: Object.assign({}, faces[0].verticies[0]) }
+        const grid = new Uint8Array(resolution ** 2)
 
-        const vrts = face.verticies
-        const faceBounds = { min: Object.assign({}, vrts[0]), max: Object.assign({}, vrts[0]) }
-        
-        //compute bounds
-        for(const v of vrts){
+        for(const face of faces){
 
-            if(v.x < faceBounds.min.x)
-                faceBounds.min.x = v.x
-            if(v.x > faceBounds.max.x)
-                faceBounds.max.x = v.x
-            if(v.y < faceBounds.min.y)
-                faceBounds.min.y = v.y
-            if(v.y > faceBounds.max.y)
-                faceBounds.max.y = v.y
+            let drawn = false
 
-            if(v.x < imgBounds.min.x)
-                imgBounds.min.x = v.x
-            if(v.x > imgBounds.max.x)
-                imgBounds.max.x = v.x
-            if(v.y < imgBounds.min.y)
-                imgBounds.min.y = v.y
-            if(v.y > imgBounds.max.y)
-                imgBounds.max.y = v.y
-
-        }
-
-        //scale bounds to image resolution
-        faceBounds.min.x = Math.floor(faceBounds.min.x * resolution)
-        faceBounds.max.x = Math.floor(faceBounds.max.x * resolution)
-        faceBounds.min.y = Math.floor(faceBounds.min.y * resolution)
-        faceBounds.max.y = Math.floor(faceBounds.max.y * resolution)
-
-        const dx = faceBounds.max.x - faceBounds.min.x + 1
-        const dy = faceBounds.max.y - faceBounds.min.y + 1
-        
-        const leftWall = new Uint16Array(dy).fill(dx)
-        const rightWall = new Uint16Array(dy)
-
-        //swap v3 and v4 to avoid hour glass shape
-        let temp = vrts[2]
-        vrts[2] = vrts[3]
-        vrts[3] = temp
-        
-        //compute left and right bounds for face
-        for(let j = 0; j < 4; j++){
-
-            const v1 = face.verticies[j]
-            const v2 = face.verticies[(j+1) % 4]
-
-            let x = Math.floor(v1.x * resolution) - faceBounds.min.x
-            let y = Math.floor(v1.y * resolution) - faceBounds.min.y
-
-            const x1 = Math.floor(v2.x * resolution) - faceBounds.min.x
-            const y1 = Math.floor(v2.y * resolution) - faceBounds.min.y
-
-            const dx = Math.abs(x1 - x)
-            const dy = Math.abs(y1 - y)
-            const sx = (x < x1) ? 1 : -1
-            const sy = (y < y1) ? 1 : -1
-
-            let err = dx - dy   
-
-            //starting at v1, draw line to v2
-            while (true) {
-
-                if(x < leftWall[y])
-
-                    leftWall[y] = x
-
-                if(x > rightWall[y])
-
-                    rightWall[y] = x    
-
-                if (x === x1 && y === y1) 
+            const vrts = face.verticies
+            const faceBounds = { min: Object.assign({}, vrts[0]), max: Object.assign({}, vrts[0]) }
             
-                    break
+            //compute bounds
+            for(const v of vrts){
 
-                const err2 = 2 * err
+                if(v.x < faceBounds.min.x)
+                    faceBounds.min.x = v.x
+                if(v.x > faceBounds.max.x)
+                    faceBounds.max.x = v.x
+                if(v.y < faceBounds.min.y)
+                    faceBounds.min.y = v.y
+                if(v.y > faceBounds.max.y)
+                    faceBounds.max.y = v.y
 
-                if (err2 > -dy) {
+                if(v.x < imgBounds.min.x)
+                    imgBounds.min.x = v.x
+                if(v.x > imgBounds.max.x)
+                    imgBounds.max.x = v.x
+                if(v.y < imgBounds.min.y)
+                    imgBounds.min.y = v.y
+                if(v.y > imgBounds.max.y)
+                    imgBounds.max.y = v.y
 
-                    err -= dy
-                    x += sx
+            }
 
-                }
+            //scale bounds to image resolution
+            faceBounds.min.x = Math.floor(faceBounds.min.x * resolution)
+            faceBounds.max.x = Math.floor(faceBounds.max.x * resolution)
+            faceBounds.min.y = Math.floor(faceBounds.min.y * resolution)
+            faceBounds.max.y = Math.floor(faceBounds.max.y * resolution)
 
-                if (err2 < dx) {
+            const dx = faceBounds.max.x - faceBounds.min.x + 1
+            const dy = faceBounds.max.y - faceBounds.min.y + 1
+            
+            const leftWall = new Uint16Array(dy).fill(dx)
+            const rightWall = new Uint16Array(dy)
 
-                    err += dx
-                    y += sy
+            //swap v3 and v4 to avoid hour glass shape
+            let temp = vrts[2]
+            vrts[2] = vrts[3]
+            vrts[3] = temp
+            
+            //compute left and right bounds for face
+            for(let j = 0; j < 4; j++){
+
+                const v1 = face.verticies[j]
+                const v2 = face.verticies[(j+1) % 4]
+
+                let x = Math.floor(v1.x * resolution) - faceBounds.min.x
+                let y = Math.floor(v1.y * resolution) - faceBounds.min.y
+
+                const x1 = Math.floor(v2.x * resolution) - faceBounds.min.x
+                const y1 = Math.floor(v2.y * resolution) - faceBounds.min.y
+
+                const dx = Math.abs(x1 - x)
+                const dy = Math.abs(y1 - y)
+                const sx = (x < x1) ? 1 : -1
+                const sy = (y < y1) ? 1 : -1
+
+                let err = dx - dy   
+
+                //starting at v1, draw line to v2
+                while (true) {
+
+                    if(x < leftWall[y])
+
+                        leftWall[y] = x
+
+                    if(x > rightWall[y])
+
+                        rightWall[y] = x    
+
+                    if (x === x1 && y === y1) 
+                
+                        break
+
+                    const err2 = 2 * err
+
+                    if (err2 > -dy) {
+
+                        err -= dy
+                        x += sx
+
+                    }
+
+                    if (err2 < dx) {
+
+                        err += dx
+                        y += sy
+
+                    }
 
                 }
 
             }
+
+            //draw face
+            for(let y = 0; y <= dy; y++)
+            for(let x = leftWall[y]; x <= rightWall[y]; x++)
+
+                if(x >= 0 && x < resolution && y >= 0 && y < resolution){
+
+                    const _x = x + faceBounds.min.x
+                    const _y = y + faceBounds.min.y
+
+                    const j = _y * resolution + _x
+
+                    if(grid[j] === 0){
+
+                        grid[j] = 1
+                        drawn = true
+
+                    }
+
+                }
+
+            
+            if(drawn)
+
+                processedFaces.push({
+
+                    pos: face.pos,
+                    col: face.col,
+                    delta1: face.delta1, 
+                    delta2: face.delta2, 
+                    faceDir: face.faceDir,
+
+                })
 
         }
 
-        //draw face
-        for(let y = 0; y <= dy; y++)
-        for(let x = leftWall[y]; x <= rightWall[y]; x++)
+        processedFaces.reverse()
 
-            if(x >= 0 && x < resolution && y >= 0 && y < resolution){
-
-                const _x = x + faceBounds.min.x
-                const _y = y + faceBounds.min.y
-
-                const j = _y * resolution + _x
-
-                if(grid[j] === 0){
-
-                    grid[j] = 1
-                    drawn = true
-
-                }
-
-            }
-
-        
-        if(drawn)
-
-            processedFaces.push({
-
-                pos: face.pos,
-                col: face.col,
-                delta1: face.delta1, 
-                delta2: face.delta2, 
-                faceDir: face.faceDir,
-
-            })
+        dx = (1 - imgBounds.max.x + imgBounds.min.x ) / 2 - imgBounds.min.x
+        dy = (1 - imgBounds.max.y + imgBounds.min.y ) / 2 - imgBounds.min.y
 
     }
-
-    processedFaces.reverse()
-
-    const dx = (1 - imgBounds.max.x + imgBounds.min.x ) / 2 - imgBounds.min.x
-    const dy = (1 - imgBounds.max.y + imgBounds.min.y ) / 2 - imgBounds.min.y
 
     //[ res | view matrix (12, only first two rows + last row needed) | dx(1) | dy(1) | pos (3) | dir (1) | delta1 (1) | delta2 (1) | col (3) | ... ]
     const m = viewMatrix.elements

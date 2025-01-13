@@ -63,7 +63,7 @@
                 />
             {/each}
         </div>
-        <p class="text-xs text-zinc-400">By connecting a wallet, you agree to our <a class="font-semibold" href="/">Terms of Service</a> and  <a class="font-semibold" href="/">Privacy Policy</a>.</p>
+        <p class="text-xs text-zinc-400">By connecting a wallet, you agree to our <a class="font-semibold" target="_blank" href="/terms-of-service">Terms of Service</a> and  <a class="font-semibold" target="_blank" href="/privacy-policy">Privacy Policy</a>.</p>
     </div>
 </Modal>
 

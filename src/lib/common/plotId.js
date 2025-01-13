@@ -1,5 +1,5 @@
 
-import { D0_PLOT_COUNT, MAX_DEPTH, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL, IMAGE_FILE_EXT} from "./constants"
+import { D0_PLOT_COUNT, MAX_DEPTH, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "./constants"
 
 const D0_BIT_MASK = 0xFFFF
 const DN_BIT_MASK = 0xFF
@@ -85,7 +85,7 @@ export default class PlotId {
 
     getImgUrl(){
 
-        return `${IMAGES_BUCKET_URL}/${this.string()}.${IMAGE_FILE_EXT}`
+        return `${IMAGES_BUCKET_URL}/${this.string()}.png`
 
     }
 

@@ -8,19 +8,15 @@
     import { page } from "$app/stores"
     import { goto } from "$app/navigation"
     import { onMount } from "svelte";
-    import { insideOf, refs, newPlots, myPlots, notification, loadScreenOpacity } from "$lib/main/store"
+    import { insideOf, refs, notification, newPlots } from "$lib/main/store"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import ReportModal from "$lib/main/components/reportModal.svelte";
-    import { MAX_DEPTH } from "$lib/common/constants";
     import { pushNotification } from "$lib/common/utils";
     import PlotId from "$lib/common/plotId"
     import { confetti } from "$lib/main/decoration"
     import WalletConnection from "$lib/main/walletConnection";
-    import MyPlot from "$lib/main/plot/myPlot"
-    import Plot from "$lib/main/plot/plot"
     import MenuOption from "./menuOption.svelte";
-    import { formatEther } from "viem";
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
     import MintModal from "$lib/main/components/mintModal.svelte";
 
@@ -145,6 +141,10 @@
         if(showSettingsModal || showConnectModal || showReportModal || showShareModal)
 
             return
+
+        if(refs.camera.update === refs.camera.autoRotate)
+
+            refs.camera.update = refs.camera.orbit
 
         refs.camera.scrollVelocity -= e.deltaY / 100
 
@@ -367,10 +367,10 @@
         </button>
     </div>
     <div class="relative h-6 sm:h-7">
-        <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} src="/menu.svg" alt="menu" tag="Menu"/>
+        <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} newBinding={newPlots} src="/menu.svg" alt="menu" tag="Menu"/>
         <div class="{menuExpanded ? "" : "translate-x-20"} transition-transform mt-1.5 space-y-1.5">
             <MenuOption on:click={() => goto("/")} src="/house.svg" alt="home" tag="Home"/>
-            <MenuOption on:click={() => goto("/myplots")} src="/plot1.svg" alt="my plots" tag="My Plots"/>
+            <MenuOption on:click={() => goto("/myplots")} newBinding={newPlots} src="/plot1.svg" alt="my plots" tag="My Plots"/>
             <MenuOption on:click={() => showSettingsModal = true} src="/settings.svg" alt="settings" tag="Settings"/>
         </div>
     </div>

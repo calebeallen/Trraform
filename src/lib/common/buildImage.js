@@ -15,7 +15,7 @@ function getCamera(geometry, aspectRatio){
 
     const bounds = geometry.boundingSphere
 
-    camera.position.setFromSpherical(new Spherical(bounds.radius * 2, Math.PI * 4.5/10, Math.PI / 4)).add(bounds.center)
+    camera.position.setFromSpherical(new Spherical(bounds.radius * 2.5, Math.PI * 4.5/10, Math.PI / 4)).add(bounds.center)
     camera.lookAt(bounds.center)
 
     camera.updateMatrixWorld()
@@ -412,6 +412,15 @@ function createPNG(p, d){
 
     d ||= new Uint8ClampedArray(p[0] ** 2 * 4)
 
+    for(let i = 0; i < d.length; i += 4){
+
+        d[i] = 0x27
+        d[i+1] = 0x27
+        d[i+2] = 0x2a
+        d[i+3] = 0xff
+
+    }
+
     for(let i = 15; i < p.length; i+=9){
         
         const dir = p[i+3]
@@ -536,7 +545,7 @@ function createPNG(p, d){
                 d[j] = p[i+6]
                 d[j+1] = p[i+7]
                 d[j+2] = p[i+8]
-                d[j+3] = 255
+                d[j+3] = 0xff
 
             }
         

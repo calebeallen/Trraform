@@ -51,17 +51,6 @@ export default class MyPlot extends PlotData{
         this.imgUrl = null
         this.isNew = isNew
 
-        if(isNew)
-
-            newPlots.update(c => c+1)
-
-    }
-
-    removeIsNew(){
-
-        this.isNew = false
-        newPlots.update(c => c-1)
-
     }
 
     copy(myPlot){

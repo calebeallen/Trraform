@@ -26,12 +26,9 @@
 
         let tag = null
 
-        if (plot.isNew) {
+        if (plot.isNew) 
 
             tag = { text: `New`, color : "#2563eb" }
-            plot.removeIsNew()
-
-        }
 
         if (banned)
 

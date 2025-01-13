@@ -34,7 +34,7 @@
 
             plotImgSrc = "/default.png"
 
-        const encoded = encodeURI(`https://trraform.com/${plotIdStr}`)
+        const encoded = encodeURI(`https://trraform.com/plotId?=${plotIdStr}`)
         const message = encodeURIComponent("Check out this plot on Trraform!")
         const param = `?url=${encoded}&text=${message}`
 
@@ -47,7 +47,7 @@
 
     function copyToClipboard(){
 
-        navigator.clipboard.writeText(`https://trraform.com/${plotIdStr}`)
+        navigator.clipboard.writeText(`https://trraform.com/plotId?=${plotIdStr}`)
         pushNotification(notification, "Plot link copied", "Thanks for sharing!")
         close()
 

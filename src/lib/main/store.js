@@ -22,7 +22,6 @@ const refs = {
     scene: null,
     camera: null,
     viewMatrix: null,
-    updateInWorld: () => {},
     mousemoveCallback: () => {},
     walletConnectedCallback: () => {},
     walletConnectXCallback: () => {}
@@ -31,7 +30,7 @@ const refs = {
 
 const defaultSettings = {
     general : {
-        fov : 70,
+        fov : 90,
         lookSens : 20,
         maxTags : 24,
         tagSize : 3

@@ -2,7 +2,7 @@
 <script>
 
     import { onMount } from "svelte"
-    import { myPlots } from "$lib/main/store"
+    import { myPlots, newPlots } from "$lib/main/store"
     import WalletConnection from "$lib/main/walletConnection"
     import PlotWidget from "$lib/main/components/myPlots/plotWidget.svelte"
 
@@ -23,6 +23,8 @@
 
         //load what can fit or 5 rows
         await WalletConnection.loadMyPlots(Math.min(fitX * fitY, fitX * 5))
+
+        $newPlots = false
 
     })
 

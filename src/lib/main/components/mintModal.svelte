@@ -9,7 +9,7 @@
     import LogoAnimated from "$lib/common/components/logoAnimated.svelte";
     import { fly } from "svelte/transition";
     import { formatEther, parseEther } from "viem";
-    import { loadScreenOpacity, insideOf, myPlots, notification } from "$lib/main/store"
+    import { loadScreenOpacity, myPlots, notification, newPlots } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
     import MyPlot from "$lib/main/plot/myPlot";
     import Plot from "$lib/main/plot/plot"
@@ -120,7 +120,8 @@
             await WalletConnection.txSuccess(hash)
 
             $myPlots.unshift(new MyPlot(plotId, true))
-        
+            $newPlots = true
+            
             plot.minted = true
 
             if (depth < MAX_DEPTH)

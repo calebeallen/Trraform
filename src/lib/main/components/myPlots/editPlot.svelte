@@ -24,7 +24,7 @@
     onMount( async () => {
 
         $loadScreenOpacity = 50
-
+        editingPlot.isNew = false
         id = editingPlot.id.string()
         depth = editingPlot.id.depth()
         name = editingPlot.name

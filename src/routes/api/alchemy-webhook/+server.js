@@ -2,7 +2,6 @@
 import { getItemWithWorkerCache, apiRes } from "$lib/server/utils"
 import { logApiErrorDiscord } from "$lib/server/discord"
 import { cachePurgeFiles } from "$lib/server/utils"
-import { IMAGE_FILE_EXT } from "$lib/common/constants"
 import PlotId from "$lib/common/plotId"
 import { trim, fromHex } from "viem"
 
@@ -45,7 +44,7 @@ async function setDefault(platform, plotId){
 
     //get default image, plot data
     const defaultPlot = await ( await getItemWithWorkerCache(platform, "PLOTS", "default") ).arrayBuffer()
-    const defaultImg = await ( await getItemWithWorkerCache(platform, "IMAGES", `default.${IMAGE_FILE_EXT}`) ).arrayBuffer()
+    const defaultImg = await ( await getItemWithWorkerCache(platform, "IMAGES", `default.png`) ).arrayBuffer()
     const metadata = JSON.stringify({
         "name": `Plot ${plotIdStr}`,
         "external_url": `https://trraform.com/${plotIdStr}`, 
@@ -54,7 +53,7 @@ async function setDefault(platform, plotId){
 
     await Promise.all([
         PLOTS.put(plotIdStr, defaultPlot, { httpMetadata: { contentType : "application/octet-stream" } }),
-        IMAGES.put(`${plotIdStr}.${IMAGE_FILE_EXT}`, defaultImg, { httpMetadata: { contentType : `image/${IMAGE_FILE_EXT}` } }),
+        IMAGES.put(`${plotIdStr}.png`, defaultImg, { httpMetadata: { contentType : `image/png` } }),
         TOKEN_METADATA.put(`${plotIdStr}.json`, metadata, { httpMetadata: { contentType : "application/json" } })
     ])
 

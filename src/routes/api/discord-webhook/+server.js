@@ -1,5 +1,4 @@
 
-import { IMAGE_FILE_EXT } from "$lib/common/constants"
 import { handleDiscordInteraction } from "$lib/server/discord"
 import { getItemWithWorkerCache, cachePurgeFiles } from "$lib/server/utils"
 import { decodePlotData, encodePlotData } from "$lib/common/utils"
@@ -39,9 +38,9 @@ export async function POST({request, platform}) {
 		}
 
 		//update plot data and image
-		const defaultImg = await ( await getItemWithWorkerCache(platform, "IMAGES", `default.${IMAGE_FILE_EXT}`) ).arrayBuffer()
+		const defaultImg = await ( await getItemWithWorkerCache(platform, "IMAGES", `default.png`) ).arrayBuffer()
 		await Promise.all([
-			IMAGES.put(`${plotIdStr}.${IMAGE_FILE_EXT}`, defaultImg, { httpMetadata: { contentType : `image/${IMAGE_FILE_EXT}` } }),
+			IMAGES.put(`${plotIdStr}.png`, defaultImg, { httpMetadata: { contentType : `image/png` } }),
 			PLOTS.put(plotIdStr, encodePlotData(plotData), { httpMetadata: { contentType : "application/octet-stream" } }),
 			cachePurgeFiles(env, plotId.getUrl())
 		])

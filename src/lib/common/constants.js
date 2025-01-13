@@ -23,7 +23,7 @@ const MAX_SMP = 9999
 const TEMP_LOCK_MINT_PRICE = 0.005
 const MAX_DEPTH = 2
 const DEFAULT_SMP = 0.001
-const D0_PLOT_COUNT = 50000
+const D0_PLOT_COUNT = 34998
 const PLOT_COUNT = 24
 
 const MAX_BUILD_SIZES = [32, 48, 64]

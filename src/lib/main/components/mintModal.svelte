@@ -21,12 +21,10 @@
     let plotIdStr = ""
     let address
     let depth
-    let isPlotAvailablePromise
-    let mintPricePromise
-    let mintPriceWei
     let mintLockChecked = false
-    let isAvailable = false
+    let refreshPromise = {}
     let interval
+    let mintPriceWei
 
     onMount(() => {
 
@@ -34,8 +32,8 @@
         plotIdStr = plotId.string()
         depth = plotId.depth()
         address = WalletConnection.getCurrentAddress().substring(0,12) + "..."
-        interval = setInterval(refresh, 15000)
-        refresh()
+        interval = setInterval(() => refreshPromise = refresh(), 15000)
+        refreshPromise = refresh()
 
     })
 
@@ -45,40 +43,65 @@
 
     })
 
-    function refresh(){
+    async function refresh(){
 
-        mintPricePromise = getSmp()
-        isPlotAvailablePromise = getPlotAvailability()
+        //check is minted
+        const isMinted = (await WalletConnection.getOwnerOf(plot.id)) !== null
 
-    }
+        if(plot.id.depth() > 0){
 
-    async function getSmp(){
+            const parentPlotId = plot.id.getParent()
+            const parentPlotOwner = await WalletConnection.getOwnerOf(parentPlotId)
+            const tempLock = await WalletConnection.getTempLock(parentPlotId)
+            const currentAddress = WalletConnection.getCurrentAddress()
 
-        const parentPlotId = plotId.getParent(plotId)
+            mintPriceWei = await WalletConnection.getSmp(parentPlotId)
+            const mintPrice = formatEther(mintPriceWei)
 
-        if(parentPlotId.id == 0){
-        
+            if(isMinted)
+
+                return {
+                    state: 2, //already minted
+                    mintPrice
+                }
+
+            if(tempLock > 0){
+
+                if(currentAddress == parentPlotOwner){
+
+                    mintPriceWei = parseEther(TEMP_LOCK_MINT_PRICE.toString())
+
+                    return {
+                        state: 0,
+                        mintPrice: TEMP_LOCK_MINT_PRICE
+                    }
+
+                }
+
+                return {
+                    state: 1, //locked
+                    unlockTime: Math.floor(tempLock / 60),
+                    mintPrice
+                }
+
+            }
+
+            return {
+                state: 0,
+                mintPrice
+            }
+
+        } else {
+
             mintPriceWei = parseEther(D0_MINT_PRICE.toString())
-            return D0_MINT_PRICE
+        
+            return {
+                state: isMinted ? 2 : 0,
+                mintPrice: D0_MINT_PRICE
+            }
 
         }
 
-        const smpWei = mintPriceWei = await WalletConnection.getSmp(parentPlotId)
-        return formatEther(smpWei)
-
-    }
-
-    async function getPlotAvailability(){
-
-        isAvailable = false
-        const { available, status } = await WalletConnection.getPlotAvailability(plotId)
-        isAvailable = available
-
-        if(!available)
-
-            clearInterval(interval)
-        
-        return status
 
     }
 
@@ -87,6 +110,8 @@
         try {
 
             $loadScreenOpacity = 50
+
+            console.log(mintLockChecked)
 
             const hash = await WalletConnection.mint(plotId, mintLockChecked, mintPriceWei)
 
@@ -106,6 +131,8 @@
             dispatch("success", plot)
 
         } catch(e) {
+
+            console.log(e)
 
             pushNotification(notification, "Minting failed", "This transaction could not be completed on chain.")
             
@@ -128,15 +155,17 @@
                 <div class="font-semibold ">Plot {plotIdStr}</div>  
                 <div class="text-xs text-zinc-300">To address: {address}</div> 
             </div>
-            {#await isPlotAvailablePromise}
+            {#await refreshPromise}
                 <div class="w-6 h-6">
                     <LogoAnimated/> 
                 </div>
-            {:then status} 
-                {#if isAvailable}
-                    <div transition:fly={{ y: 10 }} class="px-1.5 py-px text-xs text-green-300 font-semibold bg-green-900 rounded-full select-none">{status}</div>
-                {:else}
-                    <div transition:fly={{ y: 10 }} class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full select-none">{status}</div>
+            {:then {state, unlockTime}} 
+                {#if state === 0}
+                    <div transition:fly={{ y: 10 }} class="px-1.5 py-px text-xs text-green-300 font-semibold bg-green-900 rounded-full select-none">Still available</div>
+                {:else if state === 1}
+                    <div transition:fly={{ y: 10 }} class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full select-none">Locked for {unlockTime} minutes</div>
+                {:else if state === 2}
+                    <div transition:fly={{ y: 10 }} class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full select-none">Already minted</div>
                 {/if}
             {/await} 
         </div>
@@ -145,7 +174,7 @@
                 <div class="flex items-baseline justify-between gap-2">
                     <div>
                         <span class="text-sm font-semibold">Mint lock</span>
-                        <p class="text-xs text-zinc-300">Mint lock allows you to block other users from minting this plot's subplots for <b class="text-xs text-white">one hour</b>. During this hour, you will have the ability to mint subplots for a <b class="text-xs text-white">set price of {TEMP_LOCK_MINT_PRICE} ETH</b>. Once mint lock expires, all subplots left unminted will be available to anyone.<b class="text-xs text-white"> You cannot turn on mint lock after minting the plot!</b> This option is free but will increase gas cost.</p>
+                        <p class="text-xs text-zinc-300">Mint lock allows you to block other users from minting this plot's subplots for <b class="text-xs text-white">one hour</b>. During this hour, you will have the ability to mint subplots for a <b class="text-xs text-white">set price of {TEMP_LOCK_MINT_PRICE} ETH</b>. Once mint lock expires, all subplots left unminted will be available to anyone. <b class="text-xs text-white">You cannot turn on mint lock after minting the plot!</b> This option is free but will increase gas cost.</p>
                     </div>
                     <div class="inline-flex items-center">
                         <label class="relative flex items-center cursor-pointer">
@@ -166,16 +195,16 @@
                 <div class="text-sm">Total</div>
                 <div class="text-xs text-zinc-300">*excluding gas fee</div>
             </div>
-            {#await mintPricePromise}
+            {#await refreshPromise}
                 <div class="w-32 h-3 rounded-full bg-zinc-700 animate-pulse"></div>
-            {:then mintPrice} 
+            {:then { mintPrice }} 
                 <span class="text-sm">{mintPrice} ETH</span>
             {/await}
         </div>
-        {#await isPlotAvailablePromise}
+        {#await refreshPromise}
             <div class="w-full rounded-lg h-7 bg-zinc-700 animate-pulse"></div>
-        {:then _} 
-            {#if isAvailable}
+        {:then { state }} 
+            {#if state === 0}
                 <button class="w-full button0" on:click={mint}>Mint</button>
             {/if}
         {/await} 

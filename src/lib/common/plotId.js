@@ -10,7 +10,7 @@ export default class PlotId {
 
         const id = parseInt(hexStr, 16)
 
-        if(isNaN(id))
+        if(isNaN(id) || id === 0)
 
             throw new Error("Invalid plot id")
 

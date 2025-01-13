@@ -342,71 +342,46 @@ export default class WalletConnection {
 
     }
 
-    static async getPlotAvailability(plotId){
+    static async getOwnerOf(plotId){
 
-        const { publicCli, addresses, addressIndex } = this.connection
-        const tokenId = plotId.bigInt()
+        try {
 
-        try{
+            const { publicCli } = this.connection
 
-            await publicCli.readContract({
+            const tokenId = plotId.bigInt()
+            const owner = await publicCli.readContract({
                 address: DATA_CONTRACT_ADDRESS,
                 abi: DATA_CONTRACT_ABI,
                 functionName: 'ownerOf',
                 args: [tokenId]
             })
 
-            return {
-                available: false,
-                status: "Already minted"
-            }
+            return owner
 
         } catch {
 
-            if(plotId.depth() > 0){
-
-                const parentTokenId = plotId.getParent().bigInt()
-                const parentOwner = await publicCli.readContract({
-                    address: DATA_CONTRACT_ADDRESS,
-                    abi: DATA_CONTRACT_ABI,
-                    functionName: 'ownerOf',
-                    args: [parentTokenId]
-                })
-
-                //if user address does not own the parent plot, then check for mint locked
-                if( addresses[addressIndex] != parentOwner ){
-                    
-                    const lockedTimeBigInt = await publicCli.readContract({
-                        address: DATA_CONTRACT_ADDRESS,
-                        abi: DATA_CONTRACT_ABI,
-                        functionName: 'tempLock',
-                        args: [parentTokenId]
-                    })
-
-                    const lockedTime = parseInt(lockedTimeBigInt.toString())
-                    const currentTime = Math.floor(Date.now() / 1000)
-                
-                    if(currentTime < lockedTime){
-
-                        const dt = Math.floor((lockedTime - currentTime) / 60)
-                        return {
-                            available: false,
-                            status: `Locked for ${dt} minutes`
-                        }
-
-                    }
-                    
-                } 
-
-            }
-
-            return {
-                available: true,
-                status: "Still available"
-            }
+            return null
 
         }
 
+    }
+
+    static async getTempLock(plotId){
+
+        const { publicCli } = this.connection
+        const tokenId = plotId.bigInt()
+
+        const lockedTimeBigInt = await publicCli.readContract({
+            address: DATA_CONTRACT_ADDRESS,
+            abi: DATA_CONTRACT_ABI,
+            functionName: 'tempLock',
+            args: [tokenId]
+        })
+
+        const lockedTime = parseInt(lockedTimeBigInt.toString())
+        const currentTime = Math.floor(Date.now() / 1000)
+
+        return lockedTime - currentTime
 
     }
 

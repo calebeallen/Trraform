@@ -23,7 +23,7 @@
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
-    import Plot from "$lib/main/plot/Plot"
+    import { pushNotification } from "$lib/common/utils"
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -62,7 +62,7 @@
         await refs.renderManager.renderStatic(rootPlot)
 
         //set initial position
-        refs.camera.position.setFromSphericalCoords(rootPlot.boundingSphere.radius * 2,  Math.PI * 0.5, 0).add(rootPlot.boundingSphere.center)
+        refs.camera.position.setFromSphericalCoords(rootPlot.boundingSphere.radius * 2, Math.PI * 0.5, 0).add(rootPlot.boundingSphere.center)
         refs.camera.target.copy(rootPlot.boundingSphere.center)
         refs.camera.lookAt(rootPlot.boundingSphere.center)
         refs.camera.updateSphere()
@@ -75,7 +75,7 @@
 
         /* begin rendering */
         refs.renderer.setAnimationLoop(renderLoop)
-        refs.renderer.render( refs.scene, refs.camera )
+        refs.renderer.render(refs.scene, refs.camera)
         updateBg()
 
         $loadScreenOpacity = 0
@@ -89,7 +89,7 @@
         t1 = t2
 
         const route = $page.route.id
-        if(route !== "/(app)/[id]" && route !== "/(app)")
+        if(route !== "/(app)/world" && route !== "/(app)")
 
             return
         
@@ -149,11 +149,11 @@
                     $insideOf = inside   
 
                     //update page route if there was a change
-                    const pagePlotId = PlotId.fromHexString($page.params.id)
+                    const plotIdParam = $page.url.searchParams.get("plotId")
 
-                    if(!pagePlotId.equals(inside.id))
+                    if(!plotIdParam || !PlotId.fromHexString(plotIdParam).equals(inside.id))
 
-                        goto(inside.id.string())
+                        goto(`/world?plotId=${inside.id.string()}`)
 
                 }
             
@@ -250,7 +250,7 @@
     }
 
     async function handleNavigate(to){
-        
+
         const route = to.route.id
 
         //if navigation not in world, or if already inside of plot, return
@@ -259,18 +259,45 @@
             moveToPlot(rootPlot)
             $insideOf = rootPlot
 
-        } else if (route === "/(app)/[id]") {
+        } else if (route === "/(app)/world") {
 
-            const plotId = PlotId.fromHexString(to.params.id)
+            const { searchParams } = to.url
+            const cameraParam = searchParams.get("camera")
+
+            if(cameraParam){
+
+                refs.camera.setFromB64URI(cameraParam)
+                refs.camera.update = refs.camera.standard
+                return
+
+            }
+
+
+            const plotIdParam = searchParams.get("plotId")
+            let plotId 
+
+            if(!plotIdParam)
+
+                return
+
+            try { 
+
+                plotId = PlotId.fromHexString(plotIdParam) 
+
+            } catch { 
+                
+                pushNotification(notification, "Invalid plot id", `Plot "${plotIdParam}" does not exist.`)
+                return 
+
+            }
 
             // if already inside plot or plot id is 0
-            if(plotId.id === 0 || plotId.equals($insideOf?.id))
+            if(plotId.equals($insideOf?.id))
 
                 return
 
             /* load plot */
             //check that plot exist
-            const exist = rootPlot.isPlotCreated(plotId) || (await plotId.fetch()) !== null
             const ids = plotId.split()
             let plot = rootPlot
 
@@ -279,17 +306,9 @@
                 await plot.load()
                 await refs.renderManager.render(plot)
 
-                if(!plot.children.length){
+                if(!plot.children.length)
 
-                    if(exist && exist && plot.id.depth() < 2)
-
-                        plot.createChildPlots(...Plot.defaultChildPlots())
-
-                    else
-
-                        break
-
-                }
+                    break
 
                 plot = plot.children[id - 1] 
     
@@ -365,8 +384,6 @@
         tagCtx.textAlign = "center"
         tagCtx.textBaseline = "middle"
         tagCtx.clearRect(0, 0, window.innerWidth, window.innerHeight)
-
-        const pagePlotId = PlotId.fromHexString($page?.params?.id || 0)
 
         for (let i = 0; i < tagData.length; i++) {
 
@@ -531,7 +548,7 @@
         tagClickedPlot = getTagClicked(e.x, e.y)
         ismousedown = true
 
-        if( $page?.route?.id === "/(app)/[id]" && refs.camera.update === refs.camera.autoRotate )
+        if( $page?.route?.id === "/(app)/world" && refs.camera.update === refs.camera.autoRotate )
 
             refs.camera.update = refs.camera.orbit
 
@@ -548,10 +565,12 @@
 
             }
 
-            //push browser state if change
-            if(!PlotId.fromHexString($page.params.id).equals(tagClickedPlot.id))
+            const searchParam = $page.url.searchParams.get("plotId")
 
-                goto(`${tagClickedPlot.id.string()}`)
+            //push browser state if change
+            if(!searchParam || !PlotId.fromHexString(searchParam).equals(tagClickedPlot.id))
+
+                goto(`/world?plotId=${tagClickedPlot.id.string()}`)
 
         }
             
@@ -580,7 +599,7 @@
 
 <svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
-<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$page?.route?.id === "/(app)/myplots" || $page?.route?.id === "/(app)/myplots/[id]" ? "blur-xl" : ""}">
+<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$page?.route?.id === "/(app)/myplots" ? "blur-xl" : ""}">
     <canvas bind:this={glCanvas} class="absolute top-0 left-0 w-full h-full"></canvas>
     <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="absolute top-0 left-0 w-full h-full"></canvas>
 </div>

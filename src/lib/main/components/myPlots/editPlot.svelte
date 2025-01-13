@@ -289,7 +289,7 @@
 <div class="w-full h-full overflow-x-hidden overflow-y-scroll hide-scrollbar">
     <div class="flex flex-row flex-wrap justify-center gap-3 px-1 py-3">
         <div class="relative flex-none overflow-hidden w-60 h-80 rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
-            <img src={imgUrl} alt="build"/> 
+            <img class="object-cover h-full" src={imgUrl} alt="build"/> 
             <div class="absolute bottom-0 flex flex-col w-full gap-0.5 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <PlotWidgetOption on:click={loadFromEditor} src="/floppy.svg" alt="load" text="Load from editor"/>
                 <PlotWidgetOption on:click={() => buildInput.click()} src="/upload.svg" alt="upload" text="Upload build file"/>

@@ -73,6 +73,7 @@
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://trraform.com">
         <meta property="og:title" content="Trraform">
+        <meta property="og:description" content="Millions of worlds powered by Ethereum.">
         <meta property="og:image" content="https://trraform.com/ogImage.png">
 
         <!-- Twitter Meta Tags -->
@@ -80,6 +81,7 @@
         <meta property="twitter:domain" content="trraform.com">
         <meta property="twitter:url" content="https://trraform.com">
         <meta name="twitter:title" content="Trraform">
+        <meta name="twitter:description" content="Millions of worlds powered by Ethereum.">
         <meta name="twitter:image" content="https://trraform.com/ogImage.png">
 
     </svelte:head>
@@ -91,7 +93,7 @@
             <h1>Millions of Worlds</h1>
             <h4 class="mt-1">Powered by <b>Ethereum</b> <img class="inline-block w-2 h-3 translate-y-px" src="/eth-small.svg" alt="eth small"></h4>
             <nav class="w-full mt-4 space-y-3">
-                <a class="nav-option" href="/0x00">Explore</a>
+                <a class="nav-option" href="/world">Explore</a>
                 {#if !$isMobileBrowser}
                     <a class="nav-option" target="_self" href="/editor">Build</a>
                 {/if}

@@ -241,7 +241,7 @@
 
             if(!searchPlotId.verify()){
 
-                pushNotification(notification, "Invalid plot id", `Could not locate plot with id "${searchValue}."`)
+                pushNotification(notification, "Invalid plot id", `Plot "${searchValue}" does not exist.`)
                 return
 
             }
@@ -253,7 +253,7 @@
 
         } catch {
 
-            pushNotification(notification, "Plot not found", `Could not locate plot with id "${searchValue}."`)
+            pushNotification(notification, "Plot not found", `Could not locate plot with id "${searchValue}".`)
 
         }
 
@@ -326,15 +326,17 @@
 
     <!-- Facebook Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com"}>
+    <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta property="og:title" content={data?.ogTitle ?? "Trraform"}>
+    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds powered by Ethereum."}>
     <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta property="twitter:domain" content="trraform.com">
-    <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com"}>
+    <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta name="twitter:title" content={data?.ogTitle ?? "Trraform"}>
+    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds powered by Ethereum."}>
     <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
 
 </svelte:head>

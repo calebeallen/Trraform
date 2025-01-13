@@ -5,6 +5,52 @@ const PI2 = Math.PI * 2
 
 export default class Camera extends PerspectiveCamera{
 
+    static encodeCameraB64(x, y, z, phi, theta){
+
+        const f64 = new Float64Array(5)
+
+        f64[0] = x
+        f64[1] = y
+        f64[2] = z
+        f64[3] = phi
+        f64[4] = theta
+        
+        const u8 = new Uint8Array(f64.buffer)
+        let bin = ''
+       
+        for (let i = 0; i < u8.byteLength; i++) 
+
+            bin += String.fromCharCode(u8[i])
+
+        const base64 = btoa(bin)
+
+        return encodeURIComponent(base64)
+
+    }
+
+    static decodeCameraB64(base64){
+
+        const decodedUri = decodeURIComponent(base64)
+        const bin = atob(decodedUri)
+        const length = bin.length
+        const u8 = new Uint8Array(length)
+
+        for (let i = 0; i < length; i++) 
+
+            u8[i] = bin.charCodeAt(i)
+        
+        const f64 = new Float64Array(u8.buffer)
+
+        return {
+            x: f64[0],
+            y: f64[1],
+            z: f64[2],
+            phi: f64[3],
+            theta: f64[4]
+        }
+       
+    }
+
     constructor(fov = 70, worldBounds){
         
         super(fov, window.innerWidth / window.innerHeight, 0.0000001, 1000)
@@ -38,6 +84,23 @@ export default class Camera extends PerspectiveCamera{
 
         this.pause = () => {}
         this.update = this.pause
+
+    }
+
+    encodeB64URI(){
+
+        const { x, y, z } = this.position
+        const { phi, theta } = this.sphere
+        return Camera.encodeCameraB64(x, y, z, phi, theta)
+
+    }
+
+    setFromB64URI(data){
+
+        const { x, y, z, phi, theta } = Camera.decodeCameraB64(data)
+        this.position.set(x, y, z)
+        this.sphere.set(1, phi, theta)
+        this.lookAt(new Vector3().setFromSpherical(this.sphere).add(this.position))
 
     }
 

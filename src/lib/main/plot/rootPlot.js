@@ -207,7 +207,7 @@ export default class RootPlot {
                 const task = new Task("reduce-poly", { expanded, buildSize : bs })
                 const geomData = this.geometryData.stdRes = await task.run()
 
-                this.octree = new Octree(this.children)
+                this.octree = new Octree(this.children, bs)
                 this.buildSize = bs
                 this.sphere = new Sphere( new Vector3(0.5,0.5,0.5).multiplyScalar(this.buildSize * this.blockSize), Math.sqrt(3 * ( this.buildSize * this.blockSize / 2 ) ** 2) )
                 this.boundingSphere = new Sphere(new Vector3(...geomData.center), Math.hypot(...geomData.dp))

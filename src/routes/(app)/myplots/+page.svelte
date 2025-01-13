@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
     import { refs, walletAddress } from "$lib/main/store";
-    import { goto } from '$app/navigation'
+    import { goto, afterNavigate } from '$app/navigation'
     import WalletConnection from "$lib/main/walletConnection"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import PlotsList from "$lib/main/components/myPlots/plotsList.svelte";
@@ -14,6 +14,7 @@
     let connected = false
     let showConnectModal = false
     let editingPlot = null
+    let backUrl
 
     onMount(async () => {
 
@@ -24,13 +25,36 @@
         else 
 
             showConnectModal = true
+        
+    })
+
+    afterNavigate(({ from }) => {
+
+        backUrl = "/world"
+        const searchParams = from?.url?.searchParams
+
+        if(searchParams && searchParams.get("plotId"))
+
+            backUrl = `${backUrl}?plotId=${searchParams.get("plotId")}`
 
     })
+
+    function back(){
+
+        if(editingPlot)
+
+            editingPlot = null
+        
+        else
+
+            goto(backUrl)
+
+    }
 
     function connectionCancel(){
 
         showConnectModal = false
-        goto(`/${refs.lastPlotVisited || "0x00"}`)
+        goto(backUrl)
 
     }
 
@@ -39,18 +63,6 @@
         showConnectModal = false
         connected = true
 
-    }
-
-    function back(){
-
-        if(editingPlot)
-
-            editingPlot = null
-
-        else
-
-            goto(`/${refs.lastPlotVisited || "0x00"}`)
-            
     }
 
 </script>
@@ -65,6 +77,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://trraform.com">
     <meta property="og:title" content="Trraform">
+    <meta property="og:description" content="Millions of worlds powered by Ethereum.">
     <meta property="og:image" content="https://trraform.com/ogImage.png">
 
     <!-- Twitter Meta Tags -->
@@ -72,6 +85,7 @@
     <meta property="twitter:domain" content="trraform.com">
     <meta property="twitter:url" content="https://trraform.com">
     <meta name="twitter:title" content="Trraform">
+    <meta name="twitter:description" content="Millions of worlds powered by Ethereum.">
     <meta name="twitter:image" content="https://trraform.com/ogImage.png">
 
 </svelte:head>

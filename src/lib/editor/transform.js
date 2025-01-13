@@ -573,7 +573,7 @@ class TransformableGlb extends TransformableObject{
         matrix.compose( new Vector3(), this.glbMesh.quaternion, this.glbMesh.scale)
 
         const blocks = await this.glbConverter.convert(matrix)
-
+        // getTopFaceCount(blocks)
         this.init(blocks, false)
 
         this.meshGroup.add(this.mesh)
@@ -676,7 +676,7 @@ function transformControls( translation = true, rotation = true ){
 function getTopFaceCount(blocks){
 
     //4.105768 scale for 50000 top faces
-
+    //3.6061635
     const posSet = new Set()
 
     for(const [color, vect] of blocks){
@@ -711,7 +711,6 @@ function getTopFaceCount(blocks){
 
     max.sub(min)
 
-    console.log(max)
     const size = Math.max(max.x, Math.max(max.y, max.z))
     console.log(size)
     const expanded = new Uint16Array(size**3)

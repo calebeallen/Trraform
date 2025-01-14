@@ -4,7 +4,7 @@
 
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
-    import { refs, walletAddress } from "$lib/main/store";
+    import { walletAddress, insideOf } from "$lib/main/store";
     import { goto, afterNavigate } from '$app/navigation'
     import WalletConnection from "$lib/main/walletConnection"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
@@ -14,7 +14,6 @@
     let connected = false
     let showConnectModal = false
     let editingPlot = null
-    let backUrl
 
     onMount(async () => {
 
@@ -28,33 +27,32 @@
         
     })
 
-    afterNavigate(({ from }) => {
-
-        backUrl = "/world"
-        const searchParams = from?.url?.searchParams
-
-        if(searchParams && searchParams.get("plotId"))
-
-            backUrl = `${backUrl}?plotId=${searchParams.get("plotId")}`
-
-    })
-
     function back(){
 
         if(editingPlot)
 
             editingPlot = null
         
-        else
+        else {
 
-            goto(backUrl)
+            const plotId = $insideOf?.id
+
+            if(plotId)
+
+                goto(`world?plotId=${plotId.string()}`)
+
+            else
+
+                goto("world")
+
+        }
 
     }
 
     function connectionCancel(){
 
         showConnectModal = false
-        goto(backUrl)
+        back()
 
     }
 

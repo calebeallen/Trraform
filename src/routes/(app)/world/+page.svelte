@@ -8,28 +8,27 @@
     import { page } from "$app/stores"
     import { goto } from "$app/navigation"
     import { onMount } from "svelte";
-    import { insideOf, refs, notification, newPlots } from "$lib/main/store"
+    import { insideOf, refs, newPlots } from "$lib/main/store"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import ReportModal from "$lib/main/components/reportModal.svelte";
-    import { pushNotification } from "$lib/common/utils";
-    import PlotId from "$lib/common/plotId"
+
     import { confetti } from "$lib/main/decoration"
     import WalletConnection from "$lib/main/walletConnection";
     import MenuOption from "./menuOption.svelte";
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
     import MintModal from "$lib/main/components/mintModal.svelte";
+    import Search from "$lib/main/components/search.svelte"
 
     export let data 
     let menuExpanded = false
-    let searchValue = ""
-    let searchFocused = false
     let lastTouches = []
     
     let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showMintModal = false
     let reportPlotId = null, sharePlotId = null, mintPlot = null
     let profile = {}
     let showProfile = false
+    let searchFocused
 
     onMount(() => {
 
@@ -39,23 +38,13 @@
 
     function keydown(e){
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal || searchFocused)
 
             return
 
         const key = e.key.toLowerCase()
 
-        if(searchFocused){
-
-            if( key === "enter")
-
-                search()
-
-            return
-
-        }
-
-        if(key === "w" || key === "a" || key === "s" || key === "d" || key === " " || key === "control")
+        if(key === "w" || key === "a" || key === "s" || key === "d")
 
             refs.camera.update = refs.camera.standard
 
@@ -138,7 +127,7 @@
 
     function mousewheel(e){
         
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || searchFocused)
 
             return
 
@@ -152,7 +141,7 @@
 
     function touchevent(e){ 
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || refs.camera.update === refs.camera.standard)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || searchFocused || refs.camera.update === refs.camera.standard)
 
             return
 
@@ -224,38 +213,6 @@
         } else 
 
             showConnectModal = true
-
-    }
-
-    async function search() {
-
-        if(searchValue == "")
-
-            return
-
-        //go forward with search if plot ids are legit
-        try{
-
-            const pagePlotId = PlotId.fromHexString($page.params.id)
-            const searchPlotId = PlotId.fromHexString(searchValue)
-
-            if(!searchPlotId.verify()){
-
-                pushNotification(notification, "Invalid plot id", `Plot "${searchValue}" does not exist.`)
-                return
-
-            }
-
-            //only push changed browser state
-            if(!pagePlotId.equals(searchPlotId))
-
-                goto(searchPlotId.string())
-
-        } catch {
-
-            pushNotification(notification, "Plot not found", `Could not locate plot with id "${searchValue}".`)
-
-        }
 
     }
 
@@ -356,17 +313,14 @@
     on:keyup={keyup}
 />
 
-<header class="fixed top-0 left-0 flex items-center justify-between w-full gap-3 p-4">
-    <a class="flex-shrink-0 block w-6 opacity-50 sm:w-7 aspect-square" href="/">
+<header class="fixed top-0 left-0 flex items-baseline justify-between w-full gap-3 p-4 pointer-events-none select-none">
+    <a class="flex-shrink-0 block w-6 opacity-50 pointer-events-auto sm:w-7 aspect-square" href="/">
         <img src="/logo.svg" alt="Logo">
     </a>
-    <div class="flex w-full sm:w-72 items-center gap-1.5 p-1 outline outline-1 outline-zinc-800 bg-zinc-900 rounded-lg">
-        <input bind:value={searchValue} on:focus={() => searchFocused = true} on:blur={() => searchFocused = false} type="text" placeholder="Search plot by id" maxlength="10" class="flex-1 h-4 text-xs bg-transparent border-r sm:h-5 sm:text-sm focus:outline-none border-zinc-800">
-        <button on:click={search} class="flex-none w-4 sm:w-5 aspect-square group">
-            <img class="transition-opacity opacity-70 group-active:opacity-50" src="/navigate.svg" alt="search">
-        </button>
+    <div class="-translate-y-5 pointer-events-auto">
+        <Search bind:searchFocused/>
     </div>
-    <div class="relative h-6 sm:h-7">
+    <div class="relative h-6 pointer-events-auto sm:h-7">
         <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} newBinding={newPlots} src="/menu.svg" alt="menu" tag="Menu"/>
         <div class="{menuExpanded ? "" : "translate-x-20"} transition-transform mt-1.5 space-y-1.5">
             <MenuOption on:click={() => goto("/")} src="/house.svg" alt="home" tag="Home"/>

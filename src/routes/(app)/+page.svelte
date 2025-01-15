@@ -2,6 +2,7 @@
     <script>
 
         //TODO 
+        //make insideOf null
         //meta tags
         //social links
 

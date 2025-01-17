@@ -6,6 +6,7 @@
     import { page } from "$app/stores"
     import { pushNotification } from "$lib/common/utils";
     import { notification } from "$lib/main/store"
+    import AvailablePlots from "$lib/main/availablePlots"
     import PlotId from "$lib/common/plotId"
 
     export let searchFocused = false
@@ -25,6 +26,13 @@
 
     }
 
+    async function findOpenPlot(){
+
+        const plotId = await AvailablePlots.getOne(selectedIndex)
+
+        goto(`/world?plotId=${plotId.string()}`)
+
+    }
     
     async function search() {
 
@@ -32,7 +40,6 @@
 
             return
 
-        //go forward with search if plot ids are legit
         try{
 
             const searchPlotId = PlotId.fromHexString(searchValue)
@@ -70,7 +77,7 @@
     <h2 class="text-sm font-semibold">Find open plot</h2>
     <div class="relative">
         <div class="flex items-stretch overflow-hidden rounded-lg outline outline-1 outline-blue-600">
-            <button class="w-20 py-1 text-sm font-semibold transition-colors bg-blue-700 border-r border-blue-600 hover:bg-blue-800">
+            <button on:click={findOpenPlot} class="w-20 py-1 text-sm font-semibold transition-colors bg-blue-700 border-r border-blue-600 hover:bg-blue-800">
                 {options[selectedIndex]}
             </button>
             <button on:click={() => expanded = !expanded} class="px-1 bg-blue-700 hover:bg-blue-800">

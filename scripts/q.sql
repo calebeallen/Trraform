@@ -1,10 +1,1 @@
-
-WITH first_set AS (
-    SELECT * FROM AvailablePlots WHERE available = 1 AND depth = 0 ORDER BY RANDOM() LIMIT 10
-),
-second_set AS (
-    SELECT * FROM AvailablePlots WHERE available = 1 AND depth = 1 ORDER BY RANDOM() LIMIT 10
-)
-SELECT * FROM first_set
-UNION ALL
-SELECT * FROM second_set;
+INSERT INTO AvailablePlots (plotId, depth) VALUES (1,0), (2,0), (3,0), (4,0), (5,0), (6,0), (7,0), (8,0), (9,0), (10,0);

@@ -2,11 +2,11 @@
 import textwrap
 import subprocess
 
-LOCAL = True
+LOCAL = False
 
 DB_NAME = "available-plots"
-D0_PLOT_COUNT = 16 #34998
-INSERT_BATCH_SIZE = 16
+D0_PLOT_COUNT = 10 #34998
+INSERT_BATCH_SIZE = 10
 
 def runQuery(query: str):
 
@@ -15,13 +15,7 @@ def runQuery(query: str):
         file.write(query)
         file.close()
 
-    command = ["npx", "wrangler", "d1", "execute", DB_NAME]
-
-    if LOCAL:
-
-        command.append("--local")
-
-    command.append("--file=./q.sql")
+    command = ["npx", "wrangler", "d1", "execute", DB_NAME, "--local" if LOCAL else "--remote", "--file=./q.sql"]
 
     try:
 
@@ -34,7 +28,7 @@ def runQuery(query: str):
 runQuery(textwrap.dedent("""
     DROP TABLE IF EXISTS AvailablePlots;
     CREATE TABLE IF NOT EXISTS AvailablePlots (
-        id INTEGER PRIMARY KEY,
+        plotId INTEGER PRIMARY KEY,
         available BOOLEAN NOT NULL DEFAULT 1,
         depth INTEGER DEFAULT NULL
     );
@@ -50,7 +44,7 @@ def insert():
     
     global inserts
     global total
-    runQuery(f"INSERT INTO AvailablePlots (id, depth) VALUES {','.join(inserts)}")
+    runQuery(f"INSERT INTO AvailablePlots (plotId, depth) VALUES {', '.join(inserts)};")
     total += len(inserts)
     print(f"Inserted into table ({total} / {D0_PLOT_COUNT})")
     inserts = []
@@ -66,15 +60,3 @@ for i in range(1, D0_PLOT_COUNT + 1):
 if inserts:
 
     insert()
-
-print(runQuery(textwrap.dedent("""
-WITH first_set AS (
-    SELECT * FROM AvailablePlots WHERE available = 1 AND depth = 0 ORDER BY RANDOM() LIMIT 10
-),
-second_set AS (
-    SELECT * FROM AvailablePlots WHERE available = 1 AND depth = 1 ORDER BY RANDOM() LIMIT 10
-)
-SELECT * FROM first_set
-UNION ALL
-SELECT * FROM second_set;
-""")))

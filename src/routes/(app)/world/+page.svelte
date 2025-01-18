@@ -10,23 +10,15 @@
     import { onMount } from "svelte";
     import { insideOf, refs, newPlots, isMobileBrowser } from "$lib/main/store"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
-    import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
-    import ReportModal from "$lib/main/components/reportModal.svelte";
-
-    import { confetti } from "$lib/main/decoration"
-    import WalletConnection from "$lib/main/walletConnection";
+    
     import MenuOption from "./menuOption.svelte";
-    import ShareModal from "$lib/main/components/share/shareModal.svelte";
-    import MintModal from "$lib/main/components/mintModal.svelte";
     import Search from "$lib/main/components/search.svelte"
 
-    export let data 
     let menuExpanded = false
     let lastTouches = []
     
     let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showMintModal = false
-    let reportPlotId = null, sharePlotId = null, mintPlot = null
-    let profile = {}
+    let insideId = ""
     let showProfile = false
     let searchFocused
 
@@ -202,91 +194,40 @@
 
     }
 
-    async function prepMint(){
-
-        if (WalletConnection.isConnected || await WalletConnection.reconnect()) {
-
-            showConnectModal = false
-            mintPlot = $insideOf
-            showMintModal = true
-        
-        } else 
-
-            showConnectModal = true
-
-    }
-
     $: if ($insideOf !== null) {
 
-        profile = new Promise(async res => {
-
-            const plot = $insideOf
-            await plot.load()
-
-            const idStr = plot.id.string()
-
-            let link = null
-
-            //normalize url
-            if(plot.link){
-
-                link = plot.link
-
-                if(!link.startsWith("https://") && !link.startsWith("http://"))
-
-                    link = `https://${link}`
-
-            }
-
-            res({ 
-                minted : plot.minted, 
-                id : idStr,
-                name : plot.name || `Plot ${idStr}`, 
-                desc : plot.desc,
-                link,
-                linkLabel : plot.linkLabel || "link"
-            })
-
-        })
         showProfile = true
+        insideId = $insideOf.id.string()
        
-
     } else {
         
         showProfile = false
-
-    }
-
-    function refresh(){
-
-        refs.renderManager.unrenderChunkById($insideOf.chunk.id)
-        $insideOf.clear()
-        $insideOf = $insideOf
+        insideId = ""
 
     }
 
 </script>
 
 <svelte:head>
-    
+            
     <!-- HTML Meta Tags -->
     <title>Trraform</title>
     <meta name="description" content="Millions of worlds powered by Ethereum.">
 
     <!-- Facebook Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
-    <meta property="og:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds powered by Ethereum."}>
-    <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
+    <meta property="og:url" content="https://trraform.com">
+    <meta property="og:title" content="Trraform">
+    <meta property="og:description" content="Millions of worlds powered by Ethereum.">
+    <meta property="og:image" content="https://trraform.com/ogImage.png">
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta property="twitter:domain" content="trraform.com">
-    <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
-    <meta name="twitter:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds powered by Ethereum."}>
-    <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
+    <meta property="twitter:url" content="https://trraform.com">
+    <meta name="twitter:title" content="Trraform">
+    <meta name="twitter:description" content="Millions of worlds powered by Ethereum.">
+    <meta name="twitter:image" content="https://trraform.com/ogImage.png">
 
 </svelte:head>
 
@@ -316,91 +257,28 @@
         <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} newBinding={newPlots} src="/menu.svg" alt="menu" tag="Menu"/>
         <div class="{menuExpanded ? "" : "translate-x-20"} transition-transform mt-1.5 space-y-1.5">
             <MenuOption on:click={() => goto("/")} src="/house.svg" alt="home" tag="Home"/>
-            {#if !$isMobileBrowser}
-                <MenuOption on:click={() => goto("/myplots")} newBinding={newPlots} src="/plot1.svg" alt="my plots" tag="My Plots"/>
-            {/if}
             <MenuOption on:click={() => showSettingsModal = true} src="/settings.svg" alt="settings" tag="Settings"/>
         </div>
     </div>
 </header>
 
 <div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    {#await profile}
-        <div class="w-full h-20 animate-pulse">
-            <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
-            <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
+    <div>
+        <div class="flex items-center justify-between gap-1">
+            <h3 class="max-w-full break-all w-max">Plot {insideId}</h3>
         </div>
-    {:then { id, minted, name, desc, link, linkLabel } }
-        <div>
-            <div class="flex items-center justify-between gap-1">
-                <h3 class="max-w-full break-all w-max">{name}</h3>
-                <div class="select-none">
-                    <button on:click={refresh} class="relative w-4 h-4 select-none group">
-                        <img src="/refresh.svg" alt="report">   
-                        <span class="plot-option-tag">Refresh</span>
-                    </button>
-                    <button on:click={() => {
-                        sharePlotId = id
-                        showShareModal = true
-                    }} class="relative w-4 h-4 select-none group">
-                        <img src="/share.svg" alt="report">   
-                        <span class="plot-option-tag">Share</span>
-                    </button>
-                    {#if minted}
-                        <button on:click={() => {
-                            reportPlotId = id
-                            showReportModal = true
-                        }} class="relative w-4 h-4 select-none group">
-                            <img src="/report.svg" alt="report">
-                            <span class="plot-option-tag">Report</span>
-                        </button>
-                    {/if}
-                </div>
-            </div>
-            <div class="text-xs opacity-70">id: {id}</div>
-        </div>
-        {#if (!minted || desc || link) && !$isMobileBrowser}
-            <div class="w-full h-px bg-zinc-800"></div>
-        {/if}
-        {#if minted}
-            {#if desc}
-                <p>{desc}</p>
-            {/if}
-            {#if link}
-                <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity opacity-70 active:opacity-40">
-                    <img class="w-4 h-4" src="/link.svg" alt="link">
-                    <p>{linkLabel}</p>
-                </a>
-            {/if}
-        {:else if !$isMobileBrowser}
-            <button class="w-full mt-1 button0" on:click={prepMint}>Mint</button>
-        {/if}
-    {/await}
+        <div class="text-xs opacity-70">id: {insideId}</div>
+    </div>
+    <div class="w-full h-px bg-zinc-800"></div>
+    <p>Want this plot? Join the discord to be notified when minting becomes available! 🚀🚀🚀</p>
+    <a href="https://discord.gg/KGYYePyfuQ" target="_blank" class="flex items-center gap-1 transition-opacity opacity-70 active:opacity-40">
+        <img class="w-4 h-4" src="/link.svg" alt="link">
+        <p>Discord</p>
+    </a>
 </div>
-
-{#if showShareModal}
-    <ShareModal bind:plotIdStr={sharePlotId} on:close={() => showShareModal = false}/>
-{/if}
-
-{#if showReportModal}
-    <ReportModal bind:plotIdStr={reportPlotId} on:close={() => showReportModal = false}/>
-{/if}
 
 {#if showSettingsModal}
     <SettingsModal on:close={() => showSettingsModal = false}/>
-{/if}
-
-{#if showConnectModal}
-    <ConnectWalletModal on:success={prepMint} on:cancel={() => showConnectModal = false}/>
-{/if}
-
-{#if showMintModal}
-    <MintModal bind:plot={mintPlot} on:close={() => showMintModal = false} on:success={e => {
-        const plot = e.detail
-        showMintModal = false
-        confetti(plot.pos, plot.parent.blockSize)
-        $insideOf = $insideOf
-    }}/>
 {/if}
 
 <style lang="postcss">
@@ -414,12 +292,6 @@
     p {
 
         @apply text-sm;
-
-    }
-
-    .plot-option-tag {
-
-        @apply absolute text-xs font-semibold transition-opacity opacity-0 pointer-events-none select-none w-max bottom-0 -translate-x-1/2 -translate-y-full mb-0.5 left-1/2 group-hover:opacity-100;
 
     }
 

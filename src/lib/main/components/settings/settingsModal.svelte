@@ -103,13 +103,7 @@
 
 <Modal on:close class="max-w-screen-md" header="Settings">
     <div class="flex flex-col items-stretch w-full gap-4 sm:flex-row">
-        {#if !$isMobileBrowser}
-            <div class="flex flex-row justify-between flex-none w-full gap-1 sm:justify-normal sm:flex-col sm:w-52 border-zinc-600">
-                <button on:click={() => changeTab(0)} class="settings-button active:opacity-80 {selectedTab === 0 ? "bg-zinc-700" : "hover:bg-zinc-700"}">World Settings</button>
-                <button on:click={() => changeTab(1)} class="settings-button active:opacity-80 {selectedTab === 1 ? "bg-zinc-700" : "hover:bg-zinc-700"}">Wallet Settings</button>
-            </div>
-            <div class="w-full h-px sm:h-auto sm:w-px bg-zinc-700"></div>
-        {/if}
+    
         {#if selectedTab === 0}
             <div class="flex flex-col justify-between flex-1 gap-3 min-h-96">
                 <div class="settings-subsection">

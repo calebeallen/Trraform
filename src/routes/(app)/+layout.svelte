@@ -94,8 +94,7 @@
         if(route !== "/(app)/world" && route !== "/(app)")
 
             return
-        
-        refs.renderManager.update(dt)
+    
         refs.camera.update(dt)
             
         const insideArr = [rootPlot]
@@ -220,26 +219,6 @@
             if(i < len)
 
                 tagData[i] = needsRender[i].plot
-
-        }
-
-        //sort by closest to look direction projection
-        needsRender.sort((a, b) => a.dist - b.dist)
-
-        //render plots
-        for(let i = 0; i < needsRender.length; i++){
-
-            if(!refs.renderManager.hasAvailablility())
-
-                break
-
-            if(inside instanceof RootPlot)
-
-                refs.renderManager.render(needsRender[i].plot)
-
-            else if(needsRender[i].plot.pos.distanceTo(refs.camera.position) <= r)
-            
-                refs.renderManager.render(needsRender[i].plot)
 
         }
 

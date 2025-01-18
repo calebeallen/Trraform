@@ -14,33 +14,7 @@
     export let selectedIndex = 0
 
     let searchValue
-    let expanded = false
 
-    function select(i){
-
-        if(i != selectedIndex)
-
-            selectedIndex = i
-
-        expanded = false
-
-    }
-
-    async function findOpenPlot(){
-
-        const plotId = await AvailablePlots.getOne(selectedIndex)
-
-        if(plotId == null){
-
-            pushNotification(notification, "No plots found", `There are no depth ${selectedIndex} plots available.`)
-
-            return
-
-        }
-
-        goto(`/world?plotId=${plotId.string()}`)
-
-    }
     
     async function search() {
 
@@ -81,23 +55,5 @@
         <button on:click={search} class="px-1 transition-colors bg-zinc-800 hover:bg-zinc-900 {searchValue ? "pointer-events-auto" : "pointer-events-none"}">
             <img class="w-5 h-5  {searchValue ? "" : "opacity-50"}" src="/navigate.svg" alt="search">
         </button>
-    </div>
-    <h2 class="hidden text-sm font-semibold sm:block">Find open plot</h2>
-    <div class="relative hidden sm:block">
-        <div class="flex items-stretch overflow-hidden rounded-lg outline outline-1 outline-blue-600">
-            <button on:click={findOpenPlot} class="w-20 py-1 text-sm font-semibold transition-colors bg-blue-700 border-r border-blue-600 hover:bg-blue-800">
-                {options[selectedIndex]}
-            </button>
-            <button on:click={() => expanded = !expanded} class="px-1 bg-blue-700 hover:bg-blue-800">
-                <img class="w-5 h-5" src="/dropdown.svg" alt="dropdown">
-            </button>
-        </div>
-        {#if expanded}
-            <div transition:fly={{ y: -5, duration: 100}} class="absolute left-0 mt-2 overflow-hidden rounded-lg w-max top-full bg-zinc-800">
-                {#each options as option, i}
-                    <button on:click={() => select(i)} class="block w-20 py-1.5 text-sm hover:bg-zinc-700">{option}</button>
-                {/each}
-            </div>
-        {/if}
     </div>
 </div>

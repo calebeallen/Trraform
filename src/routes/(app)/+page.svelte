@@ -225,7 +225,7 @@
                         <h2 transition:fly={{ x: 50, duration: 500, delay: 100 }} class="text-right text-zinc-300">With 3D Model Conversion</h2>
                     </div>
                     <a transition:fly={{ y: 50, duration: 500, delay: 200 }} target="_self" href="/editor" class="block px-2 mt-8 translate-x-8 sm:mt-10 sm:translate-x-10">
-                        <img class="aspect-[16/9] w-full sm:rounded-2xl rounded-xl outline outline-1 shadow-2xl outline-zinc-600" src="/editor.png" alt="">
+                        <img class="aspect-[16/9] w-full sm:rounded-2xl rounded-xl outline outline-1 shadow-2xl outline-zinc-600" src="/editor.png" alt="editor">
                     </a>
                 </div>
             {/if}

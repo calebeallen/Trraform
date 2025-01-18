@@ -207,7 +207,7 @@
             {/if}
         </section>
         <section bind:this={s3} class="flex-row-reverse mt-64">
-            {#if renderS3}
+            {#if renderS3 && !$isMobileBrowser}
                 <div class="accent-container"> 
                     <div class="pt-[17px] sm:pt-[23px]">
                         <div transition:fade={{ duration: 200 }} class="accent-circle outline-blue-500"></div>
@@ -249,13 +249,13 @@
         </div>
         <ul class="flex items-center gap-4">
             <div class="w-0.5 h-5 bg-white opacity-50 rounded-full"></div>
-            <a class="icon-option" href="/">
+            <a class="icon-option" target="_blank" href="https://www.instagram.com/trraform.eth">
                 <img src="/instagram.svg" alt="Instagram">
             </a>
-            <a class="icon-option" href="/">
+            <a class="icon-option" target="_blank" href="https://discord.gg/KGYYePyfuQ">
                 <img src="/discord.svg" alt="Discord">
             </a>
-            <a class="p-px icon-option" href="/">
+            <a class="p-px icon-option" target="_blank" href="https://x.com/trraform">
                 <img src="/x.svg" alt="X">
             </a>
         </ul>

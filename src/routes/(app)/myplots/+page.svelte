@@ -5,7 +5,7 @@
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
     import { walletAddress, insideOf } from "$lib/main/store";
-    import { goto, afterNavigate } from '$app/navigation'
+    import { goto } from '$app/navigation'
     import WalletConnection from "$lib/main/walletConnection"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import PlotsList from "$lib/main/components/myPlots/plotsList.svelte";
@@ -39,11 +39,11 @@
 
             if(plotId)
 
-                goto(`world?plotId=${plotId.string()}`)
+                goto(`/world?plotId=${plotId.string()}`)
 
             else
 
-                goto("world")
+                goto("/world")
 
         }
 

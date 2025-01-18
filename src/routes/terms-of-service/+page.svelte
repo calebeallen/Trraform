@@ -126,7 +126,7 @@
         <p>We reserve the right to modify certain parameters of the Trraform smart contract, including but not limited to the maximum permissible Depth of which a plot can exist, the “Depth 0” Plot mint price, the minimum and maximum Subplot mint prices, the default Subplot mint price, the maximum total supply of plots, the mint royalties percentage (as outlined in the Mint Royalties section), and the aftermarket sale royalties percentage.</p>
         
         <h2>Contact</h2>
-        <p>If you have any questions or concerns regarding the Terms listed, you can contact us by sending an email to trraformsupport@gmail.com or through our <a target="_blank" href="">Discord Server</a>.</p>
+        <p>If you have any questions or concerns regarding the Terms listed, you can contact us by sending an email to trraformsupport@gmail.com or through our <a target="_blank" href="https://discord.gg/KGYYePyfuQ">Discord Server</a>.</p>
 
     </div>
 </div>

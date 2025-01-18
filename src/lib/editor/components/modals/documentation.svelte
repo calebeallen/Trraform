@@ -86,7 +86,7 @@
             <p>Translate, rotate, or duplicate selected blocks.</p>
             <p><b>With Overlap On:</b> Duplicating or confirming a transformed structure will replace any existing blocks that overlap with the structure.</p>
         </section>
-        <a href="/" class="mx-auto documentation-note">
+        <a href="https://discord.gg/KGYYePyfuQ" target="_blank" class="mx-auto documentation-note">
             <h2>Have Questions? Feel free to ask on our Discord!</h2>
             <img class="w-8 h-8 mx-auto" src="/discord.svg" alt="discord">
         </a>

@@ -42,7 +42,7 @@
 
 <slot/>
 <div class="fixed right-2 bottom-1">
-    <a href="/" class="relative inline-block mr-1 group">
+    <a href="https://discord.gg/KGYYePyfuQ" target="_blank" class="relative inline-block mr-1 group">
         <img class="w-6 h-6 opacity-50 group-hover:opacity-70" src="/discord.svg" alt="Discord">
         <div class="absolute right-0 p-0.5 text-xs font-semibold transition-opacity rounded opacity-0 pointer-events-none group-hover:opacity-100 bottom-7 bg-zinc-800">Discord</div>
     </a>

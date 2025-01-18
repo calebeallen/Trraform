@@ -31,14 +31,14 @@
             <div class="flex-1 h-px bg-zinc-600"></div>
         </div>
         <div class="space-y-2">
-            <button class="option" on:click={showDocs}> 
+            <button class="option" on:click={showDocs}>
                 <span>Read the docs</span>
                 <img class="w-5 h-5" src="./arrowRightDown.svg" alt="right arrow down">
             </button>
-            <button class="option" on:click={() => {}}>
+            <a class="option" target="_blank" href="https://discord.gg/KGYYePyfuQ">
                 <span>Join the Discord</span>
                 <img class="w-5 h-5" src="./arrowRightDown.svg" alt="right arrow down">
-            </button>
+            </a>
         </div>
     </div>
 </Modal>

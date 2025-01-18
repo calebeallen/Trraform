@@ -41,7 +41,11 @@
         const mobileDetect = new MobileDetect(navigator.userAgent)
 
         $isMobileBrowser = mobileDetect.mobile()
-    
+
+        if($isMobileBrowser)
+
+            pushNotification(notification, "Mobile browser detected", "For the best experience, please use a desktop browser.")
+
         /* set up scene */  
         refs.scene = new Scene()
         refs.scene.add(stars())
@@ -67,8 +71,6 @@
         refs.camera.lookAt(rootPlot.boundingSphere.center)
         refs.camera.updateSphere()
         refs.camera.update = refs.camera.autoRotate
-
-        $insideOf = rootPlot
 
         // //listen for page route change events
         page.subscribe(handleNavigate)
@@ -138,9 +140,9 @@
 
             if(inside instanceof RootPlot){
 
-                if($insideOf !== rootPlot)
+                if($insideOf !== null)
                 
-                    $insideOf = rootPlot
+                    $insideOf = null
             
             } else {
 
@@ -257,7 +259,7 @@
         if (route === "/(app)") {
 
             moveToPlot(rootPlot)
-            $insideOf = rootPlot
+            $insideOf = null
 
         } else if (route === "/(app)/world") {
 
@@ -286,13 +288,13 @@
 
             } catch { 
                 
-                pushNotification(notification, "Invalid plot id", `Plot "${plotIdParam}" does not exist.`)
+                pushNotification(notification, "Plot not found", `Plot "${plotIdParam}" does not exist.`)
                 return 
 
             }
 
             // if already inside plot or plot id is 0
-            if(plotId.equals($insideOf?.id))
+            if($insideOf !== null && plotId.equals($insideOf.id))
 
                 return
 
@@ -381,9 +383,11 @@
         const v4 = new Vector4()
         const quad = t => 1 - (t - 1) ** 2
 
+        const { width, height } = canvasContainer.getBoundingClientRect()
+
         tagCtx.textAlign = "center"
         tagCtx.textBaseline = "middle"
-        tagCtx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+        tagCtx.clearRect(0, 0, width, height)
 
         for (let i = 0; i < tagData.length; i++) {
 
@@ -457,8 +461,8 @@
                 fontSize: fontSize * scale,
                 textYAdjust: textYAdjust * scale,
                 a: distRatio * 2,
-                x: (v4.x / v4.w + 1) / 2 * window.innerWidth, 
-                y: (1 - (v4.y / v4.w + 1) / 2) * window.innerHeight, 
+                x: (v4.x / v4.w + 1) / 2 * width, 
+                y: (1 - (v4.y / v4.w + 1) / 2) * height, 
                 z
             
             })

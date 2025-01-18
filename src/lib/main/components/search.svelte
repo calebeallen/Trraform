@@ -5,7 +5,7 @@
     import { goto } from "$app/navigation"
     import { page } from "$app/stores"
     import { pushNotification } from "$lib/common/utils";
-    import { notification } from "$lib/main/store"
+    import { notification, isMobileBrowser } from "$lib/main/store"
     import AvailablePlots from "$lib/main/availablePlots"
     import PlotId from "$lib/common/plotId"
 
@@ -30,6 +30,14 @@
 
         const plotId = await AvailablePlots.getOne(selectedIndex)
 
+        if(plotId == null){
+
+            pushNotification(notification, "No plots found", `There are no depth ${selectedIndex} plots available.`)
+
+            return
+
+        }
+
         goto(`/world?plotId=${plotId.string()}`)
 
     }
@@ -40,7 +48,7 @@
 
             return
 
-        try{
+        try {
 
             const searchPlotId = PlotId.fromHexString(searchValue)
 
@@ -69,13 +77,13 @@
 <div class="grid grid-flow-col grid-rows-[auto_auto] gap-y-1 gap-x-4 grid-cols-[auto_auto] select-none">
     <h2 class="text-sm font-semibold">Search</h2>
     <div class="flex items-stretch overflow-hidden rounded-lg outline outline-1 outline-zinc-700">
-        <input bind:value={searchValue} on:focus={() => searchFocused = true} on:blur={() => searchFocused = false} type="text" placeholder="Plot id" maxlength="10" class="w-32 px-1 text-sm bg-transparent border-r bg-zinc-800 focus:outline-none border-zinc-700">
+        <input bind:value={searchValue} on:focus={() => searchFocused = true} on:blur={() => searchFocused = false} type="text" placeholder="Plot id" maxlength="10" class="w-32 px-1 py-1 text-sm bg-transparent border-r rounded-none bg-zinc-800 focus:outline-none border-zinc-700">
         <button on:click={search} class="px-1 transition-colors bg-zinc-800 hover:bg-zinc-900 {searchValue ? "pointer-events-auto" : "pointer-events-none"}">
             <img class="w-5 h-5  {searchValue ? "" : "opacity-50"}" src="/navigate.svg" alt="search">
         </button>
     </div>
-    <h2 class="text-sm font-semibold">Find open plot</h2>
-    <div class="relative">
+    <h2 class="hidden text-sm font-semibold sm:block">Find open plot</h2>
+    <div class="relative hidden sm:block">
         <div class="flex items-stretch overflow-hidden rounded-lg outline outline-1 outline-blue-600">
             <button on:click={findOpenPlot} class="w-20 py-1 text-sm font-semibold transition-colors bg-blue-700 border-r border-blue-600 hover:bg-blue-800">
                 {options[selectedIndex]}

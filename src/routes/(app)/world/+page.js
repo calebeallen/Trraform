@@ -9,7 +9,7 @@ export async function load({ url }) {
 
         const searchParams = url.searchParams
         const camera = searchParams.get("camera")
-        const plotId = searchParams.get("plotId")
+        const plotIdParam = searchParams.get("plotId")
 
         if (camera) {
 
@@ -21,9 +21,9 @@ export async function load({ url }) {
                 ogDesc: `x: ${x}, y: ${y}, z: ${z}, phi: ${phi}, theta: ${theta}`
             }
 
-        } else if (plotId) {
+        } else if (plotIdParam) {
         
-            const plotId = PlotId.fromHexString(id)
+            const plotId = PlotId.fromHexString(plotIdParam)
 
             if(!plotId.verify())
 
@@ -38,6 +38,8 @@ export async function load({ url }) {
         }
 
     } catch(e) {
+
+        console.log(e)
 
         return {}
 

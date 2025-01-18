@@ -4,9 +4,14 @@
 
 @layer base {
 
+    html{
+
+        @apply overscroll-none;
+    }
+
     body {
 
-        @apply bg-black overflow-x-hidden touch-pan-y overscroll-none text-white text-left font-sans;        
+        @apply overflow-x-hidden font-sans text-left text-white bg-black touch-pan-y overscroll-none;        
         color-scheme: dark;
 
     }

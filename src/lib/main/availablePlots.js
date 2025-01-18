@@ -13,6 +13,11 @@ export default class AvailablePlots {
             await this.refresh()
 
         const { plotIds, count } = this.available[depth]
+
+        if(count == 0)
+
+            return null
+
         let { idx } = this.available[depth]
 
         //refresh if all plots looked at
@@ -21,13 +26,9 @@ export default class AvailablePlots {
             await this.refresh()
 
         //if no more plots left (count < FIND_OPEN_PLOTS_COUNT), circle back to beginning
-        else if ( count < FIND_OPEN_PLOTS_COUNT && idx >= count ){
-
-            console.log("reset")
+        else if ( count < FIND_OPEN_PLOTS_COUNT && idx >= count )
 
             this.available[depth].idx = idx = 0
-
-        }
 
         const plotId = plotIds[idx]
         this.available[depth].idx++
@@ -37,8 +38,6 @@ export default class AvailablePlots {
     }
 
     static async refresh(){
-
-        console.log("refresh")
 
         const res = await fetch("/api/get-available-plots")
         const data = await res.json()

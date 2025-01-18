@@ -8,7 +8,7 @@
     import { page } from "$app/stores"
     import { goto } from "$app/navigation"
     import { onMount } from "svelte";
-    import { insideOf, refs, newPlots } from "$lib/main/store"
+    import { insideOf, refs, newPlots, isMobileBrowser } from "$lib/main/store"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import ReportModal from "$lib/main/components/reportModal.svelte";
@@ -127,7 +127,7 @@
 
     function mousewheel(e){
         
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || searchFocused)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal || searchFocused)
 
             return
 
@@ -141,7 +141,7 @@
 
     function touchevent(e){ 
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || searchFocused || refs.camera.update === refs.camera.standard)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal || searchFocused || refs.camera.update === refs.camera.standard)
 
             return
 
@@ -216,17 +216,39 @@
 
     }
 
-    $: if ($insideOf?.id?.id) {
+    $: if ($insideOf !== null) {
 
-        profile = getProfile($insideOf)
-        showProfile = true
-        profile.then(data => {
+        profile = new Promise(async res => {
 
-            if(data.minted)
+            const plot = $insideOf
+            await plot.load()
 
-                reportPlotId = data.id
+            const idStr = plot.id.string()
+
+            let link = null
+
+            //normalize url
+            if(plot.link){
+
+                link = plot.link
+
+                if(!link.startsWith("https://") && !link.startsWith("http://"))
+
+                    link = `https://${link}`
+
+            }
+
+            res({ 
+                minted : plot.minted, 
+                id : idStr,
+                name : plot.name || `Plot ${idStr}`, 
+                desc : plot.desc,
+                link,
+                linkLabel : plot.linkLabel || "link"
+            })
 
         })
+        showProfile = true
        
 
     } else {
@@ -235,41 +257,11 @@
 
     }
 
-    async function getProfile(plot) {
-        
-        await plot.load()
-
-        const idStr = plot.id.string()
-
-        let link = null
-
-        //normalize url
-        if(plot.link){
-
-            link = plot.link
-
-            if(!link.startsWith("https://") && !link.startsWith("http://"))
-
-                link = `https://${link}`
-
-        }
-
-        return { 
-            minted : plot.minted, 
-            id : idStr,
-            name : plot.name || `Plot ${idStr}`, 
-            desc : plot.desc,
-            link,
-            linkLabel : plot.linkLabel || "link"
-        }
-
-    }
-
     function refresh(){
 
         refs.renderManager.unrenderChunkById($insideOf.chunk.id)
         $insideOf.clear()
-        profile = getProfile($insideOf)
+        $insideOf = $insideOf
 
     }
 
@@ -314,7 +306,7 @@
 />
 
 <header class="fixed top-0 left-0 flex items-baseline justify-between w-full gap-3 p-4 pointer-events-none select-none">
-    <a class="flex-shrink-0 block w-6 opacity-50 pointer-events-auto sm:w-7 aspect-square" href="/">
+    <a class="flex-shrink-0 block opacity-50 pointer-events-auto w-7 aspect-square" href="/">
         <img src="/logo.svg" alt="Logo">
     </a>
     <div class="-translate-y-5 pointer-events-auto">
@@ -324,7 +316,9 @@
         <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} newBinding={newPlots} src="/menu.svg" alt="menu" tag="Menu"/>
         <div class="{menuExpanded ? "" : "translate-x-20"} transition-transform mt-1.5 space-y-1.5">
             <MenuOption on:click={() => goto("/")} src="/house.svg" alt="home" tag="Home"/>
-            <MenuOption on:click={() => goto("/myplots")} newBinding={newPlots} src="/plot1.svg" alt="my plots" tag="My Plots"/>
+            {#if !$isMobileBrowser}
+                <MenuOption on:click={() => goto("/myplots")} newBinding={newPlots} src="/plot1.svg" alt="my plots" tag="My Plots"/>
+            {/if}
             <MenuOption on:click={() => showSettingsModal = true} src="/settings.svg" alt="settings" tag="Settings"/>
         </div>
     </div>
@@ -365,7 +359,7 @@
             </div>
             <div class="text-xs opacity-70">id: {id}</div>
         </div>
-        {#if !minted || desc || link}
+        {#if (!minted || desc || link) && !$isMobileBrowser}
             <div class="w-full h-px bg-zinc-800"></div>
         {/if}
         {#if minted}
@@ -378,7 +372,7 @@
                     <p>{linkLabel}</p>
                 </a>
             {/if}
-        {:else}
+        {:else if !$isMobileBrowser}
             <button class="w-full mt-1 button0" on:click={prepMint}>Mint</button>
         {/if}
     {/await}
@@ -405,7 +399,7 @@
         const plot = e.detail
         showMintModal = false
         confetti(plot.pos, plot.parent.blockSize)
-        profile = getProfile(plot)
+        $insideOf = $insideOf
     }}/>
 {/if}
 

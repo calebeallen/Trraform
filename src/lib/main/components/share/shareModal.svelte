@@ -62,7 +62,7 @@
 </script>
 
 <div transition:fade={{duration: 150}} class="fixed top-0 left-0 grid w-full h-full px-2 overflow-auto bg-black bg-opacity-50 place-items-center">
-    <div transition:fly={{duration: 150, y: 50}} class="relative outline outline-1 outline-zinc-700 rounded-3xl w-96 aspect-[0.75] shadow-2xl shadow-black bg-zinc-900">
+    <div transition:fly={{duration: 150, y: 50}} class="relative outline outline-1 outline-zinc-700 rounded-3xl w-full max-w-96 aspect-[0.75] shadow-2xl shadow-black bg-zinc-900">
         {#if load}
             <div class="w-full h-full animate-pulse bg-zinc-900 rounded-3xl"></div>
             <div class="absolute top-0 left-0 flex items-baseline justify-between w-full p-4">

@@ -91,7 +91,14 @@ export default class PlotId {
 
     getUrl(){
 
-        return `${PLOT_DATA_BUCKET_URL}/${this.string()}`
+
+        if(this.id == 0)
+
+            return `${PLOT_DATA_BUCKET_URL}/${this.string()}`
+
+        else 
+
+            return `https://pub-815719a8724c493784b5030d32342ed6.r2.dev/${this.string()}`
 
     }
 
@@ -107,6 +114,8 @@ export default class PlotId {
     async fetch(){
 
         try {
+
+            console.log(this.getUrl())
 
             const res = await fetch(this.getUrl())
 

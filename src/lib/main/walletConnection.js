@@ -307,36 +307,6 @@ export default class WalletConnection {
 
     static async loadMyPlots(range){
 
-        const { publicCli, addresses, addressIndex } = this.connection
-        const promises = []
-
-        range = Math.min(range, this.plotCount)
-
-        while(this.plotIterator < range){
-
-            const tokenId = publicCli.readContract({
-                address: DATA_CONTRACT_ADDRESS,
-                abi: DATA_CONTRACT_ABI,
-                functionName: 'tokenOfOwnerByIndex',
-                args: [addresses[addressIndex], BigInt(this.plotIterator)]
-            }).then(tokenId => {
-
-                const plotId = new PlotId(Number(tokenId))
-                const myPlot = new MyPlot(plotId)
-
-                myPlots.update(arr => {
-                    arr.push(myPlot)
-                    return arr
-                })
-
-            })
-
-            promises.push(tokenId)
-            this.plotIterator++
-
-        }
-
-        await Promise.all(promises)
 
     }
 

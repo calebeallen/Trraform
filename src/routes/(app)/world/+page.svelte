@@ -79,6 +79,7 @@
 
     }
 
+    let zCancel
     function keyup(e){
 
         const key = e.key.toLowerCase()
@@ -108,6 +109,16 @@
             case "shift":
 
                 refs.camera.accelerationMultiplier = 1
+                break
+
+            case "p":
+
+                zCancel = refs.camera.animateZoom()
+                break
+
+            case "o":
+
+                zCancel()
                 break
 
         }
@@ -309,9 +320,6 @@
     <a class="flex-shrink-0 block opacity-50 pointer-events-auto w-7 aspect-square" href="/">
         <img src="/logo.svg" alt="Logo">
     </a>
-    <div class="-translate-y-5 pointer-events-auto">
-        <Search bind:searchFocused/>
-    </div>
     <div class="relative h-6 pointer-events-auto sm:h-7">
         <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} newBinding={newPlots} src="/menu.svg" alt="menu" tag="Menu"/>
         <div class="{menuExpanded ? "" : "translate-x-20"} transition-transform mt-1.5 space-y-1.5">
@@ -324,59 +332,6 @@
     </div>
 </header>
 
-<div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    {#await profile}
-        <div class="w-full h-20 animate-pulse">
-            <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
-            <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
-        </div>
-    {:then { id, minted, name, desc, link, linkLabel } }
-        <div>
-            <div class="flex items-center justify-between gap-1">
-                <h3 class="max-w-full break-all w-max">{name}</h3>
-                <div class="select-none">
-                    <button on:click={refresh} class="relative w-4 h-4 select-none group">
-                        <img src="/refresh.svg" alt="report">   
-                        <span class="plot-option-tag">Refresh</span>
-                    </button>
-                    <button on:click={() => {
-                        sharePlotId = id
-                        showShareModal = true
-                    }} class="relative w-4 h-4 select-none group">
-                        <img src="/share.svg" alt="report">   
-                        <span class="plot-option-tag">Share</span>
-                    </button>
-                    {#if minted}
-                        <button on:click={() => {
-                            reportPlotId = id
-                            showReportModal = true
-                        }} class="relative w-4 h-4 select-none group">
-                            <img src="/report.svg" alt="report">
-                            <span class="plot-option-tag">Report</span>
-                        </button>
-                    {/if}
-                </div>
-            </div>
-            <div class="text-xs opacity-70">id: {id}</div>
-        </div>
-        {#if (!minted || desc || link) && !$isMobileBrowser}
-            <div class="w-full h-px bg-zinc-800"></div>
-        {/if}
-        {#if minted}
-            {#if desc}
-                <p>{desc}</p>
-            {/if}
-            {#if link}
-                <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity opacity-70 active:opacity-40">
-                    <img class="w-4 h-4" src="/link.svg" alt="link">
-                    <p>{linkLabel}</p>
-                </a>
-            {/if}
-        {:else if !$isMobileBrowser}
-            <button class="w-full mt-1 button0" on:click={prepMint}>Mint</button>
-        {/if}
-    {/await}
-</div>
 
 {#if showShareModal}
     <ShareModal bind:plotIdStr={sharePlotId} on:close={() => showShareModal = false}/>

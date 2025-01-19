@@ -1,0 +1,13 @@
+{
+  "name": "demo-update-build",
+  "version": "0.0.0",
+  "devDependencies": {
+    "wrangler": "3.52.0"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --remote",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {}
+}

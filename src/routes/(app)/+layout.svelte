@@ -18,12 +18,13 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, myPlots } from "$lib/main/store"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
     import { pushNotification } from "$lib/common/utils"
+    import MyPlot from "$lib/main/plot/myPlot"
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -32,6 +33,17 @@
     let ismousedown = false
 
     onMount(async () => {
+
+        // document.body.style.cursor = "none";
+
+        const pids = ["22d4","22d3","22d6","22d5","0x0922d6","0x0422d6","0x0322d6","0x0722d6","0x0822d6","0x0c22d5","0x0e22d5","0x0122d5","0x0d22d5","0x0f22d5","0x1822d5","0x0722d5","0x0822d5","0x0922d5","0x0422d5","0x0522d5","0x0b22d5","0x0222d5","0x1022d5","0x1122d5","0x1322d5","0x011322d5","0x0a22d6","0x0b22d6", "0x0622d6", "0x0122d6", "0x0222d6", "0x0522d6", "0x0d22d6", "0x0f22d6", "0x1022d6", "0x0622d3","0x121822d5","0x111822d5","0x0f1822d5","0x0e1822d5","0x23fc"]
+
+        for(const pid of pids){
+
+            const plotId = PlotId.fromHexString(pid)
+            $myPlots.push(new MyPlot(plotId))
+
+        }
         
         const stored = localStorage.getItem("settings")
         if(stored)
@@ -189,6 +201,8 @@
 
         }
 
+        refs.camera.accelerationMagnitude /= 2
+
         //update tags
         const r = 15 * inside.blockSize
         const plots = inside instanceof RootPlot ? inside.withinRadius(refs.camera.position, r) : inside.withinView()
@@ -233,13 +247,22 @@
 
                 break
 
-            if(inside instanceof RootPlot)
+            let inMyPlots = false
+
+            for(const { id } of $myPlots)
+
+                if(needsRender[i].plot.id.equals(id)){
+
+                    inMyPlots = true
+                    break
+
+                }
+
+            if(inMyPlots){
 
                 refs.renderManager.render(needsRender[i].plot)
 
-            else if(needsRender[i].plot.pos.distanceTo(refs.camera.position) <= r)
-            
-                refs.renderManager.render(needsRender[i].plot)
+            }
 
         }
 

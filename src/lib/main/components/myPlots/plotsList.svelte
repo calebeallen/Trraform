@@ -11,6 +11,8 @@
 
     onMount( async () => {
 
+        console.log($myPlots)
+
         const { clientWidth, clientHeight } = container
         const w = clientWidth + 12
         const h = clientHeight - 12
@@ -20,9 +22,6 @@
 
         const fitX = Math.floor(w / widgetW)
         const fitY = Math.ceil(h / widgetH)
-
-        //load what can fit or 5 rows
-        await WalletConnection.loadMyPlots(Math.min(fitX * fitY, fitX * 5))
 
         $newPlots = false
 
@@ -56,14 +55,9 @@
 </script>
 
 <div bind:this={container} on:mousewheel|passive={onmousewheel} class="w-full h-full overflow-y-scroll hide-scrollbar">
-    {#if WalletConnection.plotCount > 0}
-        <div class="flex flex-wrap gap-3 py-3 pb-24 mx-auto w-60 sm:w-full md:max-w-[744px] sm:max-w-[492px]">
-            {#each $myPlots as plot}
-                <PlotWidget bind:editingPlot plot={plot}/>
-            {/each}
-        </div>
-    {:else}
-        <div class="w-full mt-24 text-3xl font-bold text-center">Nothing here yet!</div>
-        <div class="w-full mt-1 text-center">Explore to find an open plot.</div>
-    {/if}
+    <div class="flex flex-wrap gap-3 py-3 pb-24 mx-auto w-60 sm:w-full md:max-w-[744px] sm:max-w-[492px]">
+        {#each $myPlots as plot}
+            <PlotWidget bind:editingPlot plot={plot}/>
+        {/each}
+    </div>
 </div>

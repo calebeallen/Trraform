@@ -4,7 +4,7 @@
 
     import { onMount } from "svelte";
     import { fade } from "svelte/transition";
-    import { walletAddress, insideOf } from "$lib/main/store";
+    import { walletAddress, insideOf, myPlots } from "$lib/main/store";
     import { goto } from '$app/navigation'
     import WalletConnection from "$lib/main/walletConnection"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
@@ -16,14 +16,9 @@
     let editingPlot = null
 
     onMount(async () => {
-
-        if(WalletConnection.isConnected || await WalletConnection.reconnect())
-    
-            connected = true
-
-        else 
-
-            showConnectModal = true
+        
+        console.log($myPlots)
+        connected = true
         
     })
 

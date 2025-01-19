@@ -34,7 +34,7 @@
         buildData = editingPlot.buildData
         imgUrl = await editingPlot.getImgUrl()
 
-        smp = origSmp = formatEther(await WalletConnection.getSmp(editingPlot.id))
+        smp = origSmp = 1
 
         $loadScreenOpacity = 0
 
@@ -208,74 +208,48 @@
 
     async function save(){
 
-        try {
             
             $loadScreenOpacity = 50
 
-            if(smpChanged){
+            const payload = new FormData()
+            const encoded = encodePlotData({
+                name, 
+                desc, 
+                link, 
+                linkLabel, 
+                buildData
+            }) 
+            payload.append("plotData", new Blob([encoded]))
 
-                await WalletConnection.setSmp(editingPlot.id, smp)
-                origSmp = smp
-                smpChanged = false
+            if(buildData !== editingPlot.buildData){
+
+                const p = preprocessPNG(await MyPlot.getMesh(buildData))
+                payload.append("png", new Blob([p]))
 
             }
+            
+            //update
+            const res = await fetch(`http://127.0.0.1:8787?plotId=${editingPlot.id.string()}`, { 
+                method: "POST",
+                body: payload, 
+            })
 
-            if(changed){
+            if(!res.ok)
 
-                const payload = new FormData()
-                const encoded = encodePlotData({
-                    name, 
-                    desc, 
-                    link, 
-                    linkLabel, 
-                    buildData
-                })
-                payload.append("plotData", new Blob([encoded]))
-
-                if(buildData !== editingPlot.buildData){
-
-                    const p = preprocessPNG(await MyPlot.getMesh(buildData))
-                    payload.append("png", new Blob([p]))
-
-                }
-
-                const timestamp = Date.now()
-                const message = `Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information.\n\ntimestamp: `
-                const signatureMsg = `${message}${new Date(timestamp).toISOString()}`
-                const signature = await WalletConnection.getSignature(signatureMsg)
-
-                payload.append("signedMessage", new Blob([JSON.stringify({ message, timestamp, signature })]))
+                throw new Error("Api error")
                 
-                //update
-                const res = await fetch(`/api/update-plot?plotId=${editingPlot.id.string()}`, { 
-                    method: "POST",
-                    body: payload, 
-                })
-
-                if(!res.ok)
-
-                    throw new Error("Api error")
-                    
-                editingPlot.name = name
-                editingPlot.desc = desc
-                editingPlot.link = link
-                editingPlot.linkLabel = linkLabel
-                editingPlot.buildData = buildData
-                editingPlot.imgUrl = imgUrl
-
-            }
+            editingPlot.name = name
+            editingPlot.desc = desc
+            editingPlot.link = link
+            editingPlot.linkLabel = linkLabel
+            editingPlot.buildData = buildData
+            editingPlot.imgUrl = imgUrl
 
             editingPlot = null
 
             pushNotification(notification, "Plot updated", "Updates may take some time to appear. Check back later!")
 
-        } catch(e) {
-
-            console.log(e)
-
-            pushNotification(notification, "Something went wrong..", `Plot ${id} could not be updated.`)
-            
-        }
+       
 
         $loadScreenOpacity = 0
 
@@ -327,7 +301,7 @@
                     <input bind:value={smp} on:blur={blurSmpInput} type="number" class="block w-full hide-number-arrows {validSmp ? "outline-zinc-800" : "outline-red-600"}" maxlength="6" placeholder="Ether">
                 </div>
             </div>
-            <button on:click={save} class="mt-1 button0 { ( (changed || smpChanged) && validSmp && validUrl ) ? "pointer-events-auto" : "pointer-events-none opacity-50" }">Save</button>
+            <button on:click={save} class="mt-1 button0 ">Save</button>
         </div>
         <ul class="w-full text-sm">
             <li class="text-zinc-300">*After updating, make sure to refresh this plot's metadata on any marketplaces where you've listed it.</li>

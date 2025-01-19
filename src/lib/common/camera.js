@@ -148,6 +148,37 @@ export default class Camera extends PerspectiveCamera{
     }
 
 
+    animateZoom(){
+
+        const lookDir = new Vector3()
+        this.getWorldDirection(lookDir)
+
+        const originalPos = this.position.clone()
+        const origin = this.position.clone().add(lookDir.multiplyScalar(0.001))
+
+        const update = () => {
+
+            const v = this.position.clone().sub(origin)
+            v.multiplyScalar(1.005)
+
+            this.position.copy(origin).add(v)
+
+        }
+
+        this.update = update
+
+        return () => {
+
+            this.update = this.standard
+            this.position.copy(originalPos)
+            this.lookAt(originalPos.add(lookDir))
+
+        }
+
+    }
+
+
+
     moveTo(s1, s2, pivot, target, endFunction, tScale = 1, thetaAcceleration = 0){
 
         if(this._compareSpheres(s1, s2)){

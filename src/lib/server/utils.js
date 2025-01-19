@@ -1,6 +1,6 @@
 
 
-function apiRes({ code = 200, msg = "", err = false, headers = { "Content-Type": "application/json" } } = {}) {
+function apiRes({ code = 200, msg = "", err = false, headers = { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" } } = {}) {
    
     return new Response(code === 204 ? null : JSON.stringify({ 
         "error" : err,
@@ -17,7 +17,7 @@ async function cachePurgeFiles(env, urls){
     await fetch(`https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`, {
         method: "POST",
         body: JSON.stringify({
-            files: urls.map(url => ({ url, headers : { "Origin": "https://trraform.com" } })) 
+            files: urls.map(url => ({ url, headers : { "Origin": "https://localhost:5173" } })) 
         }),
         headers : {
             "Authorization": `Bearer ${CLOUDFLARE_API_TOKEN}`,

@@ -75,6 +75,10 @@
                 refs.camera.accelerationMultiplier = 4
                 break
 
+            case " ":
+
+                console.log(refs.camera.position)
+
         }
 
     }

@@ -36,7 +36,7 @@
 
         // document.body.style.cursor = "none";
 
-        const pids = ["22d4","22d3","22d6","22d5","0x0922d6","0x0422d6","0x0322d6","0x0722d6","0x0822d6","0x0c22d5","0x0e22d5","0x0122d5","0x0d22d5","0x0f22d5","0x1822d5","0x0722d5","0x0822d5","0x0922d5","0x0422d5","0x0522d5","0x0b22d5","0x0222d5","0x1022d5","0x1122d5","0x1322d5","0x011322d5","0x0a22d6","0x0b22d6", "0x0622d6", "0x0122d6", "0x0222d6", "0x0522d6", "0x0d22d6", "0x0f22d6", "0x1022d6", "0x0622d3","0x121822d5","0x111822d5","0x0f1822d5","0x0e1822d5","0x23fc"]
+        const pids = ["22d4","22d3","22d6","22d5","0x0a22d6","0x0b22d6", "0x0122d6", "0x0222d6", "0x0522d6", "0x0d22d6", "0x0f22d6", "0x1022d6", "0x0622d3","0x23fc","0x0c22d6","0x0322d5","0x0222d5","0x0122d5","0x040122d5","0x0822d6","0x0422d6","0x0322d6","0x0722d6","0x1422d6","0x1322d6","0x1122d6","0x1222d6","0x0622d6"]
 
         for(const pid of pids){
 
@@ -202,6 +202,9 @@
         }
 
         refs.camera.accelerationMagnitude /= 2
+
+        // const tar = new Vector3(68.52285586433804, 70.99694663828404, 24.471328311857153)
+        // refs.camera.accelerationMagnitude = refs.camera.position.distanceTo(tar)
 
         //update tags
         const r = 15 * inside.blockSize

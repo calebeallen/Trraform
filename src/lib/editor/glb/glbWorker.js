@@ -1,5 +1,5 @@
 
-import { ClampToEdgeWrapping, MirroredRepeatWrapping, RepeatWrapping, Vector2, Vector3 } from "three"
+import { ClampToEdgeWrapping, Matrix3, MirroredRepeatWrapping, RepeatWrapping, Vector2, Vector3 } from "three"
 
 const V1 = new Vector3()
 const V2 = new Vector3()
@@ -33,6 +33,7 @@ const jh = new Vector3(0,1,0)
 const kh = new Vector3(0,0,1)
 
 let chunk 
+let uvMatrix
 
 let position = []
 let color = []
@@ -50,6 +51,10 @@ onmessage = e => {
     const ids = chunk.indicies
 
     const transferable = [p.buffer]
+
+    if(chunk.uvMatrix)
+
+        uvMatrix = new Matrix3(...chunk.uvMatrix)
 
     if(chunk.type === "material")
 
@@ -259,7 +264,12 @@ function drawBlock(){
             const r = chunk.res
 
             //take linear combination of uvs
-            const uv = UV1.clone().multiplyScalar(triCoords.x).add(UV2.clone().multiplyScalar(triCoords.y)).add(UV3.clone().multiplyScalar(triCoords.z))
+            const uv = UV1.clone()
+            .multiplyScalar(triCoords.x)
+            .add(UV2.clone().multiplyScalar(triCoords.y))
+            .add(UV3.clone().multiplyScalar(triCoords.z))
+
+            uv.applyMatrix3(uvMatrix)
 
             //clamp uv between [0,1]
             switch(chunk.wrapS){

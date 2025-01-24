@@ -447,6 +447,7 @@ class TransformableGlb extends TransformableObject{
         this.meshGroup.position.copy(this.pos)
         this.controls.position.copy(this.pos)
 
+        console.log(this.glbMesh)
         this.meshGroup.add(this.glbMesh)
 
     }

@@ -26,7 +26,7 @@
     let t1 = 0
 
     onMount( () => {
-        
+
         const mobileDetect = new MobileDetect(navigator.userAgent)
 
         if(mobileDetect.mobile())

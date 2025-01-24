@@ -1,6 +1,6 @@
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, LinearSRGBColorSpace, Mesh, MeshBasicMaterial, Vector3 } from "three"
+import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, LinearSRGBColorSpace, Mesh, MeshBasicMaterial, Vector3, Texture } from "three"
 import { ColorLibrary } from "$lib/common/colorLibrary"
 import { PLOT_COUNT } from "$lib/common/constants"
 import { CONVERTING, FACES_CONVERTED, REFS, TOTAL_CONVERT } from "$lib/editor/store"
@@ -72,140 +72,141 @@ export default class GLBConverter {
     }
 
     load( file ){
-        
-        return new Promise( ( resolve, reject ) => {
 
+        return new Promise(( resolve, reject ) => {
+            
+            this.mesh = new Group()
+            this.min = new Vector3( Infinity, Infinity, Infinity )
+            this.max = this.min.clone().multiplyScalar(-1)
+            TOTAL_CONVERT.set(0)
+
+            const processMesh = mesh => {
+
+                const geom = mesh.geometry
+
+                //create new geometry to get rid of unwanted properties of old one
+                const newGeom = new BufferGeometry()
+
+                let material
+
+                mesh.updateMatrixWorld()
+
+                //if geometry exist (ie, geom is mesh and not group or object3D), create chunk
+                if(geom !== undefined){
+
+                    //because most geometry attributes share buffers (between meshes), they need to be copied to allow for parallel processing
+                    //original buffers can be scrapped once copies made
+                    const indicies = geom.index === undefined ? null : copyTypedArray(geom.index.array)
+                    const position = copyTypedArray(geom.attributes.position.array)
+                    const color = geom.attributes.color === undefined ? null : copyTypedArray(geom.attributes.color.array)
+
+                    //apply parent transformation to verticies
+                    
+                    for(let i = 0; i < position.length; i += 3){
+
+                        const v = new Vector3()
+                        v.set( position[i], position[i + 1], position[i + 2] )
+                        v.applyMatrix4( mesh.matrixWorld )
+                        this.max.max(v)
+                        this.min.min(v)
+
+                        position[i] = v.x
+                        position[i + 1] = v.y
+                        position[i + 2] = v.z
+
+                    }
+
+                    const chunk = { position }
+
+                    newGeom.setAttribute( "position", new BufferAttribute( position, 3 ) )
+
+                    if(indicies){
+
+                        //add copied indicies to chunk
+                        chunk.indicies = indicies
+
+                        newGeom.setIndex( geom.index )
+
+                        TOTAL_CONVERT.update(x => x + indicies.length / 3)
+
+                    } else
+
+                        TOTAL_CONVERT.update(x => x + position.length / 9)
+
+                    const map = mesh.material.map
+                    
+                    //categorize chunk
+                    if (map) {
+
+                        const uvid = `uv${map.channel || ""}`
+                        const uv = geom.attributes[uvid]
+                        const uvArr = copyTypedArray( geom.attributes[uvid].array)
+
+                        map.colorSpace = LinearSRGBColorSpace
+                        map.updateMatrix()
+
+                        //extract and resize textures
+                        GLBConverter.osCtx.drawImage( map.source.data, 0, 0, TEXTURE_RES, TEXTURE_RES )
+                        
+                        chunk.type = 'texture'
+                        chunk.uv = uvArr
+                        chunk.uvMatrix = Array.from(map.matrix.elements)
+                        chunk.texture = GLBConverter.osCtx.getImageData( 0, 0, TEXTURE_RES, TEXTURE_RES ).data
+                        chunk.wrapS = map.wrapS
+                        chunk.wrapT = map.wrapT
+                        chunk.res = TEXTURE_RES
+
+                        newGeom.setAttribute( uvid, uv )
+
+                        material = new MeshBasicMaterial( { map, side: DoubleSide, transparent: true } )
+
+                    } else if (mesh.material.color) {
+
+                        chunk.type = 'material'
+                        chunk.color = mesh.material.color
+
+                        material = new MeshBasicMaterial( { color: mesh.material.color, side: DoubleSide, transparent: true } )
+
+                    } else if (color) {
+
+                        chunk.type = 'vrt-colors'
+                        chunk.color = color
+
+                        newGeom.setAttribute( "color", geom.attributes.color )
+
+                        material = new MeshBasicMaterial( { vertexColors: true, side: DoubleSide, transparent: true  } )
+
+                    } else {
+
+                        chunk.type = 'material'
+                        chunk.color = new Color(0xffffff)
+
+                        material = new MeshBasicMaterial( { color: chunk.color, side: DoubleSide, transparent: true  } )
+
+                    }
+
+                    this.chunks.push(chunk)
+
+                    //create mesh from modified attributes
+                    this.mesh.add( new Mesh( newGeom, material ) )
+
+                }
+
+                for(let i = 0; i < mesh.children.length; i++)
+
+                    processMesh( mesh.children[i] )
+
+            }
+
+            //create chunks
             const fr = new FileReader()
             const loader = new GLTFLoader()
 
-            this.mesh = new Group()
+            fr.onload = async () => {
 
-            TOTAL_CONVERT.set(0)
-            // this.totalFaces = 0
-            
-            //read blob, convert to chunks via parseMesh()
-            fr.onload = () => loader.parse( fr.result, '', gltf => {
+                const { scene } = await loader.parseAsync(fr.result)
 
-                const v = new Vector3()
-
-                this.min = new Vector3( Infinity, Infinity, Infinity )
-                this.max = this.min.clone().multiplyScalar(-1)
-
-                const processMesh = mesh => {
-
-                    const geom = mesh.geometry
-
-                    //create new geometry to get rid of unwanted properties of old one
-                    const newGeom = new BufferGeometry()
-
-                    let material
-
-                    mesh.updateMatrixWorld()
-        
-                    //if geometry exist (ie, geom is mesh and not group or object3D), create chunk
-                    if(geom !== undefined){
-
-                        //because most geometry attributes share buffers (between meshes), they need to be copied to allow for parallel processing
-                        //original buffers can be scrapped once copies made
-                        const indicies = geom.index === undefined ? null : copyTypedArray(geom.index.array)
-                        const position = copyTypedArray(geom.attributes.position.array)
-                        const uv = geom.attributes.uv === undefined ? null : copyTypedArray(geom.attributes.uv.array)
-                        const color = geom.attributes.color === undefined ? null : copyTypedArray(geom.attributes.color.array)
-
-                        //apply parent transformation to verticies
-                        for(let i = 0; i < position.length; i += 3){
-
-                            v.set( position[i], position[i + 1], position[i + 2] )
-                            v.applyMatrix4(mesh.matrixWorld)
-                            this.max.max(v)
-                            this.min.min(v)
-
-                            position[i] = v.x
-                            position[i + 1] = v.y
-                            position[i + 2] = v.z
-    
-                        }
-
-                        const chunk = { position }
-
-                        newGeom.setAttribute( "position", new BufferAttribute( position, 3 ) )
-
-                        if(indicies){
-
-                            //add copied indicies to chunk
-                            chunk.indicies = indicies
-
-                            newGeom.setIndex( geom.index )
-
-                            TOTAL_CONVERT.update(x => x + indicies.length / 3)
-
-                            // this.totalFaces += indicies.length / 3
-
-                        } else
-
-                            TOTAL_CONVERT.update(x => x + position.length / 9)
-
-                        const map = mesh.material.map
-                        console.log(chunk.texture)
-                        //categorize chunk
-                        if(map){
-
-                            map.colorSpace = LinearSRGBColorSpace
-
-                            //extract and resize textures
-                            GLBConverter.osCtx.drawImage( map.source.data, 0, 0, TEXTURE_RES, TEXTURE_RES )
-                            
-                            chunk.type = 'texture'
-                            chunk.uv = uv
-                            chunk.texture = GLBConverter.osCtx.getImageData( 0, 0, TEXTURE_RES, TEXTURE_RES ).data
-                            chunk.wrapS = map.wrapS
-                            chunk.wrapT = map.wrapT
-                            chunk.res = TEXTURE_RES
-
-                            newGeom.setAttribute( "uv", geom.attributes.uv )
-
-                            material = new MeshBasicMaterial( { map: mesh.material.map, side: DoubleSide, transparent: true } )
-        
-                        }else if(mesh.material.color){
-
-                            chunk.type = 'material'
-                            chunk.color = mesh.material.color
-
-                            material = new MeshBasicMaterial( { color: mesh.material.color, side: DoubleSide, transparent: true  } )
-        
-                        }else if(color){
-        
-                            chunk.type = 'vrt-colors'
-                            chunk.color = color
-
-                            newGeom.setAttribute( "color", geom.attributes.color )
-
-                            material = new MeshBasicMaterial( { vertexColors: true, side: DoubleSide, transparent: true  } )
-        
-                        } else {
-
-                            chunk.type = 'material'
-                            chunk.color = new Color(0xffffff)
-
-                            material = new MeshBasicMaterial( { color: chunk.color, side: DoubleSide, transparent: true  } )
-
-                        }
-
-                        this.chunks.push(chunk)
-
-                        //create mesh from modified attributes
-                        this.mesh.add( new Mesh( newGeom, material ) )
-        
-                    }
-        
-                    for(let i = 0; i < mesh.children.length; i++)
-        
-                        processMesh( mesh.children[i] )
-        
-                }
-
-                //create chunks
-                processMesh( gltf.scene )
+                processMesh(scene)
 
                 const dimensions = this.max.clone().sub(this.min)
                 const scale = REFS.buildSize / Math.max(dimensions.x, dimensions.y, dimensions.z)
@@ -234,15 +235,15 @@ export default class GLBConverter {
                     child.geometry.setAttribute( "position", new BufferAttribute( copyTypedArray(child.geometry.attributes.position.array), 3 ) )
 
                 }
-                
+
                 resolve()
 
-            }, err => reject(err))
-            
-            fr.readAsArrayBuffer( file )
+            }
+
+            fr.readAsArrayBuffer(file)
 
         })
-
+        
     }
 
     /* Converts vertex and texture data into blocks. Returns an array of each block's position and color */

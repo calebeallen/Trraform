@@ -226,15 +226,36 @@ function projectBlock( x, y, z, dir ){
     
     pos.add( dir.clone().multiplyScalar( V1.clone().sub(pos).dot(normal) / dir.dot(normal) ) )
 
-    triCoords.set( triCoord(V1,V2,V3), triCoord(V2,V3,V1), triCoord(V3,V1,V2) )
+    triCoords.set( ...barycentricCoords(V1,V2,V3,pos) )
 
-    if( triCoords.x >= 0 && triCoords.y >= 0 && triCoords.z >= 0 && isFinite(pos.x) && isFinite(pos.y) && isFinite(pos.z) ){
+    if( triCoords.x >= 0 && triCoords.y >= 0 && triCoords.z >= 0 && triCoords.x <= 1 && triCoords.y <= 1 && triCoords.z <= 1 && isFinite(pos.x) && isFinite(pos.y) && isFinite(pos.z) ){
 
         pos.floor()
 
         drawBlock()
 
     }
+
+}
+
+function  barycentricCoords(A,B,C,P){
+
+    const v0 = B.clone().sub(A)
+    const v1 = C.clone().sub(A)
+    const vp = P.clone().sub(A)
+
+    const d00 = v0.dot(v0)
+    const d01 = v0.dot(v1)
+    const d11 = v1.dot(v1)
+    const dp0 = vp.dot(v0)
+    const dp1 = vp.dot(v1)
+
+    const det = d00 * d11 - d01 ** 2
+
+    const u = (d11 * dp0 - d01 * dp1) / det
+    const v = (d00 * dp1 - d01 * dp0) / det
+
+    return [1 - u - v, u, v]
 
 }
 
@@ -261,11 +282,10 @@ function drawBlock(){
         case 'texture':
 
             const t = chunk.texture
-            const r = chunk.res
+            const { width, height } = chunk
 
             //take linear combination of uvs
-            const uv = UV1.clone()
-            .multiplyScalar(triCoords.x)
+            const uv = UV1.clone().multiplyScalar(triCoords.x)
             .add(UV2.clone().multiplyScalar(triCoords.y))
             .add(UV3.clone().multiplyScalar(triCoords.z))
 
@@ -312,17 +332,58 @@ function drawBlock(){
 
             }
 
-            uv.multiplyScalar(r).floor()
-
-            const i = ( uv.y * r + uv.x ) * 4
-
-            //handle alpha channel
-            if(t[i+3] < 0.5)
-
-                return
-
-            for(let j = 0; j < 3; j++)
-                color.push(t[i+j] / 255)
+            const uvScaled = uv.clone();
+            uvScaled.x *= width; // Scale x by texture width
+            uvScaled.y *= height; // Scale y by texture height;
+            
+            // Determine surrounding texels
+            const x0 = Math.floor(uvScaled.x);
+            const x1 = x0 + 1;
+            const y0 = Math.floor(uvScaled.y);
+            const y1 = y0 + 1;
+            
+            // Fractional offsets
+            const tx = uvScaled.x - x0;
+            const ty = uvScaled.y - y0;
+            
+            // Clamp indices to texture resolution to avoid out-of-bounds access
+            const clamp = (val, max) => Math.max(0, Math.min(val, max - 1));
+            const x0Clamped = clamp(x0, width);
+            const x1Clamped = clamp(x1, width);
+            const y0Clamped = clamp(y0, height);
+            const y1Clamped = clamp(y1, height);
+            
+            // Fetch texel RGBA values
+            const i00 = ((y0Clamped * width + x0Clamped) * 4);
+            const i10 = ((y0Clamped * width + x1Clamped) * 4);
+            const i01 = ((y1Clamped * width + x0Clamped) * 4);
+            const i11 = ((y1Clamped * width + x1Clamped) * 4);
+            
+            const color00 = [t[i00], t[i00 + 1], t[i00 + 2], t[i00 + 3]];
+            const color10 = [t[i10], t[i10 + 1], t[i10 + 2], t[i10 + 3]];
+            const color01 = [t[i01], t[i01 + 1], t[i01 + 2], t[i01 + 3]];
+            const color11 = [t[i11], t[i11 + 1], t[i11 + 2], t[i11 + 3]];
+            
+            // Interpolate along X-axis
+            const row0 = color00.map((c, j) => c * (1 - tx) + color10[j] * tx);
+            const row1 = color01.map((c, j) => c * (1 - tx) + color11[j] * tx);
+            
+            // Interpolate along Y-axis
+            const finalColor = row0.map((c, j) => c * (1 - ty) + row1[j] * ty);
+            
+            // Normalize RGBA values to [0, 1]
+            const normalizedColor = finalColor.map((c) => c / 255);
+            
+            // Handle alpha channel
+            if (normalizedColor[3] < 0.5) {
+                return; // Discard the pixel
+            }
+            
+            // Push RGB and alpha values
+            for (let j = 0; j < 3; j++) {
+                color.push(normalizedColor[j]);
+            }
+            
 
             break
 

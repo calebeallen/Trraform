@@ -142,19 +142,23 @@ export default class GLBConverter {
                         const uv = geom.attributes[uvid]
                         const uvArr = copyTypedArray( geom.attributes[uvid].array)
 
+                        const { width, height } = map.source.data
                         map.colorSpace = LinearSRGBColorSpace
                         map.updateMatrix()
 
                         //extract and resize textures
-                        GLBConverter.osCtx.drawImage( map.source.data, 0, 0, TEXTURE_RES, TEXTURE_RES )
+                        const osCanvas = new OffscreenCanvas( width, height )
+                        const osCtx = osCanvas.getContext( '2d', { willReadFrequently: true } )
+                        osCtx.drawImage( map.source.data, 0, 0, width, height )
                         
                         chunk.type = 'texture'
                         chunk.uv = uvArr
                         chunk.uvMatrix = Array.from(map.matrix.elements)
-                        chunk.texture = GLBConverter.osCtx.getImageData( 0, 0, TEXTURE_RES, TEXTURE_RES ).data
+                        chunk.texture = osCtx.getImageData( 0, 0, width, height ).data
                         chunk.wrapS = map.wrapS
                         chunk.wrapT = map.wrapT
-                        chunk.res = TEXTURE_RES
+                        chunk.width = width
+                        chunk.height = height
 
                         newGeom.setAttribute( uvid, uv )
 

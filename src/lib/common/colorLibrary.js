@@ -10,11 +10,12 @@ class ColorLibrary{
 
     static light = (() => {
 
-        const intensity = 1.8
-        const angles = [43,45,47]
+        const angles = [44,45,46]
         const light = angles.map(x => Math.cos(x * Math.PI / 180))
         const magn = Math.hypot(...light)
-        return light.map(x => x / magn * intensity)
+        const normalized = light.map(x => x / magn)
+        const intensity = normalized[1]
+        return normalized.map(x => x / intensity)
 
     })()
 
@@ -101,7 +102,7 @@ class ColorLibrary{
 
         for(let i = 0; i < 3; i++)
 
-            scaled[i] = Math.pow(rgb[i] * scale, 1.1) * 255
+            scaled[i] = rgb[i] * scale * 255
 
         return scaled
 

@@ -258,8 +258,53 @@
 
     }
 
+
+    function keydown(e){
+
+        const key = e.key.toLowerCase()
+
+        switch(key){
+
+            case "w":
+
+                tranX += REFS.buildSize
+                break
+
+            case "s":
+
+                tranX -= REFS.buildSize
+                break
+
+            case "d":
+
+                tranZ += REFS.buildSize
+                break
+
+            case "a":
+
+                tranZ -= REFS.buildSize
+                break
+            
+            case "q":   
+                
+                tranY += REFS.buildSize
+                break
+
+            case "e":
+
+                tranY -= REFS.buildSize
+
+        }
+
+        changeTranslation()
+
+    }
+
 </script>
 
+<svelte:document
+    on:keydown={keydown}
+/>
 
 <div transition:fly={{x: 300, duration: 150}} class="absolute space-y-2 transition-all select-none right-2 panel-container bottom-2">
     <div class="text-sm font-semibold">Transform</div>

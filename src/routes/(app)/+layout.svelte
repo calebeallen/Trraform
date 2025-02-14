@@ -25,6 +25,7 @@
     import RenderManager from "$lib/main/renderManager"
     import { pushNotification } from "$lib/common/utils"
     import MyPlot from "$lib/main/plot/myPlot"
+    import CamPath from "$lib/main/components/camera/camPath.svelte";
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -32,13 +33,16 @@
     let tagData = [], tags = {}, tagBounds = []
     let ismousedown = false
 
+    const pids = ["0x0201249d", "0x0101249d", "0x01249d", "0x249d", "0x0624a0", "0x0524a0", "0x0324a0", "0x0424a0", "0x24a0", "0x050206a2", "0x0506a2", "0x0406a2", "0x0206a2", "0x0106a2", "0x06a2", "0x1013213e","0x0f13213e","0x0e13213e", "0x0d13213e", "0x0c13213e","0x0b13213e","0x0a13213e","0x0913213e","0x0813213e","0x0713213e","0x0613213e","0x0513213e","0x0413213e", "0x0313213e", "0x0213213e", "0x0113213e", "0x13213e", "0x11213e", "0x12213e", "0x213e", "0x011523ee", "0x1523ee", "0x23ee", "0x23ef", "0x050722ca", "0x060722ca", "0x110722ca", "0x0e0722ca", "0x0f0722ca", "0x120722ca", "0x010822ca", "0x020822ca", "0x030822ca", "0x040822ca", "0x0122ca", "0x0222ca", "0x0422ca", "0x0522ca", "0x0722ca", "0x0822ca", "0x22ca", "0x050a22c3", "0x040a22c3", "0x020a22c3", "0x030a22c3", "0x170a22c3", "0x160a22c3", "0x150a22c3", "0x140a22c3", "0x130a22c3", "0x120a22c3", "0x110a22c3", "0x100a22c3", "0x0f0a22c3","0x0e0a22c3","0x0d0a22c3","0x0c0a22c3","0x0b0a22c3","0x0a0a22c3","0x090a22c3","0x080a22c3", "0x0a22c3", "0x22c3", "0x22b6", "0x010923e6","0x020923e6","0x030923e6","0x050923e6","0x060923e6","0x070923e6", "0x0923e6","0x0723e6","0x0623e6","0x0423e6","0x0223e6","0x0323e6", "0x23ea", "0x23eb", "0x23e7", "0x23e6", "0x0601213e","0x0501213e","0x0401213e","0x0301213e","0x0201213e","0x0101213e", "0x0b213e","0x0a213e","0x09213e","0x05213e", "0x06213e", "0x07213e", "0x03213e", "0x02213e", "0x01213e", "0x2147", "0x2146", "0x213f", "0x22b9", "0x249f", "0x01042125", "0x02042125", "0x03042125", "0x04042125", "0x05042125", "0x06042125", "0x09042125", "0x08042125", "0x07042125", "0x122125", "0x112125", "0x102125", "0x0f2125", "0x0e2125", "0x0d2125", "0x0c2125", "0x0b2125", "0x0a2125", "0x092125", "0x082125", "0x072125", "0x062125", "0x052125", "0x042125", "0x032125", "0x022125", "0x012125", "0x2133", "0x2132", "0x2131", "0x2124", "0x2125", "0x2126", "0x2119", "0x211a", "0x211b", "0x010323f1", "0x0923f1","0x0823f1","0x0723f1","0x0623f1","0x0523f1","0x0423f1","0x0323f1","0x0223f1","0x0123f1","0x23f1","0x030222c3", "0x020222c3", "0x010222c3", "0x0922c3", "0x0822c3", "0x0722c3", "0x0622c3", "0x0522c3", "0x0422c3", "0x0322c3", "0x0222c3", "0x0122c3", "0x22c3", "0x0923f6", "0x0a23f6", "0x0b23f6", "0x0c23f6", "0x0f23f6", "0x0523f6", "0x0623f6", "0x0723f6", "0x0823f6", "0x0e23f6", "0x0123f6", "0x0223f6", "0x0d23f6", "0x0423f6", "0x0323f6", "0x23f6", "0x060523f2", "0x090523f2", "0x070523f2", "0x080523f2", "0x110523f2", "0x120523f2", "0x130523f2", "0x140523f2","0x150523f2", "0x160523f2", "0x0823f2","0x0523f2","0x0223f2","0x0123f2","0x23f2", "0x0e0222ac", "0x0d0222ac", "0x0b0222ac", "0x090222ac", "0x080222ac", "0x070222ac", "0x0922ac", "0x0222ac", "0x0122ac", "0x0822ac", "0x0722ac", "0x0522ac", "0x0622ac", "0x22ac", "0x0c0422c9", "0x0a0422c9", "0x070422c9", "0x040422c9", "0x050422c9", "0x060422c9", "0x0822c9","0x0722c9", "0x0622c9","0x0522c9", "0x0422c9", "0x0322c9", "0x0122c9","0x0222c9", "0x090222c0", "0x080222c0", "0x070222c0", "0x010222c0", "0x020222c0", "0x030222c0", "0x060222c0", "0x050222c0", "0x040222c0", "0x0222c0", "0x0122c0", "0x22c0","0x22c1","0x22c9","0x22ca","0x22bb", "0x22bc", "0x010923ee", "0x0723ee", "0x0823ee", "0x0923ee", "0x0a23ee", "0x0523ee", "0x0623ee","0x0123ee","0x0223ee","0x0323ee","0x0423ee", "0x23ee", "0x0104249f", "0x0204249f", "0x05249f", "0x06249f", "0x03249f","0x04249f", "0x01249f", "0x02249f", "0x0124a0", "0x0224a0","0x010124a0"]
+    const pidSet = new Set(pids.map(hexStr => parseInt(hexStr, 16)))
+
     onMount(async () => {
 
         // document.body.style.cursor = "none";
 
-        const pids = ["22d4","22d3","22d6","22d5","0x0a22d6","0x0b22d6", "0x0122d6", "0x0222d6", "0x0522d6", "0x0d22d6", "0x0f22d6", "0x1022d6", "0x0622d3","0x23fc","0x0c22d6","0x0322d5","0x0222d5","0x0122d5","0x040122d5","0x0822d6","0x0422d6","0x0322d6","0x0722d6","0x1422d6","0x1322d6","0x1122d6","0x1222d6","0x0622d6"]
+        // const pids = ["22d4","22d3","22d6","22d5","0x0a22d6","0x0b22d6", "0x0122d6", "0x0222d6", "0x0522d6", "0x0d22d6", "0x0f22d6", "0x1022d6", "0x0622d3","0x23fc","0x0c22d6","0x0322d5","0x0222d5","0x0122d5","0x040122d5","0x0822d6","0x0422d6","0x0322d6","0x0722d6","0x1422d6","0x1322d6","0x1122d6","0x1222d6","0x0622d6","0x0b0322d5","0x0c0322d5","0x0d0322d5","0x070322d5","0x050322d5","0x090322d5","0x010322d5","0x030322d5","0x0e0322d5","0x100322d5","0x110322d5"]
 
-        for(const pid of pids){
+        for(const pid of pids.slice(0,16)){
 
             const plotId = PlotId.fromHexString(pid)
             $myPlots.push(new MyPlot(plotId))
@@ -203,8 +207,8 @@
 
         refs.camera.accelerationMagnitude /= 2
 
-        // const tar = new Vector3(68.52285586433804, 70.99694663828404, 24.471328311857153)
-        // refs.camera.accelerationMagnitude = refs.camera.position.distanceTo(tar)
+        // const tar = new Vector3(69.474807189635, 69.90804980933032, 94.52555655544064)
+        // refs.camera.accelerationMagnitude = refs.camera.position.distanceTo(tar) * 3
 
         //update tags
         const r = 15 * inside.blockSize
@@ -250,22 +254,9 @@
 
                 break
 
-            let inMyPlots = false
-
-            for(const { id } of $myPlots)
-
-                if(needsRender[i].plot.id.equals(id)){
-
-                    inMyPlots = true
-                    break
-
-                }
-
-            if(inMyPlots){
+            if(pidSet.has(needsRender[i].plot.id.id))
 
                 refs.renderManager.render(needsRender[i].plot)
-
-            }
 
         }
 
@@ -617,7 +608,13 @@
 
         if(ismousedown && (refs.camera.update === refs.camera.orbit || refs.camera.update === refs.camera.standard)){
 
-            refs.camera.angularVelocityDamping = 1e-6
+            // const { clientX, clientY } = e
+            // const midX = - clientX / window.innerWidth + 0.5
+            // const midY = clientY / window.innerHeight - 0.5
+            
+            // refs.camera.mouseVect.set(midX, midY).multiplyScalar(1000)
+
+            refs.camera.angularVelocityDamping = 1e-4
             refs.camera.angularVelocity.theta += - e.movementX / window.innerWidth * Math.PI * settings.general.lookSens
             refs.camera.angularVelocity.phi += e.movementY / window.innerHeight * Math.PI * settings.general.lookSens
 
@@ -634,10 +631,13 @@
     <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="absolute top-0 left-0 w-full h-full"></canvas>
 </div>
 
+
 <slot/>
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>
 {/if}
+
+<CamPath/>
 
 <Notification store={notification}/>

@@ -11,7 +11,6 @@
 
     onMount( async () => {
 
-        console.log($myPlots)
 
         const { clientWidth, clientHeight } = container
         const w = clientWidth + 12

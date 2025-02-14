@@ -72,7 +72,7 @@
             
             case "shift":   
                 
-                refs.camera.accelerationMultiplier = 4
+                refs.camera.accelerationMultiplier = 10
                 break
 
             case " ":
@@ -123,6 +123,11 @@
             case "o":
 
                 zCancel()
+                break
+
+            case "l":
+
+                refs.camera.animateFov()
                 break
 
         }

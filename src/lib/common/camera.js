@@ -1,5 +1,5 @@
 
-import { Matrix4, PerspectiveCamera, Spherical, Vector3 } from "three";
+import { Matrix4, PerspectiveCamera, Spherical, Vector2, Vector3 } from "three";
 
 const PI2 = Math.PI * 2
 
@@ -72,7 +72,7 @@ export default class Camera extends PerspectiveCamera{
         this.velocityDamping = 1e-6
 
         this.angularVelocity = new Spherical()
-        this.angularVelocityDamping = 1e-6
+        this.angularVelocityDamping = 1e-8
 
         this.scrollVelocity = 0
         this.scrollDamping = 1e-6
@@ -84,6 +84,8 @@ export default class Camera extends PerspectiveCamera{
 
         this.pause = () => {}
         this.update = this.pause
+
+        this.mouseVect = new Vector2()
 
     }
 
@@ -147,6 +149,29 @@ export default class Camera extends PerspectiveCamera{
 
     }
 
+    animateFov(){
+
+        const x = t => 1 - (t - 1)**2
+
+        let t = -0.5
+
+        let interval = setInterval(( )=> {
+
+            t += 0.01
+
+            const _x = Math.max(0,x(t))
+
+            this.fov = 110 * _x + 40 * (1 - _x)
+            this.updateProjectionMatrix()
+
+            if(t >= 1)
+
+                clearInterval(interval)
+
+        }, 10)
+
+
+    }
 
     animateZoom(){
 
@@ -253,7 +278,7 @@ export default class Camera extends PerspectiveCamera{
 
     }
 
-    standard1(dt){
+    standard1(dt, ){
 
         //calculate change in angles
         const dTheta = this.angularVelocity.theta * dt
@@ -290,8 +315,8 @@ export default class Camera extends PerspectiveCamera{
     standard(dt){
 
         //calculate change in angles
-        const dTheta = this.angularVelocity.theta * dt
-        const dPhi = this.angularVelocity.phi * dt
+        const dTheta = this.angularVelocity.theta * dt + this.mouseVect.x * dt * dt / 2
+        const dPhi = this.angularVelocity.phi * dt + this.mouseVect.y * dt * dt / 2
 
         //apply changes
         this.sphere.theta += dTheta
@@ -332,8 +357,8 @@ export default class Camera extends PerspectiveCamera{
         this.getWorldDirection(dir)
 
         //calculate change in angles
-        const dTheta = this.angularVelocity.theta * dt 
-        const dPhi = this.angularVelocity.phi * dt
+        const dTheta = this.angularVelocity.theta * dt + this.mouseVect.x * dt * dt / 2
+        const dPhi = this.angularVelocity.phi * dt + this.mouseVect.y * dt * dt / 2
         
         targetToCamera.applyAxisAngle(this.up, dTheta)
         dir.applyAxisAngle(this.up, dTheta)

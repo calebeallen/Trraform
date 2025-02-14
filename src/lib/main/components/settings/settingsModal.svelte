@@ -114,7 +114,7 @@
             <div class="flex flex-col justify-between flex-1 gap-3 min-h-96">
                 <div class="settings-subsection">
                     <h1>General</h1>
-                    <SliderSetting bind:value={fov} name="FOV" postfix="°" min={50} max={150}/>
+                    <SliderSetting bind:value={fov} name="FOV" postfix="°" min={10} max={150}/>
                     <SliderSetting bind:value={lookSens} name="Sensitivity" min={1} max={50}/>
                     <SliderSetting bind:value={maxTags} name="Max Tags" max={100}/>
                     <SliderSetting bind:value={tagSize} name="Tag Size" min={1} max={10}/>

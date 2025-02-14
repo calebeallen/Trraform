@@ -121,9 +121,9 @@ export default class RenderManager{
 
         if(this.totalTimeElapsed - this.lastRefreshTimeStamp >= dt_REFRESH){
 
-            for(const lod of this.renderedLods)
+            // for(const lod of this.renderedLods)
 
-                lod.update(refs.camera)
+            //     lod.update(refs.camera)
 
             this.lastRefreshTimeStamp = this.totalTimeElapsed
             // console.log(`vram usage: ${Math.floor(this.vramEstimate / 1e6)} MB\nsystem usage: ${Math.floor(performance.memory.usedJSHeapSize / 1e6)} MB`)

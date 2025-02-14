@@ -9,7 +9,7 @@
 
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
-    import { WebGLRenderer, Scene, Color, LineSegments, MeshBasicMaterial, Vector3, LinearSRGBColorSpace, Vector2, Spherical, Raycaster, Sphere } from "three";
+    import { WebGLRenderer, Scene, Color, LineSegments, MeshBasicMaterial, Vector3, LinearSRGBColorSpace, Vector2, Spherical, Raycaster, Sphere, SRGBColorSpace } from "three";
     import { BUILD_SIZE, COLOR_INDEX, COLOR_SELECT, EYEDROP, GRID_SIZING, MODE, ModifyEvent, OBJECT_SELECT, OVERLAP, REFS, addEvent, LOADING, SHOW_ONBOARDING_MODAL } from "$lib/editor/store";
     import { GridGeometry } from "$lib/editor/geometries/gridGeometry" 
     import Build from "$lib/editor/build"
@@ -18,6 +18,7 @@
     import { EDITOR_VERSION, PLOT_COUNT } from "$lib/common/constants"
     import Camera from "$lib/common/camera"
     import MobileDetect from "mobile-detect";
+    import { refs } from "../../lib/main/store";
     
     const raycaster = new Raycaster()
 
@@ -37,12 +38,12 @@
 
             canvas,
             logarithmicDepthBuffer: true,
-            antialias: true
+            antialias: true,
 
         })
 
-        REFS.renderer.autoClear = false
         REFS.renderer.outputColorSpace = LinearSRGBColorSpace
+        REFS.renderer.autoClear = false
         REFS.renderer.setAnimationLoop(renderloop)
 
         REFS.camera = new Camera(70, new Sphere(new Vector3(0,0,0), 800))
@@ -83,7 +84,7 @@
             REFS.build.dispose()
 
         REFS.scene1 = new Scene()
-        REFS.scene1.background = new Color( 0x333338 )
+        REFS.scene1.background = new Color( 0x111111 )
 
         REFS.scene2 = new Scene()
 
@@ -614,6 +615,7 @@
 
     }
     
+
 </script>
 
 <svelte:window  

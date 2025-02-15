@@ -212,13 +212,13 @@
             
     <!-- HTML Meta Tags -->
     <title>Trraform</title>
-    <meta name="description" content="Millions of worlds powered by Ethereum.">
+    <meta name="description" content="Millions of worlds powered by Polygon.">
 
     <!-- Facebook Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://trraform.com">
     <meta property="og:title" content="Trraform">
-    <meta property="og:description" content="Millions of worlds powered by Ethereum.">
+    <meta property="og:description" content="Millions of worlds powered by Polygon.">
     <meta property="og:image" content="https://trraform.com/ogImage.png">
 
     <!-- Twitter Meta Tags -->
@@ -226,7 +226,7 @@
     <meta property="twitter:domain" content="trraform.com">
     <meta property="twitter:url" content="https://trraform.com">
     <meta name="twitter:title" content="Trraform">
-    <meta name="twitter:description" content="Millions of worlds powered by Ethereum.">
+    <meta name="twitter:description" content="Millions of worlds powered by Polygon.">
     <meta name="twitter:image" content="https://trraform.com/ogImage.png">
 
 </svelte:head>

@@ -68,13 +68,13 @@
             
         <!-- HTML Meta Tags -->
         <title>Trraform</title>
-        <meta name="description" content="Millions of worlds powered by Ethereum.">
+        <meta name="description" content="Millions of worlds powered by Polygon.">
 
         <!-- Facebook Meta Tags -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://trraform.com">
         <meta property="og:title" content="Trraform">
-        <meta property="og:description" content="Millions of worlds powered by Ethereum.">
+        <meta property="og:description" content="Millions of worlds powered by Polygon.">
         <meta property="og:image" content="https://trraform.com/ogImage.png">
 
         <!-- Twitter Meta Tags -->
@@ -82,7 +82,7 @@
         <meta property="twitter:domain" content="trraform.com">
         <meta property="twitter:url" content="https://trraform.com">
         <meta name="twitter:title" content="Trraform">
-        <meta name="twitter:description" content="Millions of worlds powered by Ethereum.">
+        <meta name="twitter:description" content="Millions of worlds powered by Polygon.">
         <meta name="twitter:image" content="https://trraform.com/ogImage.png">
 
     </svelte:head>
@@ -92,7 +92,7 @@
     {#if !inView}
         <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full p-3 sm:p-5 sm:max-w-max">
             <h1>Millions of Worlds</h1>
-            <h4 class="mt-1">Powered by <b>Ethereum</b> <img class="inline-block w-2 h-3 translate-y-px" src="/eth-small.svg" alt="eth small"></h4>
+            <h4>Powered by <b>Polygon</b></h4>
             <nav class="w-full mt-4 space-y-3">
                 <a class="nav-option" href="/world">Explore</a>
                 {#if !$isMobileBrowser}
@@ -116,10 +116,10 @@
                 </div>
                 <div class="flex flex-col items-center justify-between w-full gap-2 mb-64 sm:flex-row sm:items-start">
                     <div class="content-container">
-                        <div transition:fly={{ x: 50, duration: 500 }} class="text-blue-500 section-tag">Create and Explore</div>
-                        <h1 transition:fly={{ x: 50, duration: 500, delay: 100 }}>Build Your World</h1>
+                        <div transition:fly={{ x: 50, duration: 500 }} class="text-blue-500 section-tag">What is Trraform?</div>
+                        <h1 transition:fly={{ x: 50, duration: 500, delay: 100 }}>Build Anything.</h1>
                         <div transition:fly={{ x: 50, duration: 500, delay: 200 }} class="w-full pr-2 space-y-1 sm:max-w-md sm:space-y-2">
-                            <p>Each block houses a <b class="text-lime-300">plot</b> that you can purchase and use to <b class="text-lime-300">build anything</b> you want. These plots have <b class="text-lime-300">subplots</b> that can hold their own builds, and those subplots have subplots! The possiblities of what you can create are truly endless. Bring your unique creations to life alongside <b class="text-lime-300">millions</b> of others.</p>
+                            <p>Each block houses a <b class="text-lime-300">plot</b> that you can use to <b class="text-lime-300">build anything</b> you want. These plots have <b class="text-lime-300">subplots</b> that can hold their own builds, and those subplots have subplots! The possiblities of what you can create are truly endless. Bring your unique creations to life alongside <b class="text-lime-300">millions</b> of others.</p>
                         </div>
                     </div>
                     <div transition:fly={{ y: 120, duration: 500 }} class="relative hidden mr-2 w-72 md:w-96 shrink-0 sm:block aspect-square bg-radial-gradient">
@@ -145,20 +145,18 @@
                     </div>
                 </div>
                 <div class="mb-64 content-container">
-                    <div transition:fly={{ x: 50, duration: 500 }} class="section-tag text-cyan-500">Crypto</div>
-                    <h1 transition:fly={{ x: 50, duration: 500, delay: 100 }}>Mint, Earn, Trade</h1>
+                    <div transition:fly={{ x: 50, duration: 500 }} class="section-tag text-cyan-500">Why crypto?</div>
+                    <h1 transition:fly={{ x: 50, duration: 500, delay: 100 }}>You're in Control</h1>
                     <div transition:fly={{ x: 50, duration: 500, delay: 200 }} class="w-full pr-2 space-y-1 sm:space-y-2">
-                        <p>Find any open spot and make it your own. By simply owning a plot, you <b class="text-lime-300">automatically earn 70% royalties</b> when one of its subplots are minted. The funds go straight to your wallet. <b class="text-lime-300">You can set the mint price</b> for these subplots to whatever you want.</p>
-                        <p>Want to sell your plot? Trraform implements the <b class="text-lime-300">ERC-721C token standard</b> for seamless integration with popular NFT exchanges. Trade your plot like any other token.</p>
+                        <p>Keeping plots as on-chain assets streamlines <b class="text-lime-300">plot ownership management</b> and <b class="text-lime-300">creator payments</b>. Plot owners can set subplot prices however they choose. This makes Trraform truly unique—catering to those who want to <b class="text-lime-300">earn crypto</b>, or those who <b class="text-lime-300">just want to build</b> (or both!)</p>
+                        <p>We wanted to make this project accessible to everyone. Similar projects will charge hundreds or thousands of dollars to mint an assets. On Trraform, you can mint a Depth 0 plot for <b class="text-lime-300">15 USDC</b>.</p>
+                        <p>If crypto is not your thing, you can always explore the world at <b class="text-lime-300">anytime for free</b>.</p>
                     </div>
                 </div>
             {/if}
         </section>
         <section bind:this={s2}>
             {#if renderS2}
-                <div class="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 opacity-10">
-                    <img  transition:fly={{ y: 50 }} class="rotate-12 w-[50vw] max-w-screen-md min-w-[500px]" src="eth.svg" alt="eth">
-                </div>
                 <div class="accent-container"> 
                     <div class="accent-circle-container">
                         <div transition:fade={{ duration: 200 }} class="accent-circle outline-blue-500"></div>

@@ -21,13 +21,13 @@
             
     <!-- HTML Meta Tags -->
     <title>Trraform Editor</title>
-    <meta name="description" content="Trraform Editor version 1.0 out now!">
+    <meta name="description" content="Trraform editor version 1.0 out now!">
 
     <!-- Facebook Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://trraform.com/editor">
     <meta property="og:title" content="Trraform Editor">
-    <meta property="og:description" content="Trraform Editor version 1.0 out now!">
+    <meta property="og:description" content="Trraform editor version 1.0 out now!">
     <meta property="og:image" content="https://trraform.com/editor.png">
 
     <!-- Twitter Meta Tags -->
@@ -35,7 +35,7 @@
     <meta property="twitter:domain" content="trraform.com">
     <meta property="twitter:url" content="https://trraform.com/editor">
     <meta name="twitter:title" content="Trraform Editor">
-    <meta name="twitter:description" content="Trraform Editor version 1.0 out now!">
+    <meta name="twitter:description" content="Trraform editor version 1.0 out now!">
     <meta name="twitter:image" content="https://trraform.com/editor.png">
 
 </svelte:head>

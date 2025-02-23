@@ -234,7 +234,8 @@ export default class WalletConnection {
 
         return await walletCli.signMessage({
             message: message,
-            account: addresses[addressIndex]
+            account: addresses[addressIndex],
+            prefix: true
         })
     
     }

@@ -11,15 +11,14 @@
     import WalletConnection from "$lib/main/walletConnection"
     import Tip from "$lib/common/components/tip.svelte"
     import isURL from "validator/lib/isURL"
-    import { formatEther } from "viem"
     import { MAX_DEPTH } from "../../../common/constants";
     
     export let editingPlot
 
     let buildInput
     let depth = 0
-    let id, imgUrl, name = "", desc = "", link = "", linkLabel = "", origSmp, smp = 0, buildData = null
-    let errors = [], changed = false, smpChanged = false, validUrl, validSmp
+    let id, imgUrl, name = "", desc = "", link = "", linkLabel = "", buildData = null
+    let errors = [], changed = false, validUrl
 
     onMount( async () => {
 
@@ -33,8 +32,6 @@
         linkLabel = editingPlot.linkLabel
         buildData = editingPlot.buildData
         imgUrl = await editingPlot.getImgUrl()
-
-        smp = origSmp = formatEther(await WalletConnection.getSmp(editingPlot.id))
 
         $loadScreenOpacity = 0
 
@@ -156,10 +153,9 @@
 
     $:{
 
-        smpChanged = smp != origSmp
         changed = name !== editingPlot.name || desc !== editingPlot.desc || link !== editingPlot.link || linkLabel !== editingPlot.linkLabel || buildData !== editingPlot.buildData
         errors = []
-        validUrl = validSmp = true
+        validUrl = true
 
         if(link != ""){
 
@@ -179,31 +175,6 @@
 
         }
 
-        if(depth < MAX_DEPTH && origSmp){
-
-            if(smp < MIN_SMP){
-
-                errors.push(`*Subplot mint price must be at least ${MIN_SMP} ETH.`)
-                validSmp = false
-
-            } else if (smp > MAX_SMP){
-
-                errors.push(`*Subplot mint price cannot exceed ${MAX_SMP} ETH.`)
-                validSmp = false
-
-            }
-
-        }
-
-    }
-
-    function blurSmpInput(){
-
-        if(!smp)
-
-            smp = origSmp
-
-
     }
 
     async function save(){
@@ -211,59 +182,43 @@
         try {
             
             $loadScreenOpacity = 50
+            
+            const message = "Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information."
+            const signature = await WalletConnection.getSignature(message)
 
-            if(smpChanged){
+            const form = new FormData()
+            form.append("plotId", editingPlot.id.string())
+            form.append("message", message)
+            form.append("signature", signature)
+            form.append("name", name)
+            form.append("desc", desc)
+            form.append("link", link)
+            form.append("linkLabel", linkLabel)
+            form.append("buildData", new Blob([buildData]))
 
-                await WalletConnection.setSmp(editingPlot.id, smp)
-                origSmp = smp
-                smpChanged = false
+            // if(buildData !== editingPlot.buildData){
 
-            }
+            //     const p = preprocessPNG(await MyPlot.getMesh(buildData))
+            //     payload.append("png", new Blob([p]))
 
-            if(changed){
+            // }
+            
+            //update
+            const res = await fetch("http://localhost:8080/update-plot", { 
+                method: "POST",
+                body: form
+            })
 
-                const payload = new FormData()
-                const encoded = encodePlotData({
-                    name, 
-                    desc, 
-                    link, 
-                    linkLabel, 
-                    buildData
-                })
-                payload.append("plotData", new Blob([encoded]))
+            if(!res.ok)
 
-                if(buildData !== editingPlot.buildData){
-
-                    const p = preprocessPNG(await MyPlot.getMesh(buildData))
-                    payload.append("png", new Blob([p]))
-
-                }
-
-                const timestamp = Date.now()
-                const message = `Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information.\n\ntimestamp: `
-                const signatureMsg = `${message}${new Date(timestamp).toISOString()}`
-                const signature = await WalletConnection.getSignature(signatureMsg)
-
-                payload.append("signedMessage", new Blob([JSON.stringify({ message, timestamp, signature })]))
+                throw new Error("Api error")
                 
-                //update
-                const res = await fetch(`/api/update-plot?plotId=${editingPlot.id.string()}`, { 
-                    method: "POST",
-                    body: payload, 
-                })
-
-                if(!res.ok)
-
-                    throw new Error("Api error")
-                    
-                editingPlot.name = name
-                editingPlot.desc = desc
-                editingPlot.link = link
-                editingPlot.linkLabel = linkLabel
-                editingPlot.buildData = buildData
-                editingPlot.imgUrl = imgUrl
-
-            }
+            editingPlot.name = name
+            editingPlot.desc = desc
+            editingPlot.link = link
+            editingPlot.linkLabel = linkLabel
+            editingPlot.buildData = buildData
+            editingPlot.imgUrl = imgUrl
 
             editingPlot = null
 
@@ -324,10 +279,9 @@
                             <Tip class="bottom-0 right-0 -translate-y-4" text="You recieve 70% of the value you set when a subplot is minted. Changing this incurs a gas fee. This value has a maximum precision of 18 decimals."/>
                         </div>
                     </div>
-                    <input bind:value={smp} on:blur={blurSmpInput} type="number" class="block w-full hide-number-arrows {validSmp ? "outline-zinc-800" : "outline-red-600"}" maxlength="6" placeholder="Ether">
                 </div>
             </div>
-            <button on:click={save} class="mt-1 button0 { ( (changed || smpChanged) && validSmp && validUrl ) ? "pointer-events-auto" : "pointer-events-none opacity-50" }">Save</button>
+            <button on:click={save} class="mt-1 button0 { changed && validUrl ? "pointer-events-auto" : "pointer-events-none opacity-50" }">Save</button>
         </div>
         <ul class="w-full text-sm">
             <li class="text-zinc-300">*After updating, make sure to refresh this plot's metadata on any marketplaces where you've listed it.</li>

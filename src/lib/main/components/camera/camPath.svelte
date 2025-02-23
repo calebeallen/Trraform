@@ -67,7 +67,7 @@
 
         points.push({
             pos: refs.camera.position.clone(),
-            fov: 105,
+            fov: 135,
             velocity: 1,
             deleted: false
         })
@@ -78,29 +78,29 @@
 
     }
     function generateUniformKnotVector(degree, numControlPoints) {
-  // 'n' is the index of the last control point, so there are (n + 1) control points in total.
-  const n = numControlPoints - 1;
-  
-  // The knot vector length is (n + p + 2), but we use 0-based indexing, so let m = n + p + 1.
-  const m = n + degree + 1;
-  
-  const knotVector = [];
+        // 'n' is the index of the last control point, so there are (n + 1) control points in total.
+        const n = numControlPoints - 1;
+        
+        // The knot vector length is (n + p + 2), but we use 0-based indexing, so let m = n + p + 1.
+        const m = n + degree + 1;
+        
+        const knotVector = [];
 
-  for (let i = 0; i <= m; i++) {
-    if (i <= degree) {
-      // First 'degree + 1' knots are 0.
-      knotVector.push(0);
-    } else if (i >= m - degree) {
-      // Last 'degree + 1' knots are 1.
-      knotVector.push(1);
-    } else {
-      // Distribute remaining knots uniformly between 0 and 1.
-      knotVector.push((i - degree) / (m - 2 * degree));
+        for (let i = 0; i <= m; i++) {
+            if (i <= degree) {
+            // First 'degree + 1' knots are 0.
+            knotVector.push(0);
+            } else if (i >= m - degree) {
+            // Last 'degree + 1' knots are 1.
+            knotVector.push(1);
+            } else {
+            // Distribute remaining knots uniformly between 0 and 1.
+            knotVector.push((i - degree) / (m - 2 * degree));
+            }
+        }
+        
+        return knotVector;
     }
-  }
-  
-  return knotVector;
-}
 
     function update(){
 
@@ -190,10 +190,10 @@
             // // Smoothly interpolate rotation using SLERP
             // refs.camera.quaternion.slerp(newQuaternion, 0.1);
 
-            const lookat = new Vector3(67.38699765702198, 71.57373563780212, 87.76657487890198)
+            const lookat = new Vector3(71.07187222036504, 68.12406702750273, 100.42262270565995)
 
             refs.camera.position.copy(position)
-            refs.camera.lookAt(tangent)
+            refs.camera.lookAt(lookat)
             refs.camera.updateSphere()
 
             return t

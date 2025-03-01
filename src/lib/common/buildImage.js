@@ -493,7 +493,7 @@ function createPNG(p, d){
             const y1 = Math.floor(v2.y * r) - yMin
 
             const dx = Math.abs(x1 - x)
-            const dy = Math.abs(y1 - y)
+            const dy = Math.abs(y1 - y) 
             const sx = (x < x1) ? 1 : -1
             const sy = (y < y1) ? 1 : -1
 

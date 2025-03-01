@@ -11,14 +11,13 @@
     import WalletConnection from "$lib/main/walletConnection"
     import Tip from "$lib/common/components/tip.svelte"
     import isURL from "validator/lib/isURL"
-    import { MAX_DEPTH } from "../../../common/constants";
     
     export let editingPlot
 
     let buildInput
     let depth = 0
     let id, imgUrl, name = "", desc = "", link = "", linkLabel = "", buildData = null
-    let errors = [], changed = false, validUrl
+    let changed = false, validUrl, urlErrorMsg = ""
 
     onMount( async () => {
 
@@ -154,21 +153,21 @@
     $:{
 
         changed = name !== editingPlot.name || desc !== editingPlot.desc || link !== editingPlot.link || linkLabel !== editingPlot.linkLabel || buildData !== editingPlot.buildData
-        errors = []
+        urlErrorMsg = ""
         validUrl = true
 
         if(link != ""){
 
             if (!isURL(link)){
 
-                errors.push("*Invalid url")
+                urlErrorMsg = "*Invalid url"
                 validUrl = false
 
             }
             
             if (link.length > LINK_FIELD_MAXLEN) {
 
-                errors.push(`*Url cannot exceed ${LINK_FIELD_MAXLEN} characters.`)
+                urlErrorMsg = `*Url cannot exceed ${LINK_FIELD_MAXLEN} characters.`
                 validUrl = false
 
             }
@@ -198,8 +197,8 @@
 
             // if(buildData !== editingPlot.buildData){
 
-            //     const p = preprocessPNG(await MyPlot.getMesh(buildData))
-            //     payload.append("png", new Blob([p]))
+            const p = preprocessPNG(await MyPlot.getMesh(buildData))
+            form.append("buildImageData", new Blob([p]))
 
             // }
             
@@ -261,34 +260,21 @@
                 <textarea bind:value={desc} class="w-full hide-scrollbar outline-zinc-800" rows="3" maxlength={DESC_FIELD_MAXLEN} placeholder="Description"></textarea>
             </div>
             <div>
-                <h2 class="inline text-sm">Link</h2>
+                <div class="flex items-center gap-2">
+                    <h2 class="inline text-sm">Link</h2>
+                    <div class="text-xs text-red-500">{urlErrorMsg}</div>
+                </div>
                 <input bind:value={link} class="w-full {validUrl ? "outline-zinc-800" : "outline-red-500"}" type="text" maxlength={LINK_FIELD_MAXLEN + 1} placeholder="url">
             </div>
-            <div class="flex items-baseline gap-3">
-                <div class="w-1/2">
-                    <div class="flex items-center gap-1">
-                        <h2 class="inline text-sm">Link Label</h2>
-                        <Tip class="bottom-0 right-0 -translate-y-4" text="Display you link as text instead of a as a url."/> 
-                    </div>
-                    <input bind:value={linkLabel} type="text" class="block w-full hide-number-arrows outline-zinc-800" maxlength={LINK_LABEL_FIELD_MAXLEN} placeholder="ex. My Website">
+            <div>
+                <div class="flex items-center gap-1">
+                    <h2 class="inline text-sm">Link label</h2>
+                    <Tip class="bottom-0 left-0 translate-x-4" text="Display your link to users as custom text instead of a url."/> 
                 </div>
-                <div class="w-1/2 {depth < 2 ? "" : "opacity-50 pointer-events-none select-none"}">
-                    <div class="items-baseline gap-1">
-                        <div class="flex items-center gap-1">
-                            <h2 class="inline text-sm">Subplot Mint Price (ETH)</h2>
-                            <Tip class="bottom-0 right-0 -translate-y-4" text="You recieve 70% of the value you set when a subplot is minted. Changing this incurs a gas fee. This value has a maximum precision of 18 decimals."/>
-                        </div>
-                    </div>
-                </div>
+                <input bind:value={linkLabel} class="w-full outline-zinc-800" type="text" maxlength={LINK_LABEL_FIELD_MAXLEN} placeholder="ex. My website">
             </div>
             <button on:click={save} class="mt-1 button0 { changed && validUrl ? "pointer-events-auto" : "pointer-events-none opacity-50" }">Save</button>
         </div>
-        <ul class="w-full text-sm">
-            <li class="text-zinc-300">*After updating, make sure to refresh this plot's metadata on any marketplaces where you've listed it.</li>
-            {#each errors as error}
-                <li class="text-red-500">{error}</li>
-            {/each}
-        </ul>
     </div>
 </div>
 

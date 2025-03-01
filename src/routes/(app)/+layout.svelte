@@ -24,12 +24,17 @@
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
     import { pushNotification } from "$lib/common/utils"
+    import MyPlots from "$lib/main/components/myPlots/MyPlots.svelte";
+    import FindPlotsBar from "$lib/main/components/findPlotsBar.svelte";
+    import UtilBar from "$lib/main/components/utilBar.svelte"
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
     let t1 = 0
     let tagData = [], tags = {}, tagBounds = []
     let ismousedown = false
+
+    let showMyPlots = false
 
     onMount(async () => {
         
@@ -603,12 +608,23 @@
 
 <svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
-<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$page?.route?.id === "/(app)/myplots" ? "blur-xl" : ""}">
-    <canvas bind:this={glCanvas} class="absolute top-0 left-0 w-full h-full"></canvas>
-    <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="absolute top-0 left-0 w-full h-full"></canvas>
+<div>
+    <div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen">
+        <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
+        <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="fixed top-0 left-0 w-full h-full"></canvas>
+    </div>
+    <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2">
+        <img class="h-8 mx-2" src="logo.svg" alt="">
+        <FindPlotsBar/>
+        <UtilBar/>
+    </div>
 </div>
 
 <slot/>
+
+{#if showMyPlots}
+    <MyPlots on:close={() => showMyPlots = false}/>
+{/if}
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>

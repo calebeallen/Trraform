@@ -1,5 +1,5 @@
 
-import { D0_PLOT_COUNT, MAX_DEPTH, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "./constants"
+import { D0_PLOT_COUNT, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "./constants"
 
 const D0_BIT_MASK = 0xFFFF
 const DN_BIT_MASK = 0xFF
@@ -10,7 +10,7 @@ export default class PlotId {
 
         const id = parseInt(hexStr, 16)
 
-        if(isNaN(id) || id === 0)
+        if(isNaN(id) || id === 0 || id >= 2**32)
 
             throw new Error("Invalid plot id")
 
@@ -20,7 +20,7 @@ export default class PlotId {
 
     static depth(id){
 
-        id >>= 16
+        id >>>= 16
 
         let depth = 0
 
@@ -28,7 +28,7 @@ export default class PlotId {
 
             depth++
 
-            id >>= 8
+            id >>>= 8
 
         }
 
@@ -40,11 +40,7 @@ export default class PlotId {
 
         try {
 
-            const depth = this.depth()
-
-            if(depth > MAX_DEPTH)
-
-                return false
+            const depth = this.depth(id)
 
             //verify depth 0 plot id
             let idCopy = id & 0xffff

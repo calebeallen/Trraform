@@ -6,22 +6,18 @@
     //flag blue dot menu options
 
     import { page } from "$app/stores"
-    import { goto } from "$app/navigation"
     import { onMount } from "svelte";
-    import { insideOf, refs, newPlots, isMobileBrowser } from "$lib/main/store"
+    import { insideOf, refs, isMobileBrowser } from "$lib/main/store"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import ReportModal from "$lib/main/components/reportModal.svelte";
 
     import { confetti } from "$lib/main/decoration"
     import WalletConnection from "$lib/main/walletConnection";
-    import MenuOption from "./menuOption.svelte";
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
     import MintModal from "$lib/main/components/mintModal.svelte";
-    import Search from "$lib/main/components/search.svelte"
 
     export let data 
-    let menuExpanded = false
     let lastTouches = []
     
     let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showMintModal = false
@@ -305,24 +301,6 @@
     on:keyup={keyup}
 />
 
-<header class="fixed top-0 left-0 flex items-baseline justify-between w-full gap-3 p-4 pointer-events-none select-none">
-    <a class="flex-shrink-0 block opacity-50 pointer-events-auto w-7 aspect-square" href="/">
-        <img src="/logo.svg" alt="Logo">
-    </a>
-    <div class="-translate-y-5 pointer-events-auto">
-        <Search bind:searchFocused/>
-    </div>
-    <div class="relative h-6 pointer-events-auto sm:h-7">
-        <MenuOption bind:toggle={menuExpanded} on:click={() => menuExpanded = !menuExpanded} newBinding={newPlots} src="/menu.svg" alt="menu" tag="Menu"/>
-        <div class="{menuExpanded ? "" : "translate-x-20"} transition-transform mt-1.5 space-y-1.5">
-            <MenuOption on:click={() => goto("/")} src="/house.svg" alt="home" tag="Home"/>
-            {#if !$isMobileBrowser}
-                <MenuOption on:click={() => goto("/myplots")} newBinding={newPlots} src="/plot1.svg" alt="my plots" tag="My Plots"/>
-            {/if}
-            <MenuOption on:click={() => showSettingsModal = true} src="/settings.svg" alt="settings" tag="Settings"/>
-        </div>
-    </div>
-</header>
 
 <div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
     {#await profile}

@@ -69,7 +69,7 @@
         </div>
         <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
         <div class="absolute bottom-0 flex flex-col w-full gap-0.5 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlotWidgetOption on:click={() => goto(`/world?plotId=${plotData.id}`)} src="/navigate.svg" alt="navigate" text="Go to plot"/>
+            <PlotWidgetOption on:click={() => goto(`/world?plotId=${plotData.id}`)} src="/navigate.svg" alt="navigate" text="Go to"/>
             {#if !plotData.banned}
                 <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
             {/if} 

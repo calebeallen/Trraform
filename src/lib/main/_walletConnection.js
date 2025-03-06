@@ -1,0 +1,293 @@
+import { coinbaseWallet } from "@wagmi/connectors"
+import { createConfig, getConnectors, getWalletClient, getPublicClient } from "@wagmi/core"
+import { polygon } from "@wagmi/core/chains"
+import { parseAbi } from 'abitype'
+import { parseEther, http } from "viem"
+import { DATA_CONTRACT_ADDRESS } from "../common/constants"
+import { walletAddress } from "./store"
+import QuoterV2 from '@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json'
+import PlotId from "../common/plotId"
+import MyPlot from "./plot/myPlot"
+
+const PROXY_CONTRACT_ADDRESS = "0xc40f6001C9AdE096d208726EAbE9E58e1970a126"
+const IMPLEMENTATION_CONTRACT_ADDRESS = "0x07cd0297090738bca7dDB6043e18210d9e66c627"
+const UNISWAP_QUOTER_CONTRACT_ADDRESS = "0x61fFE014bA17989E743c5F6cB21bF9697530B21e"
+const WMATIC_CONTRACT_ADDRESS = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"
+const USDC_CONTRACT_ADDRESS = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
+
+const IMPLEMENTATION_CONTRACT_ABI = parseAbi([
+    "function balanceOf(address owner) public view returns (uint256)",
+    "function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256)",
+    "function ownerOf(uint256 tokenId) public view returns (address)",
+    "function tempLock(uint tokenId) public view returns (uint)"
+])
+
+const MINT_PRICE = 10
+const PARENT_MINT_PRICE = 6
+
+const wagmiConfig = createConfig({
+    chains: [polygon],
+    connectors: [
+        coinbaseWallet({
+            appName: "Trraform",
+            reloadOnDisconnect: false,
+        })
+    ],
+    transports: {
+        [polygon.id]: http()
+    },
+})
+
+const publicCli = getPublicClient(wagmiConfig)
+
+export default class WalletConnection { 
+
+    static async getTempLock(plotId){
+    
+        const tokenId = plotId.bigInt()
+
+        const lockedTimeBigInt = await publicCli.readContract({
+            address: IMPLEMENTATION_CONTRACT_ADDRESS,
+            abi: IMPLEMENTATION_CONTRACT_ABI,
+            functionName: 'tempLock',
+            args: [tokenId]
+        })
+
+        const lockedTime = parseInt(lockedTimeBigInt.toString())
+        const currentTime = Math.floor(Date.now() / 1000)
+
+        return lockedTime - currentTime
+
+    }
+
+    static async getOwnerOf(plotId){
+    
+        try {
+
+            const tokenId = plotId.bigInt()
+            const owner = await publicCli.readContract({
+                address: IMPLEMENTATION_CONTRACT_ADDRESS,
+                abi: IMPLEMENTATION_CONTRACT_ABI,
+                functionName: 'ownerOf',
+                args: [tokenId]
+            })
+
+            return owner
+
+        } catch(e){
+
+            return null
+
+        }
+
+    }
+
+    static async getQuotePOL(isParentOwner = false){
+
+        const params = {
+            tokenIn: WMATIC_CONTRACT_ADDRESS,
+            tokenOut: USDC_CONTRACT_ADDRESS,
+            fee: 500,
+            amount: (isParentOwner ? PARENT_MINT_PRICE : MINT_PRICE) * 1e6,
+            sqrtPriceLimitX96: 0
+        };
+
+        const out = await publicCli.readContract({
+            address: UNISWAP_QUOTER_CONTRACT_ADDRESS,
+            abi: QuoterV2.abi,
+            functionName: "quoteExactOutputSingle",
+            args: [params],
+        })
+
+        return out[0]
+
+    }
+
+    static getQuoteUSDC(isParentOwner = false){
+
+        return isParentOwner ? PARENT_MINT_PRICE : MINT_PRICE
+
+    }
+
+    static getConnectors() {
+    
+        const connectors = getConnectors(wagmiConfig)
+        const cs = []
+
+        for (const c of connectors) {
+
+            const connector = {
+                id: c.id,
+                name: c.name,
+                isLastConnected: c.id === localStorage.getItem("last-connector"),
+                connector: c
+            }
+
+            if (c.id === "coinbaseWalletSDK")
+
+                connector.icon = "/coinbase.svg"
+            
+            else
+
+                connector.icon = c.icon || null
+
+            cs.push(connector)
+
+        }
+
+        return cs
+
+    }
+
+    static async txSuccess(hash){
+
+        const { publicCli } = this.connection
+        const receipt = await publicCli.waitForTransactionReceipt({ hash })
+
+        if(receipt.status !== "success")
+
+            throw new Error("Transaction failed")
+
+    }
+
+    constructor(){
+
+        this.myPlots = []
+        this.myPlotsCount = 0
+        this.myPlotsIterator = 0
+        this.walletCli = null
+        this.connector = null
+        this.connected = false
+
+    }
+
+   
+    async _connect(connector, address){
+
+        this.walletClient = await getWalletClient(wagmiConfig, { connector })
+        this.connector = connector
+        this.address = address
+        this.connected = true
+
+        const count = await publicCli.readContract({
+            address: IMPLEMENTATION_CONTRACT_ADDRESS,
+            abi: IMPLEMENTATION_CONTRACT_ABI,
+            functionName: 'balanceOf',
+            args: [this.address]
+        })
+
+        this.myPlotsCount = Number(count)
+        this.myPlotsIterator = 0
+
+        localStorage.setItem("last-connector", connector.id)
+
+    }
+
+
+    async connect(connector) {
+
+        try {
+
+            await connector.connect()
+            const accounts = await connector.getAccounts()
+
+            await this._connect(connector, accounts[0])
+            return true
+
+        } catch(e) {
+
+            return false
+
+        }
+
+    }
+
+    async reconnect() {
+
+        const connectors = getConnectors(wagmiConfig)
+        const lastConnected = localStorage.getItem("last-connector")
+
+        //loop through connectors to check for last connected
+        for (const connector of connectors) 
+
+            //if connector still exist
+            if (connector.id === lastConnected) {
+
+                try {
+
+                    //get connected accounts
+                    const accounts = await connector.getAccounts()
+
+                    //if none connected return
+                    if (!accounts.length) 
+
+                        return false
+
+                    await this._connect(connector, accounts[0])
+
+                    return true
+
+                } catch (e) {
+
+                    return false
+
+                }
+
+            }
+
+        return false
+
+    }
+
+    async disconnect() {
+
+        try{
+
+            await this.connector.disconnect()
+            this.myPlots = []
+            this.myPlotsCount = 0
+            this.myPlotsIterator = 0
+            this.walletCli = null
+            this.connector = null
+            this.connected = false
+
+            return true
+
+        } catch {
+
+            return false
+
+        }
+
+    }
+
+    async loadMyPlots(range){
+
+        const promises = []
+
+        range = Math.min(range, this.myPlotsCount)
+
+        while(this.myPlotsIterator < range){
+
+            const tokenId = publicCli.readContract({
+                address: IMPLEMENTATION_CONTRACT_ADDRESS,
+                abi: IMPLEMENTATION_CONTRACT_ABI,
+                functionName: 'tokenOfOwnerByIndex',
+                args: [this.address, BigInt(this.myPlotsIterator)]
+            }).then(tokenId => {
+
+                const plotId = new PlotId(Number(tokenId))
+                this.myPlots.push(new MyPlot(plotId))
+
+            })
+
+            promises.push(tokenId)
+            this.myPlotsIterator++
+
+        }
+
+        await Promise.all(promises)
+
+    }
+
+}

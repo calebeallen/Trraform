@@ -1,12 +1,12 @@
 
 import { writable } from "svelte/store"
 
-const myPlots = writable([])
 const walletAddress = writable(null)
 const walletConnection = writable(null)
-const isMobileBrowser = writable(false)
-const showSettingsModal = writable(false)
 const showConnectWalletModal = writable(false)
+const isMobileBrowser = writable(false)
+
+const showSettingsModal = writable(false)
 const showConnectErrorModal = writable(false)
 const insideOf = writable(null)
 const notification = writable([])
@@ -47,4 +47,4 @@ const defaultSettings = {
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
 
-export { defaultSettings, settings, myPlots, walletConnection, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, newPlots, loadScreenOpacity }
+export { defaultSettings, settings, walletConnection, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, newPlots, loadScreenOpacity }

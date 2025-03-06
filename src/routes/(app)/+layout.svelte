@@ -18,7 +18,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal } from "$lib/main/store"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
@@ -27,6 +27,9 @@
     import MyPlots from "$lib/main/components/myPlots/MyPlots.svelte";
     import FindPlotsBar from "$lib/main/components/findPlotsBar.svelte";
     import UtilBar from "$lib/main/components/utilBar.svelte"
+    import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
+    import WalletConnection from "$lib/main/_walletConnection"
+    import { walletConnection } from "../../lib/main/store";
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -84,6 +87,13 @@
         refs.renderer.setAnimationLoop(renderLoop)
         refs.renderer.render(refs.scene, refs.camera)
         updateBg()
+
+        //reconnect wallet
+        const connection = new WalletConnection()
+        if(await connection.reconnect())
+
+            $walletConnection = connection
+
 
         $loadScreenOpacity = 0
 
@@ -608,19 +618,26 @@
 
 <svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
-<div>
-    <div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen">
-        <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
-        <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="fixed top-0 left-0 w-full h-full"></canvas>
+<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {showMyPlots ? "blur-2xl" : ""}">
+    <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
+    <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="fixed top-0 left-0 w-full h-full"></canvas>
+</div>
+<div class="{showMyPlots ? "blur-2xl" : ""}">
+    <a class="fixed mx-2 opacity-50 w-7 h-7 top-4 left-2"  href="/">
+        <img src="logo.svg" alt="">
+    </a>
+    <div class="fixed -translate-x-1/2 left-1/2 top-2">
+        <FindPlotsBar/> 
     </div>
-    <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2">
-        <img class="h-8 mx-2" src="logo.svg" alt="">
-        <FindPlotsBar/>
-        <UtilBar/>
+    <div class="fixed top-2 right-2">
+        <UtilBar on:openMyPlots={() => showMyPlots = true} />
     </div>
+    <slot/>
 </div>
 
-<slot/>
+{#if $showConnectWalletModal}
+    <ConnectWalletModal on:close={() => $showConnectWalletModal = false}/>
+{/if}
 
 {#if showMyPlots}
     <MyPlots on:close={() => showMyPlots = false}/>

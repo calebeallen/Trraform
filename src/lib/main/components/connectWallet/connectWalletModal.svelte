@@ -5,8 +5,8 @@
     import ConnectOption from "./connectOption.svelte";
     import { onMount, createEventDispatcher } from "svelte";
     import { pushNotification } from "../../../common/utils";
-    import { notification } from "../../../main/store";
-    import WalletConnection from "../../walletConnection"
+    import { notification, walletConnection } from "../../../main/store";
+    import WalletConnection from "$lib/main/_walletConnection"
 
     const dispatchEvent = createEventDispatcher()
 
@@ -28,17 +28,25 @@
         //trigger awaiting connection ui
         connectingId = id
         
-        if( await WalletConnection.connect(connector.connector) ){
+        const connection = new WalletConnection()
+
+        if( await connection.connect(connector.connector) ){
 
             //trigger connected ui
             connectedId = id
-            setTimeout(() => dispatchEvent("success"), 500)
+            setTimeout(() => dispatchEvent("close"), 500)
+            $walletConnection = connection
+
+            const address = $walletConnection.address.substring(0,8)
+
+            pushNotification(notification, "Wallet connected!", `Wallet ${address}... connected successfully.`)
+
 
         } else {
 
             //trigger connection failed ui
             connectedId = connectingId = null
-            pushNotification(notification,)
+            pushNotification(notification, "Wallet connection error", "Could not connect wallet")
 
         }
        
@@ -46,7 +54,7 @@
 
 </script>
 
-<Modal class="max-w-sm" header="Connect Wallet" on:close={() => dispatchEvent("cancel")}>
+<Modal class="max-w-sm" header="Connect a Wallet" on:close>
     <div class="flex flex-col w-full gap-4">
         <div class="flex items-center gap-2 justify-evenly">
             <div class="flex-1 h-px bg-zinc-600"></div>

@@ -2,12 +2,14 @@
 <script>
 
     import { onMount } from "svelte"
-    import { myPlots, newPlots } from "$lib/main/store"
+    import { newPlots } from "$lib/main/store"
     import WalletConnection from "$lib/main/walletConnection"
     import PlotWidget from "$lib/main/components/myPlots/plotWidget.svelte"
+    import { walletConnection } from "../../store";
 
     export let editingPlot
     let container
+    let plots = []
 
     onMount( async () => {
 
@@ -22,7 +24,8 @@
         const fitY = Math.ceil(h / widgetH)
 
         //load what can fit or 5 rows
-        await WalletConnection.loadMyPlots(Math.min(fitX * fitY, fitX * 5))
+        await $walletConnection.loadMyPlots(Math.min(fitX * fitY, fitX * 5))
+        plots = $walletConnection.myPlots
 
         $newPlots = false
 
@@ -35,17 +38,18 @@
 
         if(scrollTop + clientHeight + deltaY >= scrollHeight - 240){
 
-            if($myPlots.length >= WalletConnection.plotIterator){
+            if(plots.length >= $walletConnection.plotIterator){
 
                 const w = clientWidth + 12
                 const widgetW = 252
                 const fitX = Math.floor(w / widgetW)
 
                 //load 2 more rows + the rest of the remaining row (if there is anything)
-                const fillRow = Math.ceil(WalletConnection.plotIterator / fitX) * fitX
+                const fillRow = Math.ceil($walletConnection.plotIterator / fitX) * fitX
                 const range = fillRow + fitX * 2
 
-                WalletConnection.loadMyPlots(range)
+                $walletConnection.loadMyPlots(range)
+                plots = $walletConnection.myPlots
 
             }
 
@@ -56,9 +60,9 @@
 </script>
 
 <div bind:this={container} on:mousewheel|passive={onmousewheel} class="w-full h-full overflow-y-scroll hide-scrollbar">
-    {#if WalletConnection.plotCount > 0}
+    {#if $walletConnection.plotCount > 0}
         <div class="flex flex-wrap gap-3 py-3 pb-24 mx-auto w-60 sm:w-full md:max-w-[744px] sm:max-w-[492px]">
-            {#each $myPlots as plot}
+            {#each [] as plot}
                 <PlotWidget bind:editingPlot plot={plot}/>
             {/each}
         </div>

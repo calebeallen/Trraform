@@ -5,7 +5,7 @@ import { mainnet, sepolia } from "@wagmi/core/chains"
 import { parseAbi } from 'abitype'
 import { parseEther, http } from "viem"
 import { CHAIN, DATA_CONTRACT_ADDRESS, WRAPPER_CONTRACT_ADDRESS, D0_MINT_PRICE, DEFAULT_SMP, MAX_DEPTH } from "../common/constants"
-import { myPlots, walletAddress } from "./store"
+import { walletAddress } from "./store"
 import PlotId from "../common/plotId"
 import MyPlot from "./plot/myPlot"
 
@@ -89,7 +89,7 @@ export default class WalletConnection {
         this.connection.addressIndex = index
         localStorage.setItem("last-address", index)
         walletAddress.set(this.connection.addresses[index])
-        myPlots.set([])
+        // myPlots.set([])
         this.plotCount = await this.getPlotCount()
         this.plotIterator = 0
 
@@ -166,7 +166,7 @@ export default class WalletConnection {
             await this.connection.connector.disconnect()
             this.connection = null
 
-            myPlots.set([])
+            // myPlots.set([])
             this.plotIterator = this.plotCount = 0
 
             this.isConnected = false
@@ -325,10 +325,10 @@ export default class WalletConnection {
                 const plotId = new PlotId(Number(tokenId))
                 const myPlot = new MyPlot(plotId)
 
-                myPlots.update(arr => {
-                    arr.push(myPlot)
-                    return arr
-                })
+                // myPlots.update(arr => {
+                //     arr.push(myPlot)
+                //     return arr
+                // })
 
             })
 

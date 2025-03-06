@@ -20,6 +20,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@uniswap/sdk-core": "^7.7.0",
+		"@uniswap/v4-sdk": "^1.21.0",
 		"@wagmi/connectors": "^5.7.1",
 		"@wagmi/core": "^2.16.1",
 		"ethers": "^6.13.4",

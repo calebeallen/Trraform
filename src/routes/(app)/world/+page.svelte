@@ -8,19 +8,17 @@
     import { page } from "$app/stores"
     import { onMount } from "svelte";
     import { insideOf, refs, isMobileBrowser } from "$lib/main/store"
-    import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
-    import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import ReportModal from "$lib/main/components/reportModal.svelte";
 
     import { confetti } from "$lib/main/decoration"
     import WalletConnection from "$lib/main/walletConnection";
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
-    import MintModal from "$lib/main/components/mintModal.svelte";
+    import ClaimModal from "$lib/main/components/claimModal.svelte";
 
     export let data 
     let lastTouches = []
     
-    let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showMintModal = false
+    let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showClaimModal = false
     let reportPlotId = null, sharePlotId = null, mintPlot = null
     let profile = {}
     let showProfile = false
@@ -34,7 +32,7 @@
 
     function keydown(e){
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal || searchFocused)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showClaimModal || searchFocused)
 
             return
 
@@ -123,7 +121,7 @@
 
     function mousewheel(e){
         
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal || searchFocused)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showClaimModal || searchFocused)
 
             return
 
@@ -137,7 +135,7 @@
 
     function touchevent(e){ 
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showMintModal || searchFocused || refs.camera.update === refs.camera.standard)
+        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showClaimModal || searchFocused || refs.camera.update === refs.camera.standard)
 
             return
 
@@ -195,20 +193,6 @@
         }
 
         lastTouches = touches
-
-    }
-
-    async function prepMint(){
-
-        if (WalletConnection.isConnected || await WalletConnection.reconnect()) {
-
-            showConnectModal = false
-            mintPlot = $insideOf
-            showMintModal = true
-        
-        } else 
-
-            showConnectModal = true
 
     }
 
@@ -351,7 +335,7 @@
                 </a>
             {/if}
         {:else if !$isMobileBrowser}
-            <button class="w-full mt-1 button0" on:click={prepMint}>Mint</button>
+            <button class="w-full mt-1 button0" on:click={() => showClaimModal = true}>Claim</button>
         {/if}
     {/await}
 </div>
@@ -364,21 +348,8 @@
     <ReportModal bind:plotIdStr={reportPlotId} on:close={() => showReportModal = false}/>
 {/if}
 
-{#if showSettingsModal}
-    <SettingsModal on:close={() => showSettingsModal = false}/>
-{/if}
-
-{#if showConnectModal}
-    <ConnectWalletModal on:success={prepMint} on:cancel={() => showConnectModal = false}/>
-{/if}
-
-{#if showMintModal}
-    <MintModal bind:plot={mintPlot} on:close={() => showMintModal = false} on:success={e => {
-        const plot = e.detail
-        showMintModal = false
-        confetti(plot.pos, plot.parent.blockSize)
-        $insideOf = $insideOf
-    }}/>
+{#if showClaimModal}
+    <ClaimModal bind:plot={$insideOf} on:close={() => showClaimModal = false}/>
 {/if}
 
 <style lang="postcss">

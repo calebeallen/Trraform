@@ -30,7 +30,7 @@
 
     .button0{
 
-        @apply px-2 py-1 text-sm text-center transition-colors bg-blue-700 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-blue-600 enabled:active:bg-blue-700 focus:outline-none enabled:focus:bg-blue-600;
+        @apply px-2 py-1 text-sm text-center transition-colors bg-blue-700 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-blue-600 enabled:active:bg-blue-700 focus:outline-none enabled:focus:bg-blue-600 outline outline-1 outline-blue-600 font-semibold;
 
     }
 

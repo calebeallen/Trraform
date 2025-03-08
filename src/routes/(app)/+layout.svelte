@@ -27,6 +27,7 @@
     import MyPlots from "$lib/main/components/myPlots/MyPlots.svelte";
     import FindPlotsBar from "$lib/main/components/findPlotsBar.svelte";
     import UtilBar from "$lib/main/components/utilBar.svelte"
+    import HeaderBar from "$lib/main/components/headerBar.svelte"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import WalletConnection from "$lib/main/_walletConnection"
     import { walletConnection } from "../../lib/main/store";
@@ -37,7 +38,7 @@
     let tagData = [], tags = {}, tagBounds = []
     let ismousedown = false
 
-    let showMyPlots = false
+    let showMyPlots = false, showSettings = false
 
     onMount(async () => {
         
@@ -621,15 +622,12 @@
     <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
     <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="fixed top-0 left-0 w-full h-full"></canvas>
 </div>
-<div class="{showMyPlots ? "blur-2xl" : ""}">
-    <a class="fixed mx-2 opacity-50 w-7 h-7 top-4 left-2"  href="/">
-        <img src="logo.svg" alt="">
-    </a>
-    <div class="fixed -translate-x-1/2 left-1/2 top-2">
-        <FindPlotsBar/> 
-    </div>
-    <div class="fixed top-2 right-2">
-        <UtilBar on:openMyPlots={() => showMyPlots = true} />
+<div class="w-full {showMyPlots ? "blur-2xl" : ""}">
+    <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2 pointer-events-none">
+        <a class="flex-shrink-0 m-2 opacity-50 pointer-events-auto select-none w-7 h-7 focus:outline-none"  href="/">
+            <img src="logo.svg" alt="">
+        </a>
+        <HeaderBar bind:showMyPlots bind:showSettings/>
     </div>
     <slot/>
 </div>

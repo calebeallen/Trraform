@@ -71,7 +71,7 @@
             <div class="truncate max-w-20">{walletAddress}</div>
             <div class="absolute top-0 left-0 flex items-center justify-center w-full h-full overflow-hidden transition-opacity delay-100 bg-black rounded-lg opacity-0 bg-opacity-80 group-hover:opacity-100">
                 <div class="absolute top-0 left-0 z-0 w-full h-full -translate-x-1/2 bg-red-500 opacity-40" style="transform: translateX(calc((1 - {disconnectAnimationt}) * -100%));"></div>
-                <div class="absolute text-sm font-semibold">Disconnect</div>
+                <div class="absolute text-sm text-red-400">Disconnect</div>
             </div>
         </button>
         <button on:click={() => dispatch("openMyPlots")} class="transition-opacity opacity-50 w-7 h-7 hover:opacity-80">

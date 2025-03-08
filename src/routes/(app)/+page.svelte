@@ -8,6 +8,7 @@
 
         import { fly } from "svelte/transition"
         import { isMobileBrowser } from "$lib/main/store"
+        import Leaderboard from "$lib/main/components/leaderboard.svelte";
 
 
     </script>
@@ -37,8 +38,8 @@
     </svelte:head>
 
     <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full p-3 sm:p-5 sm:max-w-max">
-        <h1 class="sm:text-5xl text-4xl font-bold">Millions of Worlds</h1>
-        <h4 class="sm:text-base text-sm font-semibold mt-1">Powered by <b>Polygon</b></h4>
+        <h1 class="text-4xl font-bold sm:text-5xl">Millions of Worlds</h1>
+        <h4 class="mt-1 text-sm font-semibold sm:text-base">Powered by <b>Polygon</b></h4>
         <nav class="w-full mt-4 space-y-3">
             <a class="nav-option" href="/world">Explore</a>
             {#if !$isMobileBrowser}
@@ -47,11 +48,15 @@
         </nav>
     </div>
 
+    <div class="fixed hidden bottom-2 right-2 md:block">
+        <Leaderboard/>
+    </div>
+
     <style lang="postcss">
 
         .nav-option {
 
-            @apply hover:scale-[1.02] active:scale-100 cursor-pointer transition-transform block text-center sm:text-lg font-semibold w-full py-2.5 sm:py-3 bg-blue-700 outline-blue-500 outline outline-1 rounded-xl sm:rounded-2xl;
+            @apply hover:scale-[1.01] active:scale-100 cursor-pointer transition-transform block text-center sm:text-lg font-semibold w-full py-2.5 sm:py-3 bg-blue-700 outline-blue-500 outline outline-1 rounded-xl sm:rounded-2xl;
             
         }
 

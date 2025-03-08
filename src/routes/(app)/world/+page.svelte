@@ -9,6 +9,7 @@
     import { onMount } from "svelte";
     import { insideOf, refs, isMobileBrowser } from "$lib/main/store"
     import ReportModal from "$lib/main/components/reportModal.svelte";
+    import { setCookie, getCookie } from "$lib/common/cookie"
 
     import { confetti } from "$lib/main/decoration"
     import WalletConnection from "$lib/main/walletConnection";
@@ -24,9 +25,13 @@
     let showProfile = false
     let searchFocused
 
+    let canVote = false
+
     onMount(() => {
 
         cancelKeyEvent()
+
+        canVote = getCookie("voted") == ""
 
     })
 
@@ -245,6 +250,18 @@
 
     }
 
+    async function castVote(id){
+
+        if(getCookie("voted") == ""){
+
+            canVote = false
+            setCookie("voted", "true", 1)
+            await fetch(`http://localhost:8080/cast-vote?plotId=${id}`, { method: "POST" })
+
+        }
+
+    }
+
 </script>
 
 <svelte:head>
@@ -286,7 +303,7 @@
 />
 
 
-<div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1.5 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
+<div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
     {#await profile}
         <div class="w-full h-20 animate-pulse">
             <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
@@ -295,16 +312,16 @@
     {:then { id, minted, name, desc, link, linkLabel } }
         <div>
             <div class="flex items-center justify-between gap-1">
-                <h3 class="max-w-full break-all w-max">{name}</h3>
+                <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name}</h3>
                 <div class="select-none">
-                    <button on:click={refresh} class="relative w-4 h-4 select-none group">
+                    <button on:click={refresh} class="relative w-3.5 sm:w-4 select-none aspect-square group focus:outline-none">
                         <img src="/refresh.svg" alt="report">   
                         <span class="plot-option-tag">Refresh</span>
                     </button>
                     <button on:click={() => {
                         sharePlotId = id
                         showShareModal = true
-                    }} class="relative w-4 h-4 select-none group">
+                    }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
                         <img src="/share.svg" alt="report">   
                         <span class="plot-option-tag">Share</span>
                     </button>
@@ -312,15 +329,15 @@
                         <button on:click={() => {
                             reportPlotId = id
                             showReportModal = true
-                        }} class="relative w-4 h-4 select-none group">
+                        }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
                             <img src="/report.svg" alt="report">
                             <span class="plot-option-tag">Report</span>
                         </button>
                     {/if}
                 </div>
             </div>
-            <div class="text-xs opacity-70">id: {id}</div>
         </div>
+        <div class="text-xs opacity-70">id: {id}</div>
         {#if (!minted || desc || link) && !$isMobileBrowser}
             <div class="w-full h-px bg-zinc-800"></div>
         {/if}
@@ -334,8 +351,11 @@
                     <p>{linkLabel}</p>
                 </a>
             {/if}
+            {#if canVote}
+                <button class="button" on:click={() => castVote(id)}>Cast Vote</button>
+            {/if}
         {:else if !$isMobileBrowser}
-            <button class="w-full mt-1 button0" on:click={() => showClaimModal = true}>Claim</button>
+            <button class="button" on:click={() => showClaimModal = true}>Claim</button>
         {/if}
     {/await}
 </div>
@@ -362,13 +382,19 @@
 
     p {
 
-        @apply text-sm;
+        @apply text-xs sm:text-sm;
 
     }
 
     .plot-option-tag {
 
         @apply absolute text-xs font-semibold transition-opacity opacity-0 pointer-events-none select-none w-max bottom-0 -translate-x-1/2 -translate-y-full mb-0.5 left-1/2 group-hover:opacity-100;
+
+    }
+    
+    .button{
+
+        @apply mt-1 w-full px-2 py-1 text-xs sm:text-sm text-center transition-colors bg-blue-700 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none outline outline-1 outline-blue-600 focus:bg-blue-600 font-semibold;
 
     }
 

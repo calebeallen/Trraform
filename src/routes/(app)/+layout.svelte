@@ -94,7 +94,6 @@
 
             $walletConnection = connection
 
-
         $loadScreenOpacity = 0
 
     })

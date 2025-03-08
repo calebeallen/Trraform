@@ -5,6 +5,7 @@ const walletAddress = writable(null)
 const walletConnection = writable(null)
 const showConnectWalletModal = writable(false)
 const isMobileBrowser = writable(false)
+const dbConnection = writable(null)
 
 const showSettingsModal = writable(false)
 const showConnectErrorModal = writable(false)
@@ -47,4 +48,4 @@ const defaultSettings = {
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
 
-export { defaultSettings, settings, walletConnection, walletAddress, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, newPlots, loadScreenOpacity }
+export { defaultSettings, settings, walletConnection, walletAddress, dbConnection, refs, insideOf, isMobileBrowser, showSettingsModal, showConnectWalletModal, showConnectErrorModal, notification, newPlots, loadScreenOpacity }

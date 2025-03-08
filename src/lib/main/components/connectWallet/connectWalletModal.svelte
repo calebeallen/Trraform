@@ -47,7 +47,7 @@
             //trigger connection failed ui
             connectedId = connectingId = null
             pushNotification(notification, "Wallet connection error", "Could not connect wallet")
-
+            
         }
        
     }

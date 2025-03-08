@@ -3,7 +3,10 @@
 
     import { fly } from "svelte/transition";
     import { goto } from "$app/navigation"
+    import { dbConnection, notification } from "$lib/main/store";
     import PlotId from "$lib/common/plotId"
+    import DbConnection from "$lib/main/dbConnection"
+    import { pushNotification } from "$lib/common/utils";
 
     let plotSearchValue = "", showSearchResults = false, searchResult, searchContainer, searchResultsContainer
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
@@ -62,6 +65,25 @@
 
     }
 
+    async function findOpenPlot(){
+
+        if($dbConnection === null)
+
+            $dbConnection = new DbConnection()
+
+        const plotId = await $dbConnection.getAvailablePlot(selectedDepth)
+
+        if(plotId === null){
+
+            pushNotification(notification, "No plots found", `No available plots found at depth ${selectedDepth}.`)
+            return
+
+        }
+
+        goto(`/world?plotId=${plotId.string()}`)
+
+    }
+
 </script>
 
 <svelte:window on:mousedown={mousedown}/>
@@ -84,7 +106,7 @@
     <div class="w-px h-6 bg-zinc-700"></div>
     <div class="relative">
         <div class="flex items-center transition-colors bg-blue-700 rounded-lg hover:bg-blue-600 outline-blue-600 outline outline-1">
-            <button class="py-1 px-1.5 pr-0 text-sm font-semibold" tabindex="-1">Find available (depth {selectedDepth})</button>
+            <button on:click={findOpenPlot} class="py-1 px-1.5 pr-0 text-sm font-semibold" tabindex="-1">Find available (depth {selectedDepth})</button>
             <button bind:this={dropdownButtonContainer} on:click={() => showDepthDropdown = !showDepthDropdown} class="p-1" tabindex="-1">
                 <img class="w-4 h-4 pointer-events-none select-none" src="/dropdown.svg" alt="down arrow">
             </button>

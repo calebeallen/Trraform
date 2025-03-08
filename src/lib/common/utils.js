@@ -378,7 +378,6 @@ function decodePlotData(bytes, depth = 0, validateBuildSize = false){
 
 }
 
-
 //packages plot data into:
 // | json data length (4 bytes) | json data | buildData length (4 bytes) | buildData |
 function encodePlotData({ name, desc, link, linkLabel, rEnd, buildData = null } = {}){

@@ -190,10 +190,10 @@
             // // Smoothly interpolate rotation using SLERP
             // refs.camera.quaternion.slerp(newQuaternion, 0.1);
 
-            const lookat = new Vector3(71.07187222036504, 68.12406702750273, 100.42262270565995)
+            const lookat = new Vector3(69.55044373020363, 69.38191502082164, 94.55121308420269)
 
             refs.camera.position.copy(position)
-            refs.camera.lookAt(lookat)
+            refs.camera.lookAt(tangent)
             refs.camera.updateSphere()
 
             return t

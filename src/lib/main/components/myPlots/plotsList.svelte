@@ -10,6 +10,7 @@
     export let editingPlot
     let container
     let plots = []
+    let plotCount = 0
 
     onMount( async () => {
 
@@ -26,6 +27,7 @@
         //load what can fit or 5 rows
         await $walletConnection.loadMyPlots(Math.min(fitX * fitY, fitX * 5))
         plots = $walletConnection.myPlots
+        plotCount = $walletConnection.myPlotsCount
 
         $newPlots = false
 
@@ -60,9 +62,9 @@
 </script>
 
 <div bind:this={container} on:mousewheel|passive={onmousewheel} class="w-full h-full overflow-y-scroll hide-scrollbar">
-    {#if $walletConnection.plotCount > 0}
+    {#if plotCount > 0}
         <div class="flex flex-wrap gap-3 py-3 pb-24 mx-auto w-60 sm:w-full md:max-w-[744px] sm:max-w-[492px]">
-            {#each [] as plot}
+            {#each plots as plot}
                 <PlotWidget bind:editingPlot plot={plot}/>
             {/each}
         </div>

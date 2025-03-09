@@ -22,6 +22,16 @@ const IMPLEMENTATION_CONTRACT_ABI = parseAbi([
     "function tempLock(uint tokenId) public view returns (uint)"
 ])
 
+const PROXY_CONTRACT_ABI = parseAbi([
+    "function mintWithPOL(uint tokenId, bool useTempLock) public payable",
+    "function mintWithUSDC(uint tokenId, bool useTempLock, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public" 
+])
+
+const USDC_ABI = parseAbi([
+    "function name() view returns (string)",
+    "function nonces(address) view returns (uint256)",
+]);
+
 const MINT_PRICE = 10
 const PARENT_MINT_PRICE = 6
 
@@ -287,6 +297,99 @@ export default class WalletConnection {
         }
 
         await Promise.all(promises)
+
+    }
+
+    async claimWithPOL(plotId, useMintLock, isParentOwner = false){
+
+        const quote = await WalletConnection.getQuotePOL(isParentOwner)
+
+        return await this.walletClient.writeContract({
+            address: PROXY_CONTRACT_ADDRESS,
+            abi: PROXY_CONTRACT_ABI,
+            account: this.address,
+            functionName: 'mintWithPOL',   
+            args: [plotId.bigInt(), useMintLock],
+            value: quote,
+        })
+
+    }
+
+    async claimWithUSDC(plotId, useMintLock, isParentOwner = false){
+
+        console.log(this.address)
+
+        const [usdcName, userNonce] = await Promise.all([
+            publicCli.readContract({
+                address: USDC_CONTRACT_ADDRESS,
+                abi: USDC_ABI,
+                functionName: 'name',
+            }),
+            publicCli.readContract({
+                address: USDC_CONTRACT_ADDRESS,
+                abi: USDC_ABI,
+                functionName: 'nonces',
+                args: [this.address],
+            }),
+        ]);
+
+        console.log(usdcName)
+
+        const domain = {
+            name: usdcName,
+            version: '2',            // Confirm if USDC requires something else
+            chainId: 137,            // Polygon mainnet
+            verifyingContract: USDC_CONTRACT_ADDRESS,
+        };
+        
+        // EIP-2612 typed data structure
+        const types = {
+            Permit: [
+                { name: 'owner', type: 'address' },
+                { name: 'spender', type: 'address' },
+                { name: 'value', type: 'uint256' },
+                { name: 'nonce', type: 'uint256' },
+                { name: 'deadline', type: 'uint256' },
+            ],
+        }
+        
+        const amount = isParentOwner ? PARENT_MINT_PRICE : MINT_PRICE
+        const deadline = Math.floor(Date.now() / 1000) + 60 * 20
+        const message = {
+            owner: this.address,
+            spender: PROXY_CONTRACT_ADDRESS,
+            value: amount * 1e6,
+            nonce: userNonce,
+            deadline: deadline,
+        }
+
+        const signatureHex = await this.walletClient.signTypedData({
+            domain,
+            types,
+            primaryType: 'Permit',
+            message,
+            account: this.address
+        });
+
+        const sigStr = signatureHex.slice(2)
+        const r = '0x' + sigStr.substring(0, 64)
+        const s = '0x' + sigStr.substring(64, 128)
+        const v = parseInt(sigStr.substring(128, 130), 16)
+
+        const res = await this.walletClient.writeContract({
+            address: PROXY_CONTRACT_ADDRESS,
+            abi: PROXY_CONTRACT_ABI,
+            account: this.address,
+            functionName: 'mintWithUSDC',   
+            args: [
+                plotId.bigInt(), 
+                useMintLock,
+                deadline,
+                v,r,s
+            ]
+        })
+
+        console.log(res)
 
     }
 

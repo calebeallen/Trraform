@@ -5,10 +5,9 @@
     import { verifyBuild, encodePlotData, pushNotification } from "$lib/common/utils"
     import { preprocessPNG } from "$lib/common/buildImage"
     import { MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MIN_SMP, MAX_SMP } from "$lib/common/constants"
-    import { notification, loadScreenOpacity } from "$lib/main/store.js"
+    import { notification, loadScreenOpacity, walletConnection } from "$lib/main/store.js"
     import MyPlot from "$lib/main/plot/myPlot.js"
     import PlotWidgetOption from "$lib/main/components/myPlots/plotWidgetOption.svelte"
-    import WalletConnection from "$lib/main/walletConnection"
     import Tip from "$lib/common/components/tip.svelte"
     import isURL from "validator/lib/isURL"
     
@@ -183,7 +182,9 @@
             $loadScreenOpacity = 50
             
             const message = "Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information."
-            const signature = await WalletConnection.getSignature(message)
+            const signature = await $walletConnection.getSignature(message)
+
+            console.log("signt")
 
             const form = new FormData()
             form.append("plotId", editingPlot.id.string())

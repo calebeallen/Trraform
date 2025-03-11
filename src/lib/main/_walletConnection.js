@@ -24,7 +24,7 @@ const IMPLEMENTATION_CONTRACT_ABI = parseAbi([
 
 const PROXY_CONTRACT_ABI = parseAbi([
     "function mintWithPOL(uint tokenId, bool useTempLock) public payable",
-    "function mintWithUSDC(uint tokenId, bool useTempLock, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public" 
+    "function mintWithUSDC(uint tokenId, bool useTempLock, uint256 deadline, bytes memory signature) public" 
 ])
 
 const USDC_ABI = parseAbi([
@@ -50,7 +50,7 @@ const wagmiConfig = createConfig({
 
 const publicCli = getPublicClient(wagmiConfig)
 
-export default class WalletConnection { 
+export default class WalletConnection {
 
     static async getTempLock(plotId){
     
@@ -92,13 +92,13 @@ export default class WalletConnection {
 
     }
 
-    static async getQuotePOL(isParentOwner = false){
+    static async getQuotePOL(amount){
 
         const params = {
             tokenIn: WMATIC_CONTRACT_ADDRESS,
             tokenOut: USDC_CONTRACT_ADDRESS,
             fee: 500,
-            amount: (isParentOwner ? PARENT_MINT_PRICE : MINT_PRICE) * 1e6,
+            amount,
             sqrtPriceLimitX96: 0
         };
 
@@ -174,10 +174,12 @@ export default class WalletConnection {
    
     async _connect(connector, address){
 
-        this.walletClient = await getWalletClient(wagmiConfig, { connector })
+        this.walletCli = await getWalletClient(wagmiConfig, { connector })
         this.connector = connector
         this.address = address
         this.connected = true
+
+        console.log(this.walletCli)
 
         const count = await publicCli.readContract({
             address: IMPLEMENTATION_CONTRACT_ADDRESS,
@@ -185,6 +187,8 @@ export default class WalletConnection {
             functionName: 'balanceOf',
             args: [this.address]
         })
+
+        console.log(count)
 
         this.myPlotsCount = Number(count)
         this.myPlotsIterator = 0
@@ -300,11 +304,11 @@ export default class WalletConnection {
 
     }
 
-    async claimWithPOL(plotId, useMintLock, isParentOwner = false){
+    async claimWithPOL(plotId, useMintLock, amount){
 
-        const quote = await WalletConnection.getQuotePOL(isParentOwner)
+        const quote = await WalletConnection.getQuotePOL(amount)
 
-        return await this.walletClient.writeContract({
+        return await this.walletCli.writeContract({
             address: PROXY_CONTRACT_ADDRESS,
             abi: PROXY_CONTRACT_ABI,
             account: this.address,
@@ -315,68 +319,52 @@ export default class WalletConnection {
 
     }
 
-    async claimWithUSDC(plotId, useMintLock, isParentOwner = false){
+    async claimWithUSDC(plotId, useMintLock, amount){
 
-        console.log(this.address)
+        const nonce = await publicCli.readContract({
+            address: USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: 'nonces',
+            args: [this.address],
+        })
 
-        const [usdcName, userNonce] = await Promise.all([
-            publicCli.readContract({
-                address: USDC_CONTRACT_ADDRESS,
-                abi: USDC_ABI,
-                functionName: 'name',
-            }),
-            publicCli.readContract({
-                address: USDC_CONTRACT_ADDRESS,
-                abi: USDC_ABI,
-                functionName: 'nonces',
-                args: [this.address],
-            }),
-        ]);
+        const usdcName = await publicCli.readContract({
+            address: USDC_CONTRACT_ADDRESS,
+            abi: USDC_ABI,
+            functionName: 'name',
+        })
 
         console.log(usdcName)
 
-        const domain = {
-            name: usdcName,
-            version: '2',            // Confirm if USDC requires something else
-            chainId: 137,            // Polygon mainnet
-            verifyingContract: USDC_CONTRACT_ADDRESS,
-        };
-        
-        // EIP-2612 typed data structure
-        const types = {
-            Permit: [
-                { name: 'owner', type: 'address' },
-                { name: 'spender', type: 'address' },
-                { name: 'value', type: 'uint256' },
-                { name: 'nonce', type: 'uint256' },
-                { name: 'deadline', type: 'uint256' },
-            ],
-        }
-        
-        const amount = isParentOwner ? PARENT_MINT_PRICE : MINT_PRICE
         const deadline = Math.floor(Date.now() / 1000) + 60 * 20
-        const message = {
-            owner: this.address,
-            spender: PROXY_CONTRACT_ADDRESS,
-            value: amount * 1e6,
-            nonce: userNonce,
-            deadline: deadline,
-        }
-
-        const signatureHex = await this.walletClient.signTypedData({
-            domain,
-            types,
+        const signature = await this.walletCli.signTypedData({
+            domain: {
+                name: usdcName,
+                version: '2',            // Confirm if USDC requires something else
+                chainId: 137,            // Polygon mainnet
+                verifyingContract: USDC_CONTRACT_ADDRESS,
+            },
+            types: {
+                Permit: [
+                    { name: 'owner', type: 'address' },
+                    { name: 'spender', type: 'address' },
+                    { name: 'value', type: 'uint256' },
+                    { name: 'nonce', type: 'uint256' },
+                    { name: 'deadline', type: 'uint256' },
+                ],
+            },
+            message: {
+                owner: this.address,
+                spender: PROXY_CONTRACT_ADDRESS,
+                value: amount,
+                nonce,
+                deadline
+            },
             primaryType: 'Permit',
-            message,
             account: this.address
         });
 
-        const sigStr = signatureHex.slice(2)
-        const r = '0x' + sigStr.substring(0, 64)
-        const s = '0x' + sigStr.substring(64, 128)
-        const v = parseInt(sigStr.substring(128, 130), 16)
-
-        const res = await this.walletClient.writeContract({
+        const res = await this.walletCli.writeContract({
             address: PROXY_CONTRACT_ADDRESS,
             abi: PROXY_CONTRACT_ABI,
             account: this.address,
@@ -385,12 +373,22 @@ export default class WalletConnection {
                 plotId.bigInt(), 
                 useMintLock,
                 deadline,
-                v,r,s
+                signature
             ]
         })
 
         console.log(res)
 
+    }
+
+    async getSignature(message){
+
+        return await this.walletCli.signMessage({
+            message: message,
+            account: this.address,
+            prefix: true
+        })
+    
     }
 
 }

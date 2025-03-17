@@ -1,6 +1,5 @@
 
 import { LinearSRGBColorSpace, Matrix4, PerspectiveCamera, Scene, Spherical, Vector3, Vector4, WebGLRenderer } from "three"
-import { disposeMesh } from "./utils"
 
 const RES = 1000
 const PRECISION = 2
@@ -387,7 +386,7 @@ function preprocessPNG(mesh, resolution = 1000){
 
     //[ res | view matrix (12, only first two rows + last row needed) | dx(1) | dy(1) | pos (3) | dir (1) | delta1 (1) | delta2 (1) | col (3) | ... ]
     const m = viewMatrix.elements
-    const preprocessed = [resolution, m[0],m[4],m[8],m[12],m[1],m[5],m[9],m[13],m[3],m[7],m[11],m[15], dx, dy]
+    const preprocessed = [m[0],m[4],m[8],m[12],m[1],m[5],m[9],m[13],m[3],m[7],m[11],m[15], dx, dy]
 
     for(const face of processedFaces){
 

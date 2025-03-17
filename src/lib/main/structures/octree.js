@@ -1,7 +1,7 @@
 
 import { Vector3, Vector4, Box3, Frustum, Sphere } from "three"
-import { refs } from "../store"
-import MaxHeap from "./maxHeap"
+import { refs } from "$lib/main/store"
+import MaxHeap from "$lib/main/structures/maxHeap"
 
 class OctreeNode {
 

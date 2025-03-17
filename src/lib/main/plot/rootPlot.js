@@ -1,14 +1,11 @@
 
 import { Sphere, Vector3 } from "three";
-import PlotId from "../../common/plotId";
-import { expand, I2P } from "../../common/utils";
-import Queue from "../structures/queue";
-import Plot from "./plot";
-import Octree from "../structures/octree";
-import Task from "../task/task";
-import { D0_MINT_PRICE } from "../../common/constants"
-import { parseEther } from "viem";
-
+import PlotId from "$lib/common/plotId";
+import { expand, I2P } from "$lib/common/utils";
+import Queue from "$lib/main/structures/queue";
+import Plot from "$lib/main/plot/plot";
+import Octree from "$lib/main/structures/octree";
+import Task from "$lib/main/task/task";
 
 const CHUNK_SIZE = 4
 
@@ -265,12 +262,6 @@ export default class RootPlot {
     withinRadius(center, radius){
 
         return this.octree.withinRadius(center, radius)
-
-    }
-
-    getSmp(){
-
-        return  parseEther(D0_MINT_PRICE.toString())
 
     }
 

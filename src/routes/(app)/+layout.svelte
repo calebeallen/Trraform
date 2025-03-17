@@ -18,28 +18,23 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection } from "$lib/main/store"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
     import { pushNotification } from "$lib/common/utils"
     import MyPlots from "$lib/main/components/myPlots/MyPlots.svelte";
-    import FindPlotsBar from "$lib/main/components/findPlotsBar.svelte";
-    import UtilBar from "$lib/main/components/utilBar.svelte"
     import HeaderBar from "$lib/main/components/headerBar.svelte"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
-    import WalletConnection from "$lib/main/_walletConnection"
-    import { walletConnection } from "../../lib/main/store";
+    import { WalletConnection } from "$lib/main/walletConnection"
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
     let t1 = 0
     let tagData = [], tags = {}, tagBounds = []
     let ismousedown = false
-
-    let showMyPlots = false, showSettings = false
-
+    
     onMount(async () => {
         
         const stored = localStorage.getItem("settings")
@@ -50,10 +45,6 @@
         const mobileDetect = new MobileDetect(navigator.userAgent)
 
         $isMobileBrowser = mobileDetect.mobile()
-
-        if($isMobileBrowser)
-
-            pushNotification(notification, "Mobile browser detected", "For the best experience, please use a desktop browser.")
 
         /* set up scene */  
         refs.scene = new Scene()
@@ -81,7 +72,7 @@
         refs.camera.updateSphere()
         refs.camera.update = refs.camera.autoRotate
 
-        // //listen for page route change events
+        // listen for page route change events
         page.subscribe(handleNavigate)
 
         /* begin rendering */
@@ -89,7 +80,7 @@
         refs.renderer.render(refs.scene, refs.camera)
         updateBg()
 
-        //reconnect wallet
+        //r econnect wallet
         const connection = new WalletConnection()
         if(await connection.reconnect())
 
@@ -104,23 +95,18 @@
 
         const dt = (t2 - t1) / 1000
         t1 = t2
-
-        const route = $page.route.id
-        if(route !== "/(app)/world" && route !== "/(app)")
-
-            return
         
         refs.renderManager.update(dt)
         refs.camera.update(dt)
             
         const insideArr = [rootPlot]
 
-        //find a plot that contains the camera
+        // find a plot that contains the camera
         while(true){
 
             const l = insideArr.length - 1
 
-            //get child plots that contains camera
+            // get child plots that contains camera
             const insideOf = insideArr[l].getContains(refs.camera.position)
 
             let minDist = Infinity
@@ -189,7 +175,7 @@
 
         //average of closest plots
         if(heap.length > 0){
-
+ 
             let distSum = 0
 
             for(const elem of heap)
@@ -205,7 +191,7 @@
         }
 
         //update tags
-        const r = 15 * inside.blockSize
+        const r = 15 * inside.blockSize 
         const plots = inside instanceof RootPlot ? inside.withinRadius(refs.camera.position, r) : inside.withinView()
         const needsRender = new Array(plots.length)
 
@@ -618,16 +604,16 @@
 
 <svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
-<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {showMyPlots ? "blur-2xl" : ""}">
+<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$showMyPlots ? "blur-2xl" : ""}">
     <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
     <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="fixed top-0 left-0 w-full h-full"></canvas>
 </div>
-<div class="w-full {showMyPlots ? "blur-2xl" : ""}">
+<div class="w-full {$showMyPlots ? "blur-2xl" : ""}">
     <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2 pointer-events-none">
         <a class="flex-shrink-0 m-2 opacity-50 pointer-events-auto select-none w-7 h-7 focus:outline-none"  href="/">
             <img src="logo.svg" alt="">
         </a>
-        <HeaderBar bind:showMyPlots bind:showSettings/>
+        <HeaderBar/>
     </div>
     <slot/>
 </div>
@@ -636,8 +622,8 @@
     <ConnectWalletModal on:close={() => $showConnectWalletModal = false}/>
 {/if}
 
-{#if showMyPlots}
-    <MyPlots on:close={() => showMyPlots = false}/>
+{#if $showMyPlots}
+    <MyPlots on:close={() => $showMyPlots = false}/>
 {/if}
 
 {#if $loadScreenOpacity !== 0}

@@ -1,9 +1,8 @@
 
 <script>
 
-    import { walletConnection } from "$lib/main/store"
+    import { walletConnection, showConnectWalletModal } from "$lib/main/store"
     import { createEventDispatcher } from "svelte";
-    import { showConnectWalletModal } from "../store";
 
     const dispatch = createEventDispatcher()
 

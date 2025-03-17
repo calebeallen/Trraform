@@ -1,11 +1,11 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial } from "three"
-import { buildImageUrl } from "../../common/buildImage"
-import { expand } from "../../common/utils"
-import PlotData from "./plotData"
-import PlotId from "../../common/plotId"
-import Task from "../task/task"
-import { newPlots } from "../store"
+import { buildImageUrl } from "$lib/common/buildImage"
+import { expand } from "$lib/common/utils"
+import PlotData from "$lib/main/plot/plotData"
+import PlotId from "$lib/common/plotId"
+import Task from "$lib/main/task/task"
+import { newPlots } from "$lib/main/store"
 
 export default class MyPlot extends PlotData{
 

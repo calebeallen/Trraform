@@ -5,8 +5,9 @@
 
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
-    import PlotWidgetOption from "./plotWidgetOption.svelte";
-    import { DATA_CONTRACT_ADDRESS } from "$lib/common/constants"
+    import { showMyPlots } from "$lib/main/store"
+    import PlotWidgetOption from "$lib/main/components/myPlots/plotWidgetOption.svelte";
+    import { IMPLEMENTATION_CONTRACT_ADDRESS } from "$lib/main/walletConnection"
 
     export let editingPlot
     export let plot
@@ -48,7 +49,7 @@
 
 </script>
 
-<div class="relative flex-none overflow-hidden transition-colors w-60 aspect-[0.75] rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
+<div class="relative flex-none overflow-hidden transition-colors w-56 aspect-[0.75] rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
     {#if loading}
         <div class="w-full h-full animate-pulse bg-zinc-900">
             <div class="head-container">
@@ -59,7 +60,7 @@
     {:else}
         <div class="head-container">
             <h3 class="text-xs">{plotData.id}</h3>
-            <h2 class="text-lg font-bold truncate">{plotData.name}</h2>
+            <h2 class="font-bold truncate sm:text-lg">{plotData.name}</h2>
             {#if plotData.tag}
                 <div class="flex items-center gap-1">
                     <div class="w-2 h-2 rounded-full" style="background-color: {plotData.tag.color};"></div>
@@ -68,12 +69,15 @@
             {/if}   
         </div>
         <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
-        <div class="absolute bottom-0 flex flex-col w-full gap-0.5 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <PlotWidgetOption on:click={() => goto(`/world?plotId=${plotData.id}`)} src="/navigate.svg" alt="navigate" text="Go to"/>
+        <div class="absolute bottom-0 flex flex-col w-full gap-px p-1 transition-opacity opacity-0 group-hover:opacity-100">
+            <PlotWidgetOption on:click={() => {
+                $showMyPlots = false
+                goto(`/world?plotId=${plotData.id}`)
+            }} src="/navigate.svg" alt="navigate" text="Go to"/>
             {#if !plotData.banned}
                 <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
             {/if} 
-            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://testnets.opensea.io/assets/sepolia/${DATA_CONTRACT_ADDRESS}/${plot?.id?.id}`)}/>
+            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://opensea.io/item/matic/${IMPLEMENTATION_CONTRACT_ADDRESS}/${plot?.id?.id}`)}/>
         </div>
     {/if}
 </div>

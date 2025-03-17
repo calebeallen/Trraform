@@ -2,9 +2,9 @@
 <script>
 
     import { onMount } from "svelte"
-    import { verifyBuild, encodePlotData, pushNotification } from "$lib/common/utils"
+    import { verifyBuild, pushNotification } from "$lib/common/utils"
     import { preprocessPNG } from "$lib/common/buildImage"
-    import { MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MIN_SMP, MAX_SMP } from "$lib/common/constants"
+    import { MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN } from "$lib/common/constants"
     import { notification, loadScreenOpacity, walletConnection } from "$lib/main/store.js"
     import MyPlot from "$lib/main/plot/myPlot.js"
     import PlotWidgetOption from "$lib/main/components/myPlots/plotWidgetOption.svelte"
@@ -241,9 +241,9 @@
 
 
 <input bind:this={buildInput} on:input={changeBuild} type="file" class="hidden">
-<div class="w-full h-full overflow-x-hidden overflow-y-scroll hide-scrollbar">
-    <div class="flex flex-row flex-wrap justify-center gap-3 px-1 py-3">
-        <div class="relative flex-none overflow-hidden w-60 h-80 rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
+<div class="w-full h-full max-w-screen-sm mx-auto overflow-x-hidden overflow-y-scroll hide-scrollbar">
+    <div class="flex flex-row flex-wrap justify-center gap-3 py-3">
+        <div class="relative flex-none overflow-hidden w-60 aspect-[0.75] rounded-2xl outline-1 outline outline-zinc-800 bg-zinc-900 group">
             <img class="object-cover h-full" src={imgUrl} alt="build"/> 
             <div class="absolute bottom-0 flex flex-col w-full gap-0.5 p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <PlotWidgetOption on:click={loadFromEditor} src="/floppy.svg" alt="load" text="Load from editor"/>
@@ -251,7 +251,7 @@
                 <PlotWidgetOption on:click={download} src="/download.svg" alt="download" text="Download"/>
             </div>
         </div>
-        <div class="flex flex-col justify-between grow h-80">
+        <div class="flex flex-col justify-between grow">
             <div>
                 <h2 class="text-sm">Name</h2>
                 <input bind:value={name} class="w-full outline-zinc-800" type="text" maxlength={NAME_FIELD_MAXLEN} placeholder="Name">

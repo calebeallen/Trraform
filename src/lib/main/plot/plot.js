@@ -5,7 +5,6 @@ import Task from "../task/task";
 import { refs } from "../store";
 import { MAX_DEPTH, PLOT_COUNT } from "../../common/constants";
 import { I2P, P2I } from "../../common/utils";
-import WalletConnection from "../walletConnection"
 
 export default class Plot extends PlotData {
 
@@ -205,7 +204,7 @@ export default class Plot extends PlotData {
 
             const dist = child.sphere.center.distanceTo(point)
 
-            if(heap.length < k || dist < heap[0].dist){
+            if (heap.length < k || dist < heap[0].dist) {
                 
                 heap.add({child, dist})
 

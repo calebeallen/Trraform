@@ -5,7 +5,7 @@
     import Tip from "$lib/common/components/tip.svelte";
     import { onDestroy, onMount } from "svelte";
     import { fly } from "svelte/transition";
-    import WalletConnection from "../_walletConnection";
+    import { WalletConnection } from "$lib/main/walletConnection";
     import { formatEther } from "viem";
     import { walletConnection,loadScreenOpacity, showConnectWalletModal } from "$lib/main/store"
     import { MAX_BUILD_SIZES } from "$lib/common/constants";

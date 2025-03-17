@@ -7,23 +7,21 @@
 
     import { page } from "$app/stores"
     import { onMount } from "svelte";
-    import { insideOf, refs, isMobileBrowser } from "$lib/main/store"
+    import { insideOf, refs, isMobileBrowser, showMyPlots, plotSearchFocused, showSettingsModal } from "$lib/main/store"
     import ReportModal from "$lib/main/components/reportModal.svelte";
     import { setCookie, getCookie } from "$lib/common/cookie"
 
     import { confetti } from "$lib/main/decoration"
-    import WalletConnection from "$lib/main/walletConnection";
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
     import ClaimModal from "$lib/main/components/claimModal.svelte";
 
     export let data 
     let lastTouches = []
     
-    let showSettingsModal = false, showConnectModal = false, showReportModal = false, showShareModal = false, showClaimModal = false
-    let reportPlotId = null, sharePlotId = null, mintPlot = null
+    let showConnectModal = false, showReportModal = false, showShareModal = false, showClaimModal = false
+    let reportPlotId = null, sharePlotId = null
     let profile = {}
     let showProfile = false
-    let searchFocused
 
     let canVote = false
 
@@ -37,7 +35,7 @@
 
     function keydown(e){
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showClaimModal || searchFocused)
+        if( showConnectModal || showReportModal || showShareModal || showClaimModal || $plotSearchFocused || $showMyPlots || $showSettingsModal )
 
             return
 
@@ -126,7 +124,7 @@
 
     function mousewheel(e){
         
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showClaimModal || searchFocused)
+        if( showConnectModal || showReportModal || showShareModal || showClaimModal || $showMyPlots || $plotSearchFocused || $showSettingsModal )
 
             return
 
@@ -140,7 +138,7 @@
 
     function touchevent(e){ 
 
-        if(showSettingsModal || showConnectModal || showReportModal || showShareModal || showClaimModal || searchFocused || refs.camera.update === refs.camera.standard)
+        if( showConnectModal || showReportModal || showShareModal || showClaimModal || $showMyPlots || $plotSearchFocused || $showSettingsModal || refs.camera.update === refs.camera.standard )
 
             return
 

@@ -1,5 +1,5 @@
 
-import { D0_PLOT_COUNT, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "./constants"
+import { D0_PLOT_COUNT, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "$lib/common/constants"
 
 const D0_BIT_MASK = 0xFFFF
 const DN_BIT_MASK = 0xFF

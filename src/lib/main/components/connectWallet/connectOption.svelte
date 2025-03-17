@@ -1,7 +1,7 @@
 
 <script>
 
-    import LogoAnimated from "../../../common/components/logoAnimated.svelte";
+    import LogoAnimated from "$lib/common/components/logoAnimated.svelte";
     import { fly } from 'svelte/transition';
     import { createEventDispatcher } from "svelte";
 

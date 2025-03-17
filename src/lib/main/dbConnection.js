@@ -30,7 +30,9 @@ export default class DbConnection {
 
             this.cache[depth] = tracker(data.map(a => a.id))
 
-        }
+        } else
+
+            this.cache[depth].itr %= this.cache[depth].ids.length
 
         const cached = this.cache[depth]
 
@@ -39,6 +41,7 @@ export default class DbConnection {
             return null
 
         const plotId = new PlotId(cached.ids[cached.itr])
+
         cached.itr++
 
         return plotId

@@ -1,5 +1,5 @@
 
-import PlotId from "../../common/plotId"
+import PlotId from "$lib/common/plotId"
 
 export default class PlotData {
 

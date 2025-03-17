@@ -1,12 +1,12 @@
 
 <script>
 
-    import Modal from "../../../common/components/modal.svelte"
-    import ConnectOption from "./connectOption.svelte";
     import { onMount, createEventDispatcher } from "svelte";
-    import { pushNotification } from "../../../common/utils";
-    import { notification, walletConnection } from "../../../main/store";
-    import WalletConnection from "$lib/main/_walletConnection"
+    import Modal from "$lib/common/components/modal.svelte"
+    import ConnectOption from "./connectOption.svelte";
+    import { pushNotification } from "$lib/common/utils";
+    import { notification, walletConnection } from "$lib/main/store";
+    import { WalletConnection } from "$lib/main/walletConnection"
 
     const dispatchEvent = createEventDispatcher()
 

@@ -1,7 +1,7 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial, ShaderMaterial, Sphere, Vector3, LOD, Box3 } from "three"
-import Task from "./task/task"
-import { settings, refs } from "./store";
+import Task from "$lib/main/task/task"
+import { settings, refs } from "$lib/main/store";
 
 const material = new MeshBasicMaterial({vertexColors: true})
 // const material = new ShaderMaterial({

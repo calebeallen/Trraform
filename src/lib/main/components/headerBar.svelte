@@ -3,18 +3,10 @@
 
     import { fly } from "svelte/transition";
     import { goto } from "$app/navigation"
-    import { dbConnection, notification, isMobileBrowser } from "$lib/main/store";
+    import { dbConnection, notification, isMobileBrowser, walletConnection, showConnectWalletModal, plotSearchFocused, showMyPlots, showSettingsModal } from "$lib/main/store";
     import PlotId from "$lib/common/plotId"
     import DbConnection from "$lib/main/dbConnection"
     import { pushNotification } from "$lib/common/utils";
-    import { walletConnection } from "$lib/main/store"
-    import { createEventDispatcher } from "svelte";
-    import { showConnectWalletModal } from "../store";
-
-    const dispatch = createEventDispatcher()
-
-    export let showSettings = false
-    export let showMyPlots = false
     
     let plotSearchValue = "", showSearchResults = false, searchResult, searchContainer, searchResultsContainer
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
@@ -145,7 +137,7 @@
     <div bind:this={searchContainer} class="relative flex items-center gap-1 p-1 bg-transparent">
         <img class="w-4 h-4 pointer-events-none select-none" src="/search.svg" alt="search">
         <form class="inline-flex p-0 m-0" on:submit|preventDefault={search}>
-            <input bind:value={plotSearchValue} class="bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
+            <input on:focus={() => $plotSearchFocused = true} on:blur={() => $plotSearchFocused = false} bind:value={plotSearchValue} on:focu class="w-full bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
             <button tabindex="-1" class="hidden" type="submit"></button>
         </form>
         {#if showSearchResults}
@@ -179,7 +171,7 @@
         {#if !walletConnected}
             <button on:click={() => $showConnectWalletModal = true} class="flex gap-1 p-1.5 items-center text-zinc-400 hover:bg-zinc-800 rounded-lg sm:rounded-xl transition-colors focus:outline-none focus:bg-zinc-800">
                 <img class="w-3 pointer-events-none select-none aspect-square sm:w-4" src="/power.svg" alt="">
-                <div>Connect wallet</div>
+                <div class="truncate">Connect wallet</div>
             </button>
         {:else}
             <button on:mousedown={disconnectMousedown} class="relative flex gap-1 p-1.5 items-center text-zinc-400 group focus:outline-none">
@@ -190,12 +182,12 @@
                     <div class="absolute text-red-400 select-none">Disconnect</div>
                 </div>
             </button>
-            <button on:click={() => showMyPlots = true} class="transition-opacity opacity-50 w-7 h-7 hover:opacity-80 focus:outline-none focus:opacity-80">
+            <button on:click={() => $showMyPlots = true} class="transition-opacity opacity-50 shrink-0 w-7 h-7 hover:opacity-80 focus:outline-none">
                 <img class="pointer-events-none select-none" src="/plot1.svg" alt="">
             </button>
         {/if}
     {/if}
-    <button on:click={() => showSettings = true} class="transition-opacity opacity-50 w-7 h-7 hover:opacity-80 focus:outline-none focus:opacity-80">
+    <button on:click={() => $showSettingsModal = true} class="transition-opacity opacity-50 shrink-0 w-7 h-7 hover:opacity-80 focus:outline-none">
         <img class="pointer-events-none select-none" src="/settings.svg" alt="">
     </button>
 </div>

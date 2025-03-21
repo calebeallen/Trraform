@@ -43,9 +43,9 @@ onmessage = async e => {
 
         }
 
-        response.err = false
-
     } catch(e) {
+
+        console.error(e)
 
         response = { err: true, msg: e }
 
@@ -66,31 +66,205 @@ onmessage = async e => {
 }
 
 /* one function that does everything, should reduce overhead */
+async function processPlotData(id){
+
+    const plotId = new PlotId(id)
+    const encodedBuffer = await plotId.fetch()
+
+    // plot doesn't exist
+    if(encodedBuffer === null)
+        return [null, null]
+
+    const encoded = new Uint8Array(encodedBuffer)
+    const { name, desc, link, linkLabel, buildData } = decodePlotData(encoded, plotId.depth(), true)
+    const buildSize = buildData[1]
+    const plotIndicies = new Array(PLOT_COUNT).fill(-1)
+    let plotsUnplaced = PLOT_COUNT
+    let expanded 
+
+    if(buildData.length > 2){
+
+        //mark plots that are already placed
+        let idx = 0
+        for(let i = 2; i < buildData.length; i++){
+
+            const val = buildData[i] >> 1
+
+            if (buildData[i] & 1) {
+
+                if(val <= PLOT_COUNT && val !== 0){
+                    plotIndicies[val - 1] = idx
+                    plotsUnplaced--
+                }
+
+                idx++
+
+            } else
+                idx += val
+
+        }
+
+        expanded = expand(buildData)
+
+        // if plots unplaced, place on top surfaces
+        if(plotsUnplaced > 0){
+
+            const topSurfaces = []
+            const bs2 = buildSize ** 2
+
+            for(let i = 0; i < expanded.length; i++){
+
+                const y = I2P(i, buildSize)[1]
+                const val = expanded[i]
+
+                // don't check top plane
+                if (y == buildSize - 1)
+                    break
+
+                // open spot on ground
+                if (y == 0 && val == 0){
+                    topSurfaces.push({idx: i, rand: 0})
+                    continue
+                }
+
+                const aboveVal = expanded[i + bs2]
+                if(aboveVal == 0 && val > PLOT_COUNT)
+                    topSurfaces.push({idx: i, rand: 0})
+
+            }
+
+            // hash build data to generate seed
+            let hash = 0
+            const MAX_32 = 0xFFFFFFFF
+            for(let i = 0; i < buildData.length; i++){
+                hash += buildData[i]
+                hash %= MAX_32
+            }
+
+            for(let i = 0; i < topSurfaces.length; i++){
+                const seed = (hash + i) % MAX_32
+                topSurfaces[i].rand = seedRand(seed)
+            }
+        
+            topSurfaces.sort((a, b) => a.rand - b.rand)
+
+            const n = Math.min(topSurfaces.length, plotsUnplaced)
+            for(let i = 0, j = 0; i < n; i++){
+
+                const { idx } = topSurfaces[i]
+
+                while(plotIndicies[j] != -1 && j < PLOT_COUNT) j++
+
+                expanded[idx] = j + 1
+                plotIndicies[j] = idx
+                plotsUnplaced--
+
+            }
+
+        }
+
+    }
+
+    // if left over plots (and build not blank), place them on top surfaces
+    // if left over plots, place in a grid
+    const X0 = 1/12, Z0 = 3/12, S = 1/6
+    const v1 = new Vector3()
+    let j = 0
+
+    for(let z = 0; z < 4; z++)
+    for(let x = 0; x < 6; x++){
+
+        v1.set(X0 + x * S, 0, Z0 + z * S)
+        v1.multiplyScalar(buildSize).floor()
+
+        const idx = P2I(v1, buildSize)
+ 
+        if(expanded[idx] > 0 && expanded[idx] <= PLOT_COUNT)
+            continue
+
+        while(plotIndicies[j] != -1 && j < PLOT_COUNT) j++
+
+        plotIndicies[j] = idx
+
+    }
+
+    const plotData = {
+        name,
+        desc,
+        link,
+        linkLabel,
+        buildSize,
+        plotIndicies,
+        chunkArr: createChunkArr(plotIndicies, buildSize, CHUNK_SIZE),
+        geometryData: null
+    }
+    
+    if(buildData.length == 2)
+
+        return [plotData, null]
+
+
+    const min = new Vector3(Infinity, Infinity, Infinity)
+    const max = new Vector3()
+
+    //place plots in build
+    for(let i = 0; i < plotIndicies.length; i++){
+
+        v1.set(...I2P(plotIndicies[i], buildSize))
+        min.min(v1)
+        max.max(v1)
+        expanded[plotIndicies[i]] = 0
+
+    }
+
+    const stdRes = reducePoly(expanded, buildSize)[0]
+    const lowRes = makeLowRes(expanded, buildSize, LOW_RES)
+    v2.set(...stdRes.dp)
+    v1.set(...stdRes.center)
+    v1.sub(v2)
+    min.min(v1)
+    v1.set(...stdRes.center)
+    v1.add(v2)
+    max.max(v1)    
+
+    plotData.geometryData = {
+        max: max.toArray(),
+        min: min.toArray(),
+        stdRes,
+        lowRes
+    }
+
+    return [plotData, [
+        stdRes.position.buffer,
+        stdRes.color.buffer,
+        stdRes.index.buffer,
+        lowRes.position.buffer,
+        lowRes.color.buffer,
+        lowRes.index.buffer
+    ]]
+
+}
+
+function seedRand(seed) {
+    let t = b << 9, r = (b * 5) << 7
+    c ^= a; d ^= b; b ^= c; a ^= d
+    c ^= t; d = (d << 11) | (d >>> 21)
+    return (r >>> 0) / 4294967296
+}
 
 async function generatePlot(id){
 
     const plotId = new PlotId(id)
     const encodedBuffer = await plotId.fetch()
-    if(encodedBuffer === null) 
+    if(encodedBuffer === null) // plot doesn't exist
         
-        throw new Error()
+        return [null, null]
 
     const encoded = new Uint8Array(encodedBuffer)
     const decoded = decodePlotData(encoded, plotId.depth(), true)
     const buildData = decoded.buildData
-
-    if(buildData === null)
-
-        return [{
-            name : decoded.name,
-            desc : decoded.desc,
-            link : decoded.link,
-            geometryData : null
-        }, []]
-
     const buildSize = buildData[1]
 
-    //set default plot indicies
     const v1 = new Vector3(), v2 = new Vector3()
     const plotIndicies = new Array(PLOT_COUNT).fill(-1)
     const X0 = 1/12, Z0 = 3/12, S = 1/6
@@ -159,7 +333,6 @@ async function generatePlot(id){
         desc : decoded.desc,
         link : decoded.link,
         linkLabel : decoded.linkLabel,
-        smp : decoded.smp,
         buildSize : buildData[1],
         plotIndicies : plotIndicies,
         chunkArr : createChunkArr(plotIndicies, buildSize, CHUNK_SIZE),

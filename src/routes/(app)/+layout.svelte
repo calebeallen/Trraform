@@ -22,12 +22,13 @@
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
-    import RenderManager from "$lib/main/renderManager"
+    import RenderManager from "$lib/main/_renderManager"
     import { pushNotification } from "$lib/common/utils"
     import MyPlots from "$lib/main/components/myPlots/MyPlots.svelte";
     import HeaderBar from "$lib/main/components/headerBar.svelte"
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import { WalletConnection } from "$lib/main/walletConnection"
+    import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -49,7 +50,7 @@
         /* set up scene */  
         refs.scene = new Scene()
         refs.scene.add(stars())
-        refs.camera = new Camera(settings.general.fov, new Sphere(new Vector3(65,65,65), 800))
+        refs.camera = new Camera(settings.fov, new Sphere(new Vector3(65,65,65), 800))
         
         tagCtx = tagCanvas.getContext("2d")
 
@@ -206,7 +207,7 @@
         needsRender.sort((a, b) => a.dist - b.dist)
 
         //set tags, compute distance to look direction projected on sphere
-        const len = Math.min(needsRender.length, settings.general.maxTags)
+        const len = Math.min(needsRender.length, settings.tagCount)
         const target = new Vector3()
         refs.camera.getWorldDirection(target)
         target.multiplyScalar(r).add(refs.camera.position)
@@ -230,7 +231,7 @@
         //render plots
         for(let i = 0; i < needsRender.length; i++){
 
-            if(!refs.renderManager.hasAvailablility())
+            if(!refs.renderManager.hasAvailability())
 
                 break
 
@@ -445,7 +446,7 @@
             const yPadding = 7
             
             const distRatio = tag.plot.sphere.radius / dist
-            let scale = Math.max(distRatio, 0.1) * settings.general.tagSize / 2 * 2
+            let scale = Math.max(distRatio, 0.1) * settings.tagSize / 2 * 2
             scale = scale * quad(tag.t)
 
             tagCtx.font = `${fontSize}px Arial`
@@ -586,15 +587,11 @@
 
     function mousemove(e){
 
-        if(refs.disabled)
-
-            return        
-
         if(ismousedown && (refs.camera.update === refs.camera.orbit || refs.camera.update === refs.camera.standard)){
 
             refs.camera.angularVelocityDamping = 1e-6
-            refs.camera.angularVelocity.theta += - e.movementX / window.innerWidth * Math.PI * settings.general.lookSens
-            refs.camera.angularVelocity.phi += e.movementY / window.innerHeight * Math.PI * settings.general.lookSens
+            refs.camera.angularVelocity.theta += - e.movementX / window.innerWidth * settings.sensitivity * 10
+            refs.camera.angularVelocity.phi += e.movementY / window.innerHeight * settings.sensitivity * 10
 
         }
 
@@ -618,12 +615,16 @@
     <slot/>
 </div>
 
-{#if $showConnectWalletModal}
-    <ConnectWalletModal on:close={() => $showConnectWalletModal = false}/>
-{/if}
-
 {#if $showMyPlots}
     <MyPlots on:close={() => $showMyPlots = false}/>
+{/if}
+
+{#if $showSettingsModal}
+    <SettingsModal on:close={() => $showSettingsModal = false}/>
+{/if}
+
+{#if $showConnectWalletModal}
+    <ConnectWalletModal on:close={() => $showConnectWalletModal = false}/>
 {/if}
 
 {#if $loadScreenOpacity !== 0}

@@ -1,189 +1,146 @@
 
+
 <script>
 
-    import { onMount } from "svelte"
-    import { refs, settings, defaultSettings, isMobileBrowser } from "../../store"
-    import WalletConnection from "../../walletConnection";
-    import Modal from "../../../common/components/modal.svelte"
-    import SliderSetting from "./sliderSetting.svelte";
-    import OptionSetting from "./optionSetting.svelte";
-    import Tip from "../../../common/components/tip.svelte";
-    import DropDown from "./dropDown.svelte";
-    import ConnectWalletModal from "../connectWallet/connectWalletModal.svelte";
+    import { refs, settings, defaultSettings } from "$lib/main/store"
+    import Modal from "$lib/common/components/modal.svelte";
+    import Slider from "$lib/common/components/slider.svelte";
+    import Tip from "$lib/common/components/tip.svelte";
+    import { onMount } from "svelte";
 
-    let selectedTab = 0
-    let showConnectModal = false
-    let fov, lookSens, maxTags, tagSize, antialias, limitType, vramLimit, renderLimit, renderDist, lowResDist
-    let addressIndex = 0
-    let addresses = []
-    let providerName = ""
-    let providerIcon = null
+    const FOV_MIN = 30, FOV_MAX = 160
+    const SENSITIVITY_MIN = 1, SENSITIVITY_MAX = 20
+    const TAG_COUNT_MIN = 0, TAG_COUNT_MAX = 25
+    const TAG_SIZE_MIN = 1, TAG_SIZE_MAX = 10
+    const RENDER_LIMIT_MIN = 10, RENDER_LIMIT_MAX = 10000
+    const LOW_LOD_DIST_MIN = 10, LOW_LOD_DIST_MAX = 250
+
+    let fovValue, sensitivityValue, tagCountValue, tagSizeValue, renderLimitValue, lowLODDistValue
+    let fovDisplay, sensitivityDisplay, tagCountDisplay, tagSizeDisplay, renderLimitDisplay, lowLODDistDisplay
 
     onMount(() => {
 
-        fov = settings.general.fov
-        lookSens = settings.general.lookSens
-        maxTags = settings.general.maxTags
-        tagSize = settings.general.tagSize
-        antialias = settings.render.antialias ? 0 : 1
-        limitType = settings.render.limitType
-        vramLimit = settings.render.vramLimit
-        renderLimit = settings.render.renderLimit
-        renderDist = settings.render.renderDist
-        lowResDist = settings.render.lowResDist
-        
+        fovValue = settings.fov
+        sensitivityValue = settings.sensitivity
+        tagCountValue = settings.tagCount
+        tagSizeValue = settings.tagSize
+        renderLimitValue = settings.renderLimit
+        lowLODDistValue = settings.lowLODDist
+
     })
+
+    function nonLinear(value, exp, min, max) {
+
+        const range = (max - min)
+        const normalized = (value - min) / range
+        return Math.round(Math.pow(normalized, exp) * range + min)
+
+    }
+
+    function formatNumber(num) {
+
+        num = parseInt(num)
+        if (num < 1000) 
+            return num.toString()
+
+        const suffixes = ["", "k", "M", "B", "T"]
+        let magnitude = Math.floor(Math.log10(num) / 3)
+        let shortValue = (num / Math.pow(10, magnitude * 3)).toFixed(1)
+        
+        shortValue = shortValue.replace(/\.0$/, "")
+
+        return shortValue + suffixes[magnitude]
+        
+    }
 
     function save(){
 
-        settings.general.fov = refs.camera.fov = parseInt(fov)
-        settings.general.lookSens = parseInt(lookSens)
-        settings.general.maxTags = parseInt(maxTags)
-        settings.general.tagSize = parseInt(tagSize)
-        settings.render.limitType = parseInt(limitType)
-        settings.render.vramLimit = parseInt(vramLimit)
-        settings.render.renderLimit = parseInt(renderLimit)
+        settings.fov = refs.camera.fov = parseInt(fovValue)
+        settings.sensitivity = parseInt(sensitivityValue)
+        settings.tagCount = parseInt(tagCountValue)
+        settings.tagSize = parseInt(tagSizeValue)
 
-        const newLowResDist = parseInt(lowResDist)
-        refs.renderManager.setLodDistances( newLowResDist / settings.render.lowResDist )
-        settings.render.lowResDist = newLowResDist
+        if(renderLimitValue == RENDER_LIMIT_MAX)
+            settings.renderLimit = -1
+        else
+            settings.renderLimit = renderLimitValue
 
-        refs.camera.updateProjectionMatrix(); // Apply the changes
+        const newLowLODDist = parseInt(lowLODDistValue)
+        refs.renderManager.setLodDistances( newLowLODDist / settings.lowLODDist )
+        settings.lowLODDist = newLowLODDist
+
+        refs.camera.updateProjectionMatrix()
 
         localStorage.setItem("settings", JSON.stringify(settings))
 
     }
 
-    function loadDefault(){
+    function reset(){
 
-        fov = defaultSettings.general.fov
-        lookSens = defaultSettings.general.lookSens
-        maxTags = defaultSettings.general.maxTags
-        tagSize = defaultSettings.general.tagSize
-        limitType = defaultSettings.render.limitType
-        vramLimit = defaultSettings.render.vramLimit
-        renderLimit = defaultSettings.render.renderLimit
-        lowResDist = defaultSettings.render.lowResDist
-        
-    }
-
-    async function changeTab(tab){
-
-        showConnectModal = false
-
-        if (tab === 1) {
-
-            if(WalletConnection.isConnected || await WalletConnection.reconnect()){
-    
-                selectedTab = 1
-                providerName = WalletConnection.connection.connector.name
-                providerIcon = WalletConnection.connection.connector.icon
-                addresses = WalletConnection.connection.addresses
-                addressIndex = WalletConnection.connection.addressIndex
-
-            } else 
-
-                showConnectModal = true
-
-        } else
-
-            selectedTab = 0
+        fovValue = defaultSettings.fov
+        sensitivityValue = defaultSettings.sensitivity
+        tagCountValue = defaultSettings.tagCount
+        tagSizeValue = defaultSettings.tagSize
+        renderLimitValue = defaultSettings.renderLimit
+        lowLODDistValue = defaultSettings.lowLODDist
 
     }
 
-    async function disconnect() {
-        
-        await WalletConnection.disconnect()
-        changeTab(0)
+    $:{
+        fovDisplay = formatNumber(fovValue)
+        sensitivityDisplay = formatNumber(sensitivityValue)
+        tagCountDisplay = formatNumber(tagCountValue)
+        tagSizeDisplay = formatNumber(tagSizeValue)
 
+        if(renderLimitValue == RENDER_LIMIT_MAX)
+            renderLimitDisplay = "None"
+        else
+            renderLimitDisplay = formatNumber(nonLinear(renderLimitValue, 3, RENDER_LIMIT_MIN, RENDER_LIMIT_MAX))
+
+        if(lowLODDistValue == LOW_LOD_DIST_MAX)
+            lowLODDistDisplay = "None"
+        else
+            lowLODDistDisplay = formatNumber(lowLODDistValue)
     }
 
 </script>
 
+<Modal class="max-w-lg" header="Settings" on:close>
+    <div class="grid grid-cols-[auto_1fr_auto] items-center gap-4 text-xs sm:text-sm mt-4">
 
-<Modal on:close class="max-w-screen-md" header="Settings">
-    <div class="flex flex-col items-stretch w-full gap-4 sm:flex-row">
-        {#if !$isMobileBrowser}
-            <div class="flex flex-row justify-between flex-none w-full gap-1 sm:justify-normal sm:flex-col sm:w-52 border-zinc-600">
-                <button on:click={() => changeTab(0)} class="settings-button active:opacity-80 {selectedTab === 0 ? "bg-zinc-700" : "hover:bg-zinc-700"}">World Settings</button>
-                <button on:click={() => changeTab(1)} class="settings-button active:opacity-80 {selectedTab === 1 ? "bg-zinc-700" : "hover:bg-zinc-700"}">Wallet Settings</button>
-            </div>
-            <div class="w-full h-px sm:h-auto sm:w-px bg-zinc-700"></div>
-        {/if}
-        {#if selectedTab === 0}
-            <div class="flex flex-col justify-between flex-1 gap-3 min-h-96">
-                <div class="settings-subsection">
-                    <h1>General</h1>
-                    <SliderSetting bind:value={fov} name="FOV" postfix="°" min={50} max={150}/>
-                    <SliderSetting bind:value={lookSens} name="Sensitivity" min={1} max={50}/>
-                    <SliderSetting bind:value={maxTags} name="Max Tags" max={100}/>
-                    <SliderSetting bind:value={tagSize} name="Tag Size" min={1} max={10}/>
-                </div>
-                <div class="settings-subsection">
-                    <h1>Render Settings</h1>
-                    <OptionSetting bind:selected={limitType} name="Limit Metric" options={["VRAM", "Plots"]}>
-                        <Tip text="The metric used to limit the amount of plots rendered. Note that the accompanying limits should be set based on your system's capabilities."/>
-                    </OptionSetting>
-                    {#if limitType === 0}
-                        <SliderSetting bind:value={vramLimit} name="VRAM Limit" units={[" MB"," GB",""]} nolimit={true} min={100} max={24000}/>
-                    {:else}
-                        <SliderSetting bind:value={renderLimit} name="Max Rendered Plots" nolimit={true} min={100} max={75000}/>
-                    {/if}
-                    <SliderSetting bind:value={lowResDist} name="Low Resolution Distance" min={10} max={200}>
-                        <Tip text="The distance from a plot that causes it to render in low resolution. Useful for reducing lag when rendering many plots."/>
-                    </SliderSetting>
-                </div>
-                <div class="flex w-full gap-3">
-                    <button on:click={save} class="flex-1 button0">Apply</button>
-                    <button on:click={loadDefault} class="flex-1 button0">Load Default</button>
-                </div>
-            </div>
-        {:else if selectedTab === 1}
-            <div class="flex flex-col justify-between flex-1 w-full min-h-96">
-                <div>
-                    <div class="settings-subsection">
-                        <h1>Wallet Provider</h1>
-                        <div class="flex items-center gap-2">
-                            <img class="w-6 h-6" src={providerIcon} alt="">
-                            <div class="text-sm">{providerName}</div>
-                        </div>
-                    </div>
-                    <div class="mt-3 settings-subsection">
-                        <h1>Current Wallet</h1>
-                        <DropDown on:change={e => WalletConnection.changeWallets(e.detail.index)} bind:options={addresses} bind:selectedIndex={addressIndex}/>
-                    </div>
-                </div>
-                <div class="settings-subsection">
-                    <button on:click={disconnect} class="px-2 py-1 text-sm font-semibold text-center transition-colors bg-red-600 rounded-lg hover:bg-red-500 active:bg-red-600">Disconnect Wallets</button>
-                </div>
-            </div>
-        {/if}
+        <div>FOV</div>
+        <Slider bind:value={fovValue} min={FOV_MIN} max={FOV_MAX}/>
+        <div class="text-center w-14">{fovDisplay}</div>
+
+        <div>Sensitivity</div>
+        <Slider bind:value={sensitivityValue} min={SENSITIVITY_MIN} max={SENSITIVITY_MAX}/>
+        <div class="text-center w-14">{sensitivityDisplay}</div>
+
+        <div>Tag count</div>
+        <Slider bind:value={tagCountValue} min={TAG_COUNT_MIN} max={TAG_COUNT_MAX}/>
+        <div class="text-center w-14">{tagCountDisplay}</div>
+
+        <div>Tag size</div>
+        <Slider bind:value={tagSizeValue} min={TAG_SIZE_MIN} max={TAG_SIZE_MAX}/>
+        <div class="text-center w-14">{tagSizeDisplay}</div>
+
+        <div class="flex items-center gap-1">
+            <span>Chunk render limit</span>
+            <Tip class="bottom-0 left-0 translate-x-4" text="The maximum number of chunks that can be rendered at once."/>
+        </div>
+        <Slider bind:value={renderLimitValue} min={RENDER_LIMIT_MIN} max={RENDER_LIMIT_MAX}/>
+        <div class="text-center w-14">{renderLimitDisplay}</div>
+
+        <div class="flex items-center gap-1">
+            <div>Low LOD threshold</div>
+            <Tip class="bottom-0 left-0 translate-x-4" text="The distance threshold at which builds are rendered in low resolution. Lower this threshold to improve performance when many chunks are loaded."/>
+        </div>
+        <Slider bind:value={lowLODDistValue} min={LOW_LOD_DIST_MIN} max={LOW_LOD_DIST_MAX}/>
+        <div class="text-center w-14">{lowLODDistDisplay}</div>
+
+    </div>
+    <div class="flex w-full gap-3 mt-6">
+        <button on:click={save} class="w-full button0">Save</button>
+        <button on:click={reset} class="w-full button0">Reset</button>
     </div>
 </Modal>
-
-{#if showConnectModal}
-    <ConnectWalletModal on:cancel={() => changeTab(0)} on:success={() => changeTab(1)}/>
-{/if}
-
-
-<style lang="postcss">
-
-    .settings-button{
-
-        @apply text-left w-full px-3 py-2 text-sm transition-all rounded-xl;
-
-    }
-
-    h1{
-
-        @apply font-semibold text-sm;
-
-    }
-
-    .settings-subsection{
-
-        @apply flex gap-3 flex-col;
-
-    }
-
-</style>

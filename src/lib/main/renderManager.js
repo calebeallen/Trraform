@@ -100,20 +100,10 @@ export default class RenderManager{
 
         if(this.totalTimeElapsed - this.lastCleanUpTimeStamp >= dt_CLEAN){
 
-            // make single statement
-            if(settings.render.limitType === 0){ // vram limit
 
-                if(settings.render.vramLimit < 24000 && this.vramEstimate / 1e6 > settings.render.vramLimit)
+            if(settings.renderLimit > 0 && this.renderedPlots.size > settings.renderLimit)
 
-                    this.unrenderOldestChunks()
-
-            } else {
-
-                if(settings.render.renderLimit < 75000 && this.renderedPlots.size > settings.render.renderLimit)
-
-                    this.unrenderOldestChunks()
-
-            }
+                this.unrenderOldestChunks()
             
             this.lastCleanUpTimeStamp = this.totalTimeElapsed
 
@@ -287,7 +277,7 @@ export default class RenderManager{
                 const lod = new LOD()
                 lod.autoUpdate = lod.matrixAutoUpdate = lod.matrixWorldAutoUpdate = false
                 lod.addLevel(stdRes, 0)
-                lod.addLevel(lowRes, settings.render.lowResDist * plot.parent.blockSize, 0.01)
+                lod.addLevel(lowRes, settings.lowLODDist * plot.parent.blockSize, 0.01)
                 lod.position.copy(stdRes.position)
                 lod.updateMatrix()
                 lod.matrixWorld.copy(lod.matrix)
@@ -333,7 +323,7 @@ export default class RenderManager{
                 const lod = new LOD()
                 lod.autoUpdate = lod.matrixAutoUpdate = lod.matrixWorldAutoUpdate = false
                 lod.addLevel(stdRes, 0)
-                lod.addLevel(lowRes, settings.render.lowResDist * plot.parent.blockSize, 0.01)
+                lod.addLevel(lowRes, settings.lowLODDist * plot.parent.blockSize, 0.01)
                 lod.position.copy(plot.pos)
                 // lod.scale.set(plot.blockSize, plot.blockSize, plot.blockSize)
                 lod.updateMatrix()

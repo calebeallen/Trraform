@@ -29,7 +29,7 @@ export default class RootPlot {
 
             this._loading = ( async () => {
 
-                //no json data stored, so no decoding needed
+                //get build
                 const condensed = new Uint16Array(await this.id.fetch())
                 const bs = condensed[1]
                 const expanded = expand(condensed)
@@ -183,20 +183,39 @@ export default class RootPlot {
 
                 }
 
-                //create chunk objects to pass to children (they are shared for memory efficiency)
-                const chunks = []
-                for(const [i, size] of Object.entries(chunkSizes))
+                //c reate chunk objects to pass to children (they are shared for memory efficiency)
+                let maxChunkId = chunkArr[0]
+                for(let i = 1; i < chunkArr.length; i++)
 
-                    chunks[i] = { id: `_${ ((this.id.id << 16) | (parseInt(i) + 1)).toString(16) }`, size }
+                    if(chunkArr[i] > maxChunkId)
+                        maxChunkId = chunkArr[i]
 
-                //create child plots
+                const chunkCount = maxChunkId + 1
+                const chunks = new Array(chunkCount)
+
+                for(let i = 0; i < chunkCount; i++)
+
+                    chunks[i] = { 
+                        parent: null,
+                        children: new Set(),
+                        plots: [],
+                        lod: null,
+                        center: new Vector3()
+                    }
+        
+                // create child plots
                 for(let i = 0; i < plotIndicies.length; i++){
 
                     const childPlotId = this.id.mergeChild(i + 1)
                     const childPos = new Vector3(...I2P(plotIndicies[i], bs))
                     childPos.y++
                     childPos.multiplyScalar(this.blockSize).add(this.pos)
-                    this.children.push( new Plot(childPlotId, childPos, this, chunks[chunkArr[i]]) )
+                    
+                    const chunk = chunks[chunkArr[i]]
+                    const plot = new Plot(childPlotId, childPos, this, chunk)
+
+                    chunk.plots.push(plot)
+                    this.children.push(plot)
 
                 }
 

@@ -1,6 +1,6 @@
 
 import { ColorLibrary } from "./colorLibrary"
-import { DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, PLOT_VERSION } from "./constants"
+import { DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MIN_BUILD_SIZE, NAME_FIELD_MAXLEN, PLOT_COUNT } from "./constants"
 
 function P2I( pos, size ){
 
@@ -161,12 +161,9 @@ function disposeMesh( mesh ){
 
 }
 
-//YOU CHANGED THIS
 function condense(buildData, buildSize){
 
-    console.log(buildSize)
     const condensed = [0, buildSize] //editor version 0
-
     const MB15 = 0x7fff
 
     let last = buildData[0]
@@ -254,6 +251,58 @@ function expand(condensed){
 
 }
 
+function validateBuildData(data) {
+
+    const MAX_COLOR_INDEX = ColorLibrary.colors.length - 1
+
+    if (data.length < 2) 
+        return false
+
+    const bs = data[1]
+    const bs3 = bs ** 3
+  
+    const subplotsUsed = new Array(PLOT_COUNT).fill(false)
+  
+    let blkCnt = 0
+  
+    for (let i = 2; i < data.length; i++) {
+
+        const write = data[i] & 1
+        const val = data[i] >>> 1
+    
+        if (write === 1) {
+
+            if (val > MAX_COLOR_INDEX)
+                return false
+            
+            if (val > 0 && val <= PLOT_COUNT) {
+
+                if (subplotsUsed[val - 1])
+                    return false
+        
+                if ((i + 1) < data.length && ((data[i + 1] & 1) === 0))
+                    return false
+        
+                subplotsUsed[val - 1] = true
+
+            }
+    
+            blkCnt++
+
+        } else 
+
+            blkCnt += val
+        
+        if (blkCnt > bs3)
+            return false
+        
+    }
+    
+    return true
+
+}
+  
+
 function verifyBuild(buffer){
 
     //verify that editor version is vaild
@@ -275,7 +324,7 @@ function verifyBuild(buffer){
         
             if(val >= ColorLibrary.colors.length)
 
-            return false
+                return false
 
             blkCount++
 
@@ -293,7 +342,8 @@ function verifyBuild(buffer){
 
 }
 
-function decodePlotData(bytes, depth = 0, validateBuildSize = false){
+// does not do an in-depth validation
+function decodePlotData(bytes){
 
     const parts = []
 
@@ -306,84 +356,42 @@ function decodePlotData(bytes, depth = 0, validateBuildSize = false){
 
     }
 
-    const jsonData = parts[0].length === 0 ? {} : JSON.parse(new TextDecoder().decode(parts[0]))
-    let { ver, name, desc, link, linkLabel, rEnd } = jsonData
+    // json part is mandatory, build is optional
+    if(parts.length == 0 || parts.length > 2)
 
+        throw new Error("cannot decode plot data: invalid parts length")
+
+    const jsonData = JSON.parse(new TextDecoder().decode(parts[0]))
+    const { ver, name, desc, link, linkLabel, rEnd } = jsonData
     let buildData = null
 
-    if(parts[1]?.length){
+    // if it has a build part, give blank build
+    // *this is already done on server, but just for precaution
+    if (parts.length == 1) {
+        
+        buildData = new Uint16Array([0, MIN_BUILD_SIZE])
+
+    } else {
 
         const buildDataU8 = Uint8Array.from(parts[1])
-        buildData = new Uint16Array(buildDataU8.buffer)
+        const dv = new DataView(buildDataU8.buffer)
+        const len = buildDataU8.length / 2
 
-        //clip build data to fit within max build size for its depth
-        if(validateBuildSize){
+        buildData = new Uint16Array(len)
 
-            const maxInd = MAX_BUILD_SIZES[depth] ** 3 - 1
-            let i, ptr = 0
-
-            for(i = 2; i < buildData.length; i++){
-
-                const newBlock = buildData[i] & 1
-
-                if (newBlock) {
-                    
-                    // if adding the block would push past max length, break
-                    if(ptr + 1 > maxInd)
-                        
-                        break
-
-                    ptr++
-
-                } else {
-
-                    //clip repeat length
-                    const lastInd = Math.min( ptr + (buildData[i] >> 1), maxInd )
-                    const len = lastInd - ptr
-
-                    if(!len)
-
-                        break
-
-                    if(lastInd == maxInd){
-
-                        buildData[i] = len << 1
-                        i++
-                        break
-
-                    }
-
-                    ptr += len
-                    
-                }
-
-            }
-
-            buildData = buildData.subarray(0, i)
-            buildData[1] = Math.min(buildData[1], MAX_BUILD_SIZES[depth])
-
-        }
+        for (let i = 0; i < len.length; i++) 
+            buildData[i] = dv.getUint16(i * 2, true)
 
     }
 
-    return {
-        ver,
-        name : substring(name ?? "", NAME_FIELD_MAXLEN),
-        desc : substring(desc ?? "", DESC_FIELD_MAXLEN),
-        link : (link ?? "").substring(0, LINK_FIELD_MAXLEN),
-        linkLabel : substring(linkLabel ?? "", LINK_LABEL_FIELD_MAXLEN),
-        rEnd : parseInt(rEnd ?? 0),
-        buildData
-    }   
+    return { ver, name, desc, link, linkLabel, rEnd, buildData }   
 
 }
 
-//packages plot data into:
-// | json data length (4 bytes) | json data | buildData length (4 bytes) | buildData |
+// not used 
 function encodePlotData({ name, desc, link, linkLabel, rEnd, buildData = null } = {}){
 
     const json = {
-        ver : PLOT_VERSION,
         name : substring(name ?? "", NAME_FIELD_MAXLEN),
         desc : substring(desc ?? "", DESC_FIELD_MAXLEN),
         link : (link ?? "").substring(0, LINK_FIELD_MAXLEN),
@@ -457,84 +465,4 @@ function deleteNotification(notification, _id){
 
 }
 
-
-// function decodePlotData(buffer, depth){
-
-//     //parse restriction header
-//     const restrictionLevel = buffer[1]
-//     const endTimeU8 = new Uint8Array(8)
-//     for(let i = 0; i < 8; i++)
-
-//         endTimeU8[i] = buffer[i + 2]
-
-//     const endTimeU64 = new BigUint64Array(endTimeU8.buffer)
-//     const endTime = endTimeU64[0]
-
-//     //parse body
-//     const chunks = _readChunks(buffer.subarray(12))
-
-//     let transferable = []
-//     let buildData = null
-
-//     if(chunks[3].length !== 0){
-
-//         const buildDataU8 = new Uint8Array(chunks[3].length)
-//         buildDataU8.set(chunks[3])
-
-//         buildData = new Uint16Array(buildDataU8.buffer)
-        
-//         //limits in place incase someone messes with client side js to upload something that goes beyond allowed constraints
-//         //limit build size
-
-//         const buildSize = Math.min(buildData[1], MAX_BUILD_SIZES[depth])
-//         const maxLen = buildSize ** 3 + 2
-
-//         buildData = buildData.subarray(0, maxLen)
-//         buildData[1] = buildSize
-//         transferable.push(buildData.buffer)
-
-//     }
-
-//     const textDecoder = new TextDecoder()
-
-//     //limit text lengths (note they need to be double the length )
-//     return [{
-//         restrictionLevel,
-//         endTime,
-//         name : substring(textDecoder.decode(chunks[0]).trim(), NAME_FIELD_MAXLEN),
-//         desc : substring(textDecoder.decode(chunks[1]).trim(), DESC_FIELD_MAXLEN),
-//         link : substring(textDecoder.decode(chunks[2]).trim(), LINK_FIELD_MAXLEN),
-//         buildData
-//     }, transferable]
-
-// }
-
-
-// function encodePlotData(name = null, desc = null, link = null, buildData = null){
-
-//     buildData = buildData || new Uint8Array()
-
-//     const textEncoder = new TextEncoder()
-//     const binData = [
-//         textEncoder.encode(name || ""), 
-//         textEncoder.encode(desc || ""), 
-//         textEncoder.encode(link || ""), 
-//         new Uint8Array(buildData.buffer)
-//     ]
-//     const blobParts = [new Uint8Array(12)] //header (set on server) [version(2bytes)|verified(1byte)|restricted(1byte)|restrictionEndTime(8byte)]
-
-//     //prepend byte length to each buffer
-//     for(let i = 0; i < binData.length; i++){
-
-//         const sizeHeader = new Uint32Array([binData[i].byteLength])
-//         blobParts.push(sizeHeader, binData[i])
-
-//     }
-
-//     //minimum encoded length = header 12 + body 4 * fieldCount = 28 bytes
-//     return new Blob( blobParts, { type: "application/octet-stream" } )
-
-// }
-
-
-export { I2P, P2I, P2I_D, getFaceIndex, getVertexIndicies, vertexIndiciesToUintArr, topFace, bottomFace, frontFace, backFace, leftFace, rightFace, disposeMesh, condense, expand, verifyBuild, decodePlotData, encodePlotData, pushNotification, deleteNotification }
+export { I2P, P2I, P2I_D, getFaceIndex, getVertexIndicies, vertexIndiciesToUintArr, topFace, bottomFace, frontFace, backFace, leftFace, rightFace, disposeMesh, condense, expand, validateBuildData, decodePlotData, encodePlotData, pushNotification, deleteNotification }

@@ -31,9 +31,6 @@ const USDC_ABI = parseAbi([
     "function nonces(address) view returns (uint256)",
 ]);
 
-const MINT_PRICE = 10
-const PARENT_MINT_PRICE = 6
-
 const wagmiConfig = createConfig({
     chains: [polygon],
     connectors: [
@@ -109,12 +106,6 @@ class WalletConnection {
         })
 
         return out[0]
-
-    }
-
-    static getQuoteUSDC(isParentOwner = false){
-
-        return isParentOwner ? PARENT_MINT_PRICE : MINT_PRICE
 
     }
 

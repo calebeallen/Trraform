@@ -16,37 +16,23 @@ const newPlots = writable(0)
 const loadScreenOpacity = writable(100)
 
 const refs = {
-
-    disabled: false,
-    lastPlotVisited: "0x0",
     tagCanvas: null,
     renderer: null,
     renderManager : null,
     scene: null,
     camera: null,
-    viewMatrix: null,
-    mousemoveCallback: () => {},
-    walletConnectedCallback: () => {},
-    walletConnectXCallback: () => {}
-
+    viewMatrix: null
 }
 
 const defaultSettings = {
-    general : {
-        fov : 90,
-        lookSens : 20,
-        maxTags : 24,
-        tagSize : 3
-    },
-    render : {
-        limitType : 0, // 0:vram 1:plots
-        vramLimit : 1000, //MB
-        renderLimit : 1000,
-        lowResDist : 50
-    }
+    fov: 90,
+    sensitivity: 8,
+    tagCount: 10,
+    tagSize: 2,
+    renderLimit: 1600,
+    lowLODDist: 50
 }
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
-
 
 export { defaultSettings, settings, walletConnection, walletAddress, dbConnection, refs, insideOf, isMobileBrowser, showConnectWalletModal, myPlots, showSettingsModal, showMyPlots, plotSearchFocused, notification, newPlots, loadScreenOpacity }

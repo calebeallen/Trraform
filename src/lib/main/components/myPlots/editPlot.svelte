@@ -2,7 +2,7 @@
 <script>
 
     import { onMount } from "svelte"
-    import { verifyBuild, pushNotification } from "$lib/common/utils"
+    import { validateBuildData, pushNotification } from "$lib/common/utils"
     import { preprocessPNG } from "$lib/common/buildImage"
     import { MAX_BUILD_SIZES, NAME_FIELD_MAXLEN, DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN } from "$lib/common/constants"
     import { notification, loadScreenOpacity, walletConnection } from "$lib/main/store.js"
@@ -69,14 +69,12 @@
 
         try {
 
-            if(!verifyBuild(_buildData)){
+            if(!validateBuildData(_buildData)){
 
-                pushNotification(notification, "Invalid Build", "Build data could not be validated.")
+                pushNotification(notification, "Invalid build", "Build data could not be validated.")
                 return
 
             }
-
-            console.log(isSameBuild(buildData, _buildData))
 
             if(isSameBuild(buildData, _buildData))
 
@@ -87,24 +85,24 @@
 
             if( bs < 6 ){
 
-                pushNotification(notification, "Invalid Build Size", `Build size must be greater than ${maxbs}x${maxbs}x${maxbs}.`)
+                pushNotification(notification, "Invalid build size", `Build size must be greater than ${maxbs}x${maxbs}x${maxbs}.`)
                 return
 
             }
 
             if( bs > maxbs ){
 
-                pushNotification(notification, "Invalid Build Size", `Build size exceeds the maximum for this plot (${maxbs}x${maxbs}x${maxbs}).`)
+                pushNotification(notification, "Invalid build size", `Build size exceeds the maximum for this plot (${maxbs}x${maxbs}x${maxbs}).`)
                 return
                 
             }
 
-            imgUrl = await MyPlot.imgUrl(_buildData)
+            imgUrl = _buildData.length == 2 ? "/default.png" : await MyPlot.imgUrl(_buildData)
             buildData = _buildData
 
         } catch(e) {
 
-            pushNotification(notification, "Error Uploading Build", "An unknown error occured.")
+            pushNotification(notification, "Error uploading build", "An unknown error occured.")
 
         }
 
@@ -184,8 +182,6 @@
             const message = "Your signature is used to verify your ownership of the plot you are trying to update. This allows us to authenticate you without saving any sensitive information."
             const signature = await $walletConnection.getSignature(message)
 
-            console.log("signt")
-
             const form = new FormData()
             form.append("plotId", editingPlot.id.string())
             form.append("message", message)
@@ -194,14 +190,18 @@
             form.append("desc", desc)
             form.append("link", link)
             form.append("linkLabel", linkLabel)
-            form.append("buildData", new Blob([buildData]))
 
-            // if(buildData !== editingPlot.buildData){
+            if (buildData !== null) {
 
-            const p = preprocessPNG(await MyPlot.getMesh(buildData))
-            form.append("buildImageData", new Blob([p]))
+                form.append("buildData", new Blob([buildData]))
 
-            // }
+                //if build changed, update image
+                if (buildData !== editingPlot.buildData) {
+                    const p = preprocessPNG(await MyPlot.getMesh(buildData))
+                    form.append("buildImageData", new Blob([p]))
+                }
+            
+            }
             
             //update
             const res = await fetch("http://localhost:8080/update-plot", { 

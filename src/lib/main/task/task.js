@@ -135,7 +135,6 @@ export default class Task{
 
                     transferable.push(d.position[i].buffer, d.color[i].buffer, d.index[i].buffer)
 
-
         }
     
         return await Task.deployTask(this.method, this.params, transferable)

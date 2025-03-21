@@ -15,7 +15,7 @@ export default class MaxHeap extends Array{
 
         let i = this.length - 1
 
-        //sort heap
+        //percolate up
         while(i > 0){
 
             const pi = Math.floor((i - 1) / 2)
@@ -38,39 +38,87 @@ export default class MaxHeap extends Array{
 
         let i = 0
 
-        const last = this.pop()
+        if(this.length == 0)
 
-        if(this.length > 0){
+            return null
 
-            this[0] = last
+        const head = this[0]
+        this[0] = this.pop()
 
-            //sort heap
-            while (true) {
+        //sort heap
+        while (true) {
 
-                const li = 2 * i + 1 //left index
-                const ri = 2 * i + 2 //right index
+            const li = 2 * i + 1 //left index
+            const ri = 2 * i + 2 //right index
 
-                let j = i
+            let j = i
 
-                if (li < this.length && this[li].dist > this[j].dist) 
+            if (li < this.length && this[li].dist > this[j].dist) 
 
-                    j = li
-                
-                if (ri < this.length && this[ri].dist > this[j].dist) 
+                j = li
+            
+            if (ri < this.length && this[ri].dist > this[j].dist) 
 
-                    j = ri
+                j = ri
 
-                if (j === i)
-                
-                    break
-
-                [this[i], this[j]] = [this[j], this[i]]
-
-                i = j
-
-            }
+            if (j === i)
+            
+                break
+            
+            [this[i], this[j]] = [this[j], this[i]]
+            i = j
 
         }
+
+        return head
+
+    }
+
+    heapify(){
+
+        for (let i = Math.floor(this.length / 2) - 1; i >= 0; i--) {
+
+            let currentIndex = i;
+          
+            while (true) {
+            
+                const li = 2 * currentIndex + 1 // left child index
+                const ri = 2 * currentIndex + 2 // right child index
+            
+                let j = currentIndex
+            
+                // Compare left child
+                if (li < this.length && this[li].dist > this[j].dist) 
+                    j = li
+            
+                // Compare right child
+                if (ri < this.length && this[ri].dist > this[j].dist)
+                    j = ri
+            
+                // No swap needed -> done
+                if (j === currentIndex)
+                    break
+            
+                // Swap
+                [this[currentIndex], this[j]] = [this[j], this[currentIndex]]
+            
+                // Keep sifting down
+                currentIndex = j
+
+            }
+          
+        }
+
+    }
+
+    heapSort(){
+
+        const sorted = new Array(this.length)
+        
+        for(let i = 0; i < this.length; i++)
+            sorted[i] = this.popHead()
+
+        return sorted
 
     }
 

@@ -54,7 +54,17 @@ export default class Plot extends PlotData {
         this.blockSize = this.parent.blockSize / this.buildSize
 
         this.geometryData = null
-        this.hasGeometry = false
+
+    }
+
+    async safeClear(){
+
+        // wait for load before clearing
+        if(this._loading !== null)
+
+            await this._loading
+
+        this.clear()
 
     }
 
@@ -73,7 +83,6 @@ export default class Plot extends PlotData {
         this.blockSize = this.parent.blockSize / this.buildSize
 
         this.geometryData = null
-        this.hasGeometry = false
 
     }
 
@@ -81,61 +90,59 @@ export default class Plot extends PlotData {
 
         if(this._loading === null)
 
-            this._loading = ( async () => {
+            this._loading = new Promise(async resolve => {
 
-                try {
+                const task = new Task("generate-plot", {
+                    id: this.id.id,
+                    depth: this.id.depth()
+                })
+                const data = await task.run()
 
-                    const task = new Task("generate-plot", {
-                        id: this.id.id,
-                        depth: this.id.depth()
-                    })
-                    const data = await task.run()
-
-                    if(data.err) 
-                        
-                        throw new Error("Error generating plot")
-
-                    this.name = data.name
-                    this.desc = data.desc
-                    this.link = data.link
-                    this.linkLabel = data.linkLabel
-                    this.minted = true
-
-                    let plotIndicies, chunkArr
-
-                    if (data.geometryData !== null) {
-                        
-                        this.buildSize = data.buildSize
-                        this.geometryData = data.geometryData
-                        this.hasGeometry = true
-                        this.blockSize = this.parent.blockSize / data.buildSize
-                        
-                        //calculate bounding sphere (this is not the same as the geometry bounding sphere. It is scaled and includes plot positions)
-                        const min = new Vector3(...data.geometryData.min)
-                        const max = new Vector3(...data.geometryData.max)
-                        const center = min.clone().add(max).multiplyScalar( this.blockSize / 2 ).add(this.pos)
-                        const radius = max.sub(min).length() * this.blockSize / 2
-                        this.boundingSphere.set(center, radius)
-
-                        //set child data
-                        plotIndicies = data.plotIndicies
-                        chunkArr = data.chunkArr
+                if(data.err){
                     
-                    } else
-                        
-                        //set default child data
-                        [plotIndicies, chunkArr] = Plot.defaultChildPlots(this.buildSize)
+                    resolve(null)
+                    return
 
-                    //child plots
-                    if (this.id.depth() < MAX_DEPTH)
+                }
 
-                        this.createChildPlots( plotIndicies, chunkArr )
+                this.name = data.name
+                this.desc = data.desc
+                this.link = data.link
+                this.linkLabel = data.linkLabel
+                this.minted = true
 
-                } catch {}
+                let plotIndicies, chunkArr
 
-                return this
+                if (data.geometryData !== null) {
+                    
+                    this.buildSize = data.buildSize
+                    this.geometryData = data.geometryData
+                    this.blockSize = this.parent.blockSize / data.buildSize
+                    
+                    //calculate bounding sphere (this is not the same as the geometry bounding sphere. It is scaled and includes plot positions)
+                    const min = new Vector3(...data.geometryData.min)
+                    const max = new Vector3(...data.geometryData.max)
+                    const center = min.clone().add(max).multiplyScalar( this.blockSize / 2 ).add(this.pos)
+                    const radius = max.sub(min).length() * this.blockSize / 2
+                    this.boundingSphere.set(center, radius)
+
+                    //set child data
+                    plotIndicies = data.plotIndicies
+                    chunkArr = data.chunkArr
                 
-            })()
+                } else
+                    
+                    //set default child data
+                    [plotIndicies, chunkArr] = Plot.defaultChildPlots(this.buildSize)
+
+                //child plots
+                if (this.id.depth() < MAX_DEPTH)
+
+                    this.createChildPlots( plotIndicies, chunkArr )
+
+                resolve(this)
+                
+            })
 
         return this._loading
 
@@ -143,22 +150,26 @@ export default class Plot extends PlotData {
 
     createChildPlots(plotIndicies, chunkArr){
 
-        const chunkSizes = {}
+        //create shared chunk reference, give parent chunk a reference to child
+        let maxChunkId = chunkArr[0]
+        for(let i = 1; i < chunkArr.length; i++)
 
-        for(let i = 0; i < chunkArr.length; i++){
+            if(chunkArr[i] > maxChunkId)
+                maxChunkId = chunkArr[i]
 
-            if(!chunkSizes[chunkArr[i]]) 
-                chunkSizes[chunkArr[i]] = 1
-            else 
-                chunkSizes[chunkArr[i]]++
+        const chunkCount = maxChunkId + 1
+        const chunks = new Array(chunkCount)
 
-        }
+        // create chunks, give parent a reference to child chunks
+        for(let i = 0; i < chunkCount; i++)
 
-        //create chunk objects to pass to children (they are shared for memory efficiency)
-        const chunks = []
-        for(const [i, size] of Object.entries(chunkSizes))
-
-            chunks[i] = { id: ((BigInt(this.id.id) << 16n) | BigInt(parseInt(i) + 1)).toString(16), size }
+            chunks[i] = { 
+                parent: this.chunk,
+                children: new Set(),
+                plots: [],
+                lod: null,
+                center: new Vector3()
+            }
 
         //create child plots
         for(let i = 0; i < plotIndicies.length; i++){
@@ -166,7 +177,12 @@ export default class Plot extends PlotData {
             const childPlotId = this.id.mergeChild(i + 1)
             const childPos = new Vector3(...I2P(plotIndicies[i], this.buildSize))
             childPos.multiplyScalar(this.blockSize).add(this.pos)
-            this.children.push( new Plot(childPlotId, childPos, this, chunks[chunkArr[i]]) )
+
+            const chunk = chunks[chunkArr[i]]
+            const plot = new Plot(childPlotId, childPos, this, chunk)
+
+            chunk.plots.push(plot)
+            this.children.push(plot)
 
         }
 

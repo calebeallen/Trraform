@@ -4,7 +4,7 @@ import MaxHeap from "./structures/maxHeap"
 import Task from "./task/task"
 
 
-const CLEAN_UP_AMT = 5
+const CLEAN_UP_AMT = 10
 
 const DT_LOAD = 0.5 
 const dt_REFRESH = 0.5
@@ -15,7 +15,8 @@ export default class RenderManager {
 
     constructor(){
 
-        this.rendered = new Set()
+        this.renderedChunks = new Set()
+        this.renderedBuildsCount = 0
         this.totalTimeElapsed = 0
         this.lastLoadTimeStamp = 0
         this.lastRefreshTimeStamp = 0
@@ -25,7 +26,7 @@ export default class RenderManager {
 
     setLodDistances(ratio){
 
-        for(const { lod } of this.rendered)
+        for(const { lod } of this.renderedChunks)
             for(const level of lod.levels)
                 level.distance *= ratio
 
@@ -44,7 +45,7 @@ export default class RenderManager {
 
         if(this.totalTimeElapsed - this.lastRefreshTimeStamp >= dt_REFRESH){
 
-            for(const { lod } of this.rendered){
+            for(const { lod } of this.renderedChunks){
 
                 if(lod !== null)
 
@@ -105,17 +106,24 @@ export default class RenderManager {
 
     async render({ chunk, parent }){
 
-        if(this.throttle <= 0 || this.rendered.has(chunk))
+        if(this.throttle <= 0 || this.renderedChunks.has(chunk))
 
             return
 
-        this.rendered.add(chunk)
+        this.renderedChunks.add(chunk)
         this.throttle -= chunk.plots.length
 
         // load all plots
         const loadPlots = chunk.plots.map(plot => plot.load())
-        await Promise.all(loadPlots)
+        const plots = await Promise.all(loadPlots)
+        let buildCount = 0
 
+        for(const plot of plots)
+            if(plot.geometryData !== null)
+                buildCount++
+
+        this.renderedBuildsCount += buildCount
+        chunk.buildCount = buildCount
         // merge geometries
         const merged = {}
 
@@ -194,7 +202,7 @@ export default class RenderManager {
         if(chunk.parent !== null)
             chunk.parent.children.add(chunk)
 
-        if(this.rendered.size > settings.renderLimit)
+        if(this.renderedBuildsCount > settings.renderLimit)
             await this.cleanUp()
 
     }
@@ -204,24 +212,23 @@ export default class RenderManager {
         //remove furthest chunks
         const heap = MaxHeap()
         
-        for(const chunk of this.rendered)
-
-            heap.push({
-                chunk,
-                dist: refs.camera.distanceToSquared(chunk.center)
-            })
+        for(const chunk of this.renderedChunks)
+            if(chunk.buildCount > 0)
+                heap.push({
+                    chunk,
+                    dist: refs.camera.distanceToSquared(chunk.center)
+                })
 
         heap.heapify()
 
-        for(let i = 0; i < CLEAN_UP_AMT; i++)
-
+        while(this.renderedBuildsCount > settings.renderLimit - CLEAN_UP_AMT && heap.length > 0)
             await this.unrenderChunk(heap.popHead())
 
     }
 
     async unrenderChunk(chunk){
 
-        if(chunk == null || !this.rendered.has(chunk)) 
+        if(chunk == null || !this.renderedChunks.has(chunk)) 
             return
 
         // recursively unrender child chunks
@@ -236,11 +243,14 @@ export default class RenderManager {
         if(chunk.parent !== null)
             chunk.parent.children.delete(chunk)
 
-        // remove from rendered set
-        this.rendered.delete(chunk)
+        // remove from renderedChunks set
+        this.renderedChunks.delete(chunk)
 
         // remove from scene
         refs.scene.remove(chunk.lod)
+
+        // deduct from rendered builds count
+        this.renderedBuildsCount -= chunk.buildCount
 
     }
 

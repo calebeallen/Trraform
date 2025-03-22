@@ -200,7 +200,8 @@ export default class RootPlot {
                         children: new Set(),
                         plots: [],
                         lod: null,
-                        center: new Vector3()
+                        center: new Vector3(),
+                        buildCount: 0
                     }
         
                 // create child plots

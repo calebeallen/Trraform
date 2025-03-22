@@ -92,14 +92,14 @@ export default class Plot extends PlotData {
 
             this._loading = new Promise(async resolve => {
 
-                const task = new Task("generate-plot", {
+                const task = new Task("get-plot-data", {
                     id: this.id.id,
                     depth: this.id.depth()
                 })
                 const data = await task.run()
 
-                if(data.err){
-                    
+                if(data === null){
+
                     resolve(null)
                     return
 
@@ -109,15 +109,13 @@ export default class Plot extends PlotData {
                 this.desc = data.desc
                 this.link = data.link
                 this.linkLabel = data.linkLabel
+                this.buildSize = data.buildSize
+                this.blockSize = this.parent.blockSize / data.buildSize
                 this.minted = true
-
-                let plotIndicies, chunkArr
 
                 if (data.geometryData !== null) {
                     
-                    this.buildSize = data.buildSize
                     this.geometryData = data.geometryData
-                    this.blockSize = this.parent.blockSize / data.buildSize
                     
                     //calculate bounding sphere (this is not the same as the geometry bounding sphere. It is scaled and includes plot positions)
                     const min = new Vector3(...data.geometryData.min)
@@ -125,16 +123,9 @@ export default class Plot extends PlotData {
                     const center = min.clone().add(max).multiplyScalar( this.blockSize / 2 ).add(this.pos)
                     const radius = max.sub(min).length() * this.blockSize / 2
                     this.boundingSphere.set(center, radius)
-
-                    //set child data
-                    plotIndicies = data.plotIndicies
-                    chunkArr = data.chunkArr
                 
-                } else
-                    
-                    //set default child data
-                    [plotIndicies, chunkArr] = Plot.defaultChildPlots(this.buildSize)
-
+                }
+                
                 //child plots
                 if (this.id.depth() < MAX_DEPTH)
 
@@ -168,7 +159,8 @@ export default class Plot extends PlotData {
                 children: new Set(),
                 plots: [],
                 lod: null,
-                center: new Vector3()
+                center: new Vector3(),
+                buildCount: 0
             }
 
         //create child plots

@@ -18,7 +18,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal } from "$lib/main/store"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
@@ -29,6 +29,7 @@
     import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
     import { WalletConnection } from "$lib/main/walletConnection"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
+    import HowItWorksModal from "../../lib/main/components/howItWorksModal.svelte"
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
@@ -629,6 +630,10 @@
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>
+{/if}
+
+{#if $showHowItWorksModal}
+    <HowItWorksModal on:close={() => $showHowItWorksModal = false}/>
 {/if}
 
 <Notification store={notification}/>

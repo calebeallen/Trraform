@@ -7,7 +7,7 @@
 
     import { page } from "$app/stores"
     import { onMount } from "svelte";
-    import { insideOf, refs, isMobileBrowser, showMyPlots, plotSearchFocused, showSettingsModal } from "$lib/main/store"
+    import { insideOf, refs, isMobileBrowser, showMyPlots, plotSearchFocused, showSettingsModal, showHowItWorksModal } from "$lib/main/store"
     import ReportModal from "$lib/main/components/reportModal.svelte";
     import { setCookie, getCookie } from "$lib/common/cookie"
 
@@ -28,7 +28,6 @@
     onMount(() => {
 
         cancelKeyEvent()
-
         canVote = getCookie("voted") == ""
 
     })

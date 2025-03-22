@@ -121,7 +121,7 @@ export default class Task{
                 transferable = [this.params.expanded.buffer]
                 break
 
-            case "generate-plot":
+            case "get-plot-data":
 
                 transferable = []
                 break

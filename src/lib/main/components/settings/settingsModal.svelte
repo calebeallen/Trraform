@@ -24,7 +24,7 @@
         sensitivityValue = settings.sensitivity
         tagCountValue = settings.tagCount
         tagSizeValue = settings.tagSize
-        renderLimitValue = settings.renderLimit
+        renderLimitValue = settings.renderLimitLinear
         lowLODDistValue = settings.lowLODDist
 
     })
@@ -59,11 +59,12 @@
         settings.sensitivity = parseInt(sensitivityValue)
         settings.tagCount = parseInt(tagCountValue)
         settings.tagSize = parseInt(tagSizeValue)
+        settings.renderLimitLinear = parseInt(renderLimitValue)
 
         if(renderLimitValue == RENDER_LIMIT_MAX)
             settings.renderLimit = -1
         else
-            settings.renderLimit = renderLimitValue
+            settings.renderLimit = nonLinear(settings.renderLimitLinear, 3, RENDER_LIMIT_MIN, RENDER_LIMIT_MAX)
 
         const newLowLODDist = parseInt(lowLODDistValue)
         refs.renderManager.setLodDistances( newLowLODDist / settings.lowLODDist )
@@ -81,7 +82,7 @@
         sensitivityValue = defaultSettings.sensitivity
         tagCountValue = defaultSettings.tagCount
         tagSizeValue = defaultSettings.tagSize
-        renderLimitValue = defaultSettings.renderLimit
+        renderLimitValue = defaultSettings.renderLimitLinear
         lowLODDistValue = defaultSettings.lowLODDist
 
     }

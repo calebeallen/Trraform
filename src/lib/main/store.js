@@ -30,7 +30,8 @@ const defaultSettings = {
     sensitivity: 8,
     tagCount: 10,
     tagSize: 2,
-    renderLimit: 1600,
+    renderLimitLinear: 1600,
+    renderLimit: 50,
     lowLODDist: 50
 }
 

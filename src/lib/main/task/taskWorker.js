@@ -81,6 +81,7 @@ async function getPlotData(id){
 
     const encoded = new Uint8Array(encodedBuffer)
     const { name, desc, link, linkLabel, buildData } = decodePlotData(encoded, depth, true)
+
     const buildSize = buildData[1]
     const plotData = {
         name,
@@ -93,7 +94,12 @@ async function getPlotData(id){
         geometryData: null
     }
 
-    let expanded = null
+    let expanded = buildData.length > 2 ? expand(buildData) : null
+
+    const min = new Vector3(Infinity, Infinity, Infinity)
+    const max = new Vector3()
+    const v1 = new Vector3()
+    const v2 = new Vector3()
 
     // handle subplot placement if not max depth
     if (depth < MAX_DEPTH) {
@@ -102,7 +108,7 @@ async function getPlotData(id){
         let plotsUnplaced = PLOT_COUNT
 
         // if build is not blank..
-        if (buildData.length > 2) {
+        if (expanded !== null) {
 
             //mark plots that are already placed
             let idx = 0
@@ -124,8 +130,6 @@ async function getPlotData(id){
                     idx += val
 
             }
-
-            expanded = expand(buildData)
 
             // if plots unplaced, place on top surfaces
             if(plotsUnplaced > 0){
@@ -191,7 +195,6 @@ async function getPlotData(id){
         // if left over plots (and build not blank), place them on top surfaces
         // if left over plots, place in a grid
         const X0 = 1/12, Z0 = 3/12, S = 1/6
-        const v1 = new Vector3()
         let j = 0
 
         for (let z = 0; z < 4; z++)
@@ -220,25 +223,23 @@ async function getPlotData(id){
 
         plotData.plotIndicies = plotIndicies
         plotData.chunkArr = createChunkArr(plotIndicies, buildSize, CHUNK_SIZE)
+
+        // account for subplot positions in min/max
+        for(let i = 0; i < plotIndicies.length; i++){
+
+            v1.set(...I2P(plotIndicies[i], buildSize))
+            min.min(v1)
+            max.max(v1)
+
+        }
+
     
     }
     
-    if(expanded == null)
+    if(expanded === null)
 
         return [plotData, null]
-
-    const min = new Vector3(Infinity, Infinity, Infinity)
-    const max = new Vector3()
-
-    //place plots in build
-    for(let i = 0; i < plotIndicies.length; i++){
-
-        v1.set(...I2P(plotIndicies[i], buildSize))
-        min.min(v1)
-        max.max(v1)
-
-    }
-
+   
     const stdRes = reducePoly(expanded, buildSize)[0]
     const lowRes = makeLowRes(expanded, buildSize, LOW_RES)
     v2.set(...stdRes.dp)
@@ -268,10 +269,10 @@ async function getPlotData(id){
 }
 
 function seedRand(seed) {
-    const a = seed & 0xff
-    const b = (seed >> 8) & 0xff
-    const c = (seed >> 16) & 0xff
-    const d = (seed >> 24) & 0xff
+    let a = seed & 0xff
+    let b = (seed >> 8) & 0xff
+    let c = (seed >> 16) & 0xff
+    let d = (seed >> 24) & 0xff
     let t = b << 9, r = (b * 5) << 7
     c ^= a; d ^= b; b ^= c; a ^= d
     c ^= t; d = (d << 11) | (d >>> 21)

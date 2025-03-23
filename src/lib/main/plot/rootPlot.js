@@ -261,17 +261,23 @@ export default class RootPlot {
 
     }
 
-    getContains(point){
+    getKClosest(k, camera){
 
-        return this.octree.getContains(point)
+        return this.octree.getKClosestWithHeuristic(k, camera, 1)
 
     }
 
-    getKClosest(point, k, heap){
+    getClosestContains(target, radiusScalar = 1){
 
-        return this.octree.getKClosest(point, k, heap)
+        return this.octree.getClosestContains(target, radiusScalar)
+
+    }
+
+    // getKClosest(point, k, heap){
+
+    //     return this.octree.getKClosest(point, k, heap)
         
-    }
+    // }
     
     kClosestToPointAndLine(origin, dir, k){
 

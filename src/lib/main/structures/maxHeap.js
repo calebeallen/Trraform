@@ -8,6 +8,45 @@ export default class MaxHeap extends Array{
 
     }
 
+    addAndPopHead(elem){
+
+        this[0] = elem
+
+        if(this.length == 1)
+
+            return
+        
+        let currentIndex = 0;
+          
+        while (true) {
+        
+            const li = 2 * currentIndex + 1 // left child index
+            const ri = 2 * currentIndex + 2 // right child index
+        
+            let j = currentIndex
+        
+            // Compare left child
+            if (li < this.length && this[li].dist > this[j].dist) 
+                j = li
+        
+            // Compare right child
+            if (ri < this.length && this[ri].dist > this[j].dist)
+                j = ri
+        
+            // No swap needed -> done
+            if (j === currentIndex)
+                break
+        
+            // Swap
+            [this[currentIndex], this[j]] = [this[j], this[currentIndex]]
+        
+            // Keep sifting down
+            currentIndex = j
+
+        }
+
+    }
+
     add(elem){
 
         //add element to heap
@@ -110,16 +149,5 @@ export default class MaxHeap extends Array{
         }
 
     }
-
-    heapSort(){
-
-        const sorted = new Array(this.length)
-        
-        for(let i = 0; i < this.length; i++)
-            sorted[i] = this.popHead()
-
-        return sorted
-
-    }
-
+    
 }

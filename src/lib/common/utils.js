@@ -378,8 +378,8 @@ function decodePlotData(bytes){
         const len = buildDataU8.length / 2
 
         buildData = new Uint16Array(len)
-
-        for (let i = 0; i < len.length; i++) 
+        
+        for (let i = 0; i < len; i++) 
             buildData[i] = dv.getUint16(i * 2, true)
 
     }

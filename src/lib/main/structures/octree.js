@@ -104,14 +104,133 @@ export default class Octree extends OctreeNode{
             if(point.distanceTo(child.sphere.center) <= child.sphere.radius * scale){
 
                 if(child.worldPlot)
-
                     containers.push(child.worldPlot)
-
                 else
-
                     this._getContains(point, child, containers, scale)
 
             }
+
+    }
+
+    getClosestContains(target, radiusScalar){
+
+        const closest = { plot: null, dist: Infinity }
+        this._getClosestContains(target, this, closest, radiusScalar)
+        return closest.plot
+
+    }
+
+    _getClosestContains(target, node, closest, radiusScalar){
+        
+        for(const child of node.children){
+
+            const dist = target.distanceTo(child.sphere.center)
+
+            if(dist <= child.sphere.radius * radiusScalar){
+
+                if(child.worldPlot !== null){
+
+                    if(dist < closest.dist){
+                        closest.dist = dist
+                        closest.plot = child.worldPlot
+                    }
+
+                } else
+
+                    this._getClosestContains(target, child, closest, radiusScalar)
+
+            }
+
+        }
+        
+    }
+
+    getKClosestWithHeuristic(k, camera, alpha){
+
+        const frustum = new Frustum()
+        frustum.setFromProjectionMatrix(camera.viewMatrix)
+
+        const camFwd = new Vector3()
+        camera.getWorldDirection(camFwd)
+
+        const heap = new MaxHeap()
+
+        this._getKClosestWithHeuristic(this, k, camera.position, camFwd, alpha, heap, frustum)
+
+        if(heap.length <= 1)
+            return heap.map(a => a.node.worldPlot)
+
+        // compute distance without heuristic
+        for(const elem of heap)
+            elem.dist = camera.position.distanceTo(elem.node.worldPlot.sphere.center)
+
+        heap.heapify()
+
+        //sort in ascending order
+        const n = heap.length
+        const sorted = new Array(heap.length)
+        for(let i = 0; i < n; i++){
+            const elem = heap.popHead()
+            sorted[i] = {
+                plot: elem.node.worldPlot,
+                dist: elem.dist
+            }
+        }
+
+        return sorted
+
+    }
+
+
+    _getKClosestWithHeuristic(node, k, camPos, camFwd, alpha, heap, frustum){
+
+        const next = []
+        
+        // filter out-of-bound nodes, calculate heuristic
+        for(const child of node.children){
+
+            const { sphere } = child
+
+            // continue if outside of frustum
+            if(!frustum.intersectsSphere(sphere))
+                continue
+
+            // continue if outside of max dist bounds or if distance to node is greater than the max distance of the items found so far.
+            
+            const camToCenter = sphere.center.clone().sub(camPos)
+            const camDistToSurface = camToCenter.length() - sphere.radius
+            const proj = camToCenter.clone().projectOnVector(camFwd)
+            const projToCenter = camToCenter.sub(proj)
+            const projDistToSurface = projToCenter.length() - sphere.radius
+            const heuristic = camDistToSurface + projDistToSurface * alpha
+
+            next.push({ child, dist: heuristic })
+
+        }
+
+        // sort by heuristic
+        next.sort((a, b) => a.dist - b.dist)
+
+        // recursive step to minimize heuristic
+        for(const { child, dist } of next){
+
+            if(heap.length === k && dist > heap[0].dist)
+                continue
+
+            if(child.worldPlot === null)
+                this._getKClosestWithHeuristic(child, k, camPos, camFwd, alpha, heap, frustum)
+
+            else {
+
+                const heapElem = { node: child, dist }
+                if(heap.length < k)
+                    heap.add(heapElem)
+                else
+                    heap.addAndPopHead(heapElem)
+
+            }
+
+        }
 
     }
 

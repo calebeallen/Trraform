@@ -1,10 +1,11 @@
 
-import { Sphere, Vector3, Vector4 } from "three";
+import { Frustum, Sphere, Vector3, Vector4 } from "three";
 import PlotData from "./plotData";
 import Task from "../task/task";
 import { refs } from "../store";
 import { MAX_DEPTH, PLOT_COUNT } from "../../common/constants";
 import { I2P, P2I } from "../../common/utils";
+import MaxHeap from "../structures/maxHeap";
 
 export default class Plot extends PlotData {
 
@@ -100,7 +101,7 @@ export default class Plot extends PlotData {
 
                 if(data === null){
 
-                    resolve(null)
+                    resolve(this)
                     return
 
                 }
@@ -129,7 +130,7 @@ export default class Plot extends PlotData {
                 //child plots
                 if (this.id.depth() < MAX_DEPTH)
 
-                    this.createChildPlots( plotIndicies, chunkArr )
+                    this.createChildPlots( data.plotIndicies, data.chunkArr )
 
                 resolve(this)
                 
@@ -192,38 +193,54 @@ export default class Plot extends PlotData {
 
     }
 
-    getContains(point){
+    getClosestContains(target, radiusScalar = 1){
 
-        const found = []
-
-        for(const child of this.children)
-
-            if(child.sphere.containsPoint(point))
-
-                found.push(child)
-
-        return found
-
-    }
-
-    getKClosest(point, k, heap){
+        let minDist = Infinity
+        let closest = null
 
         for(const child of this.children){
 
-            const dist = child.sphere.center.distanceTo(point)
-
-            if (heap.length < k || dist < heap[0].dist) {
-                
-                heap.add({child, dist})
-
-                if(heap.length > k)
-
-                    heap.popHead()
-
+            const dist = child.sphere.center.distanceTo(target)
+            if(dist <= child.sphere.radius * radiusScalar && dist < minDist){
+                minDist = dist
+                closest = child
             }
 
         }
+
+        return closest
+
+    }
+
+    getKClosest(k, camera){
+
+        const { position, viewMatrix } = camera
+        const heap = new MaxHeap()
+
+        const frustum = new Frustum()
+        frustum.setFromProjectionMatrix(viewMatrix)
+
+        for(const child of this.children){
+
+            if(!frustum.intersectsSphere(child.sphere))
+                continue
+
+            const dist = child.sphere.center.distanceTo(position)
+
+            if(heap.length < k)
+                heap.add({plot: child, dist})
+            else if(dist < heap[0].dist)
+                heap.addAndPopHead({plot: child, dist})
+
+        }
+
+        const n = heap.length
+        const sorted = new Array(n)
+        for(let i = 0; i < n; i++)
+            sorted[i] = heap.popHead()
         
+        return sorted
+
     }
 
     withinView(){

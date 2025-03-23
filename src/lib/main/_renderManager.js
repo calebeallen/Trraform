@@ -202,6 +202,8 @@ export default class RenderManager {
         if(chunk.parent !== null)
             chunk.parent.children.add(chunk)
 
+        console.log(this.renderedBuildsCount, settings.renderLimit)
+
         if(this.renderedBuildsCount > settings.renderLimit)
             await this.cleanUp()
 
@@ -210,19 +212,19 @@ export default class RenderManager {
     async cleanUp() {
 
         //remove furthest chunks
-        const heap = MaxHeap()
+        const heap = new MaxHeap()
         
         for(const chunk of this.renderedChunks)
             if(chunk.buildCount > 0)
                 heap.push({
                     chunk,
-                    dist: refs.camera.distanceToSquared(chunk.center)
+                    dist: refs.camera.position.distanceToSquared(chunk.center)
                 })
 
         heap.heapify()
 
         while(this.renderedBuildsCount > settings.renderLimit - CLEAN_UP_AMT && heap.length > 0)
-            await this.unrenderChunk(heap.popHead())
+            await this.unrenderChunk(heap.popHead().chunk)
 
     }
 

@@ -19,6 +19,7 @@
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
     import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal } from "$lib/main/store"
+    import { MAX_DEPTH } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
@@ -33,6 +34,7 @@
 
     let rootPlot
     let canvasContainer, glCanvas, tagCanvas, tagCtx
+    let tagContainer
     let t1 = 0
     let tagData = [], tags = {}, tagBounds = []
     let ismousedown = false
@@ -53,7 +55,7 @@
         refs.scene.add(stars())
         refs.camera = new Camera(settings.fov, new Sphere(new Vector3(65,65,65), 800))
         
-        tagCtx = tagCanvas.getContext("2d")
+        // tagCtx = tagCanvas.getContext("2d")
 
         refs.renderer = new WebGLRenderer({ canvas: glCanvas, alpha: true, antialias: true, logarithmicDepthBuffer: true })
         refs.renderer.outputColorSpace = LinearSRGBColorSpace
@@ -78,7 +80,7 @@
         page.subscribe(handleNavigate)
 
         /* begin rendering */
-        refs.renderer.setAnimationLoop(renderLoop)
+        refs.renderer.setAnimationLoop(renderLoop_)
         refs.renderer.render(refs.scene, refs.camera)
         updateBg()
 
@@ -92,6 +94,168 @@
 
     })
 
+    function renderLoop_(t2){
+
+        const dt = (t2 - t1) / 1000
+        t1 = t2
+        
+        refs.renderManager.update(dt)
+        refs.camera.update(dt)
+            
+        const insideArr = [rootPlot]
+
+        for(let i = 0; i < MAX_DEPTH; i++){
+
+            const last = insideArr[insideArr.length - 1]
+            const contains = last.getClosestContains(refs.camera.position, 1)
+            if(contains === null)
+                break
+
+            insideArr.push(contains)
+
+        }
+
+        let inside = insideArr[insideArr.length - 1]
+        
+        //handle routing and ui updates if camera in standard update mode (wasd move)
+        if(refs.camera.update === refs.camera.standard){
+
+            if(inside instanceof RootPlot){
+
+                if($insideOf !== null)
+                    $insideOf = null
+
+            } else {
+
+                if(inside !== $insideOf){
+                
+                    $insideOf = inside   
+
+                    //update page route if there was a change
+                    const plotIdParam = $page.url.searchParams.get("plotId")
+                    if(!plotIdParam || !PlotId.fromHexString(plotIdParam).equals(inside.id))
+                        goto(`/world?plotId=${inside.id.string()}`)
+
+                }
+
+            }
+        
+        }
+
+        //if the lowest depth plot that camera is inside of has no children, use next depth up for tags and loading
+        if(inside.children.length === 0)
+            inside = insideArr[insideArr.length - 2]
+
+        //get k closest plots
+        const closest = inside.getKClosest(25, refs.camera)
+        refs.renderer.render( refs.scene, refs.camera )
+
+        _updateTags(t2, closest)
+
+        //update tags
+        if(closest.length == 0)
+            return
+
+        //update speed
+        if(closest.length > 0){
+
+            const n = Math.min(closest.length, 5)
+            let distSum = 0
+
+            for(let i = 0; i < n; i++)
+
+                distSum += closest[i].dist
+
+            distSum /= n
+            refs.camera.accelerationMagnitude = distSum * 10
+
+        }
+        
+
+        //if there are none, update tags and return
+        //if there are some, take aveage of first few as speed multiplier
+        //if    
+    
+    }
+
+    function _updateTags(t2, plots){
+
+        const plotSet = new Set(plots.map(a => a.plot))
+    
+        //update tags that no longer exist
+        for(const key of Object.keys(tags)){
+
+            const tag = tags[key]
+            if(!plotSet.has(tag.plot)){
+                tag.t -= 0.1
+                tag.z = 0
+            }
+
+            if(tag.t < 0){
+                delete tags[key]
+                tagContainer.removeChild(tag.elem)
+            } else
+                updateTag(tag)
+
+        }
+
+        let z = 1
+        for(const { plot, dist } of plots){
+
+            const key = plot.id.string()
+            if(!(key in tags)){
+
+                const elem = document.createElement("button")
+                elem.classList.add("plot-tag")
+                elem.innerText = plot.name || key
+                tagContainer.appendChild(elem)
+
+                tags[key] = {
+                    plot, 
+                    elem,
+                    dist,
+                    t: 0,
+                    z: 0
+                }
+
+            }
+            
+            const tagData = tags[key]
+            tagData.z = z
+            tagData.t = Math.min(tagData.t + 0.1, 1)
+            tagData.dist = dist / plot.parent.blockSize
+            z++
+            updateTag(tags[key])
+
+        }
+
+    }
+
+    const quad = t => 1 - (t - 1)**2
+    function updateTag({plot, elem, dist, t, z}){
+
+        const v3 = plot.sphere.center
+        const v4 = new Vector4(v3.x, v3.y, v3.z, 1)
+        v4.applyMatrix4(refs.camera.viewMatrix)
+
+        const x = (v4.x / v4.w * 0.5 + 0.5) * window.innerWidth
+        const y = (-v4.y / v4.w * 0.5 + 0.5) * window.innerHeight
+
+        const MIN_SCALE = 0.5
+        const MIN_OPACITY = 0.1
+        const MAX_SCALE = 1
+        const MAX_OPACITY = 1
+        const THRESHOLD = 50
+
+        let a = 1 / dist
+        a = Math.min(a, 1)
+        const opacity = (a * MIN_OPACITY + (1 - a) * MAX_OPACITY) * quad(a)
+        const scale = Math.max(a, 0.2) * quad(t)
+        
+        elem.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${scale})`;
+        elem.style.zIndex = z
+
+    }
 
     function renderLoop(t2){
 
@@ -512,15 +676,9 @@
     function resize(){
 
         const { width, height } = canvasContainer.getBoundingClientRect()
-        const dpr = window.devicePixelRatio || 1
 
         refs.renderer.setPixelRatio(window.devicePixelRatio)
         refs.renderer.setSize(width, height, false)
-
-        tagCanvas.width = width * dpr
-        tagCanvas.height = height * dpr
-        
-        tagCtx.scale(dpr, dpr)
 
         refs.camera.aspect = width / height
         refs.camera.updateProjectionMatrix()
@@ -604,7 +762,8 @@
 
 <div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$showMyPlots ? "blur-2xl" : ""}">
     <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
-    <canvas bind:this={tagCanvas} on:mousedown={mousedown} on:mousemove={mousemove} class="fixed top-0 left-0 w-full h-full"></canvas>
+    <div on:mousedown={mousedown} on:mousemove={mousemove} bind:this={tagContainer} class="fixed top-0 left-0 w-full h-full select-none"></div>
+    <!-- <canvas bind:this={tagCanvas}  class="fixed top-0 left-0 w-full h-full"></canvas> -->
 </div>
 <div class="w-full {$showMyPlots ? "blur-2xl" : ""}">
     <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2 pointer-events-none">
@@ -637,3 +796,12 @@
 {/if}
 
 <Notification store={notification}/>
+
+<style lang="postcss">
+
+    :global(.plot-tag) {
+        @apply absolute will-change-transform px-2.5 py-1 bg-zinc-900 rounded-2xl text-2xl font-semibold;
+        backface-visibility: hidden;
+    }
+
+</style>

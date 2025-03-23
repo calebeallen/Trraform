@@ -48,9 +48,11 @@ export default class Plot extends PlotData {
         this.chunk = chunk //object shared between all plots that belong to this chunk
         this.minted = false
 
-        this.sphere = new Sphere(pos.clone().addScalar( parent.blockSize / 2), Math.sqrt((parent.blockSize / 2 ) ** 2 * 3)) //does not change, is the absolute bounds of the plot
+        const c = pos.clone().addScalar( parent.blockSize / 2)
+        this.sphere = new Sphere(c, Math.sqrt((parent.blockSize / 2 ) ** 2 * 3)) //does not change, is the absolute bounds of the plot
         this.boundingSphere = this.sphere.clone() //bounds of mesh + plots (not set until plot is loaded)
         
+        this.tagPosition = new Vector4(c.x, c.y, c.z, 1)
         this.buildSize = 16
         this.blockSize = this.parent.blockSize / this.buildSize
 
@@ -123,6 +125,12 @@ export default class Plot extends PlotData {
                     const max = new Vector3(...data.geometryData.max)
                     const center = min.clone().add(max).multiplyScalar( this.blockSize / 2 ).add(this.pos)
                     const radius = max.sub(min).length() * this.blockSize / 2
+
+                    //calculate tag position
+                    this.tagPosition.x = center.x
+                    this.tagPosition.z = center.z
+                    this.tagPosition.y = max.y * this.blockSize * 1.1 + this.pos.y
+
                     this.boundingSphere.set(center, radius)
                 
                 }
@@ -160,7 +168,7 @@ export default class Plot extends PlotData {
                 children: new Set(),
                 plots: [],
                 lod: null,
-                center: new Vector3(),
+                boundingSphere: new Sphere(),
                 buildCount: 0
             }
 

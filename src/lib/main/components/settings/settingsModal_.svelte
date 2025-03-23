@@ -3,7 +3,6 @@
 
     import { onMount } from "svelte"
     import { refs, settings, defaultSettings, isMobileBrowser } from "../../store"
-    // import WalletConnection from "../../walletConnection";
     import Modal from "../../../common/components/modal.svelte"
     import SliderSetting from "./sliderSetting.svelte";
     import OptionSetting from "./optionSetting.svelte";

@@ -200,7 +200,7 @@ export default class RootPlot {
                         children: new Set(),
                         plots: [],
                         lod: null,
-                        center: new Vector3(),
+                        boundingSphere: new Sphere(),
                         buildCount: 0
                     }
         

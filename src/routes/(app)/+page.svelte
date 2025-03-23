@@ -51,7 +51,7 @@
                 <a class="nav-option" target="_self" href="/editor">Build</a>
             {/if}
         </nav>
-        <div class="flex flex-col items-stretch w-full gap-2 mt-2 text-xs sm:text-sm sm:justify-normal sm:flex-row">
+        <div class="flex flex-col items-stretch w-full gap-2 mt-2 text-xs sm:text-sm sm:justify-normal sm:flex-row opacity-70">
             <div class="flex items-center justify-center gap-2">
                 <a href="/terms-of-service" target="_blank">Terms of service</a>
                 <div class="w-px h-3.5 sm:h-4 bg-white"></div>

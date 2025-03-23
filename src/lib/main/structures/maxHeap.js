@@ -75,14 +75,15 @@ export default class MaxHeap extends Array{
 
     popHead(){
 
-        let i = 0
-
-        if(this.length == 0)
-
+        if (this.length === 0)
             return null
-
+    
+        if (this.length === 1)
+            return this.pop()
+        
         const head = this[0]
         this[0] = this.pop()
+        let i = 0
 
         //sort heap
         while (true) {

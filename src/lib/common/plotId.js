@@ -104,9 +104,9 @@ export default class PlotId {
 
         try {
 
-            // const res = await fetch(this.getUrl())
+            const res = await fetch(this.getUrl())
 
-            const res = await fetch(`${PLOT_DATA_BUCKET_URL}/${this.id === 0 ? "0x00" : "0x01"}`) 
+            // const res = await fetch(`${PLOT_DATA_BUCKET_URL}/${this.id === 0 ? "0x00" : "0x01"}`) 
             
             if(!res.ok)
 

@@ -12,7 +12,7 @@
     const SENSITIVITY_MIN = 1, SENSITIVITY_MAX = 20
     const TAG_COUNT_MIN = 0, TAG_COUNT_MAX = 25
     const TAG_SIZE_MIN = 1, TAG_SIZE_MAX = 10
-    const RENDER_LIMIT_MIN = 10, RENDER_LIMIT_MAX = 10000
+    const RENDER_LIMIT_MIN = 100, RENDER_LIMIT_MAX = 50000
     const LOW_LOD_DIST_MIN = 10, LOW_LOD_DIST_MAX = 250
 
     let fovValue, sensitivityValue, tagCountValue, tagSizeValue, renderLimitValue, lowLODDistValue
@@ -65,6 +65,8 @@
             settings.renderLimit = -1
         else
             settings.renderLimit = nonLinear(settings.renderLimitLinear, 3, RENDER_LIMIT_MIN, RENDER_LIMIT_MAX)
+
+            console.log(settings.renderLimitLinear, settings.renderLimit)
 
         const newLowLODDist = parseInt(lowLODDistValue)
         refs.renderManager.setLodDistances( newLowLODDist / settings.lowLODDist )
@@ -126,8 +128,8 @@
         <div class="text-center w-14">{tagSizeDisplay}</div>
 
         <div class="flex items-center gap-1">
-            <span>Chunk render limit</span>
-            <Tip class="bottom-0 left-0 translate-x-4" text="The maximum number of chunks that can be rendered at once."/>
+            <span>Plot render limit</span>
+            <Tip class="bottom-0 left-0 translate-x-4" text="The target number of plots that can be rendered at once. Can "/>
         </div>
         <Slider bind:value={renderLimitValue} min={RENDER_LIMIT_MIN} max={RENDER_LIMIT_MAX}/>
         <div class="text-center w-14">{renderLimitDisplay}</div>

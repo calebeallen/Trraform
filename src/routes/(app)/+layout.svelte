@@ -2,14 +2,9 @@
 <script>
 
     //TODO
-    //Settings
-    //if inside of plot while it is popped off of rendered queue, push it to the back of queue
-    //update plots
-    //add a maximum scroll/ fly distance
-    //add mobile controls
 
     import "../../main.css"
-	import { LinearSRGBColorSpace, Scene, Sphere, Spherical, Vector3, Vector4, WebGLRenderer } from "three"
+	import { LinearSRGBColorSpace, Scene, Sphere, Spherical, Vector3, WebGLRenderer } from "three"
     import MobileDetect from "mobile-detect"
 	import { onMount } from "svelte"
     import { page } from "$app/stores"
@@ -21,7 +16,6 @@
     import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal } from "$lib/main/store"
     import { MAX_DEPTH } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
-    import MaxHeap from "$lib/main/structures/maxHeap"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/_renderManager"
     import { pushNotification } from "$lib/common/utils"
@@ -33,17 +27,16 @@
     import HowItWorksModal from "../../lib/main/components/howItWorksModal.svelte"
 
     let rootPlot
-    let canvasContainer, glCanvas, tagCanvas, tagCtx
+    let canvasContainer, glCanvas
     let tagContainer
     let t1 = 0
-    let tagData = [], tags = {}, tagBounds = []
+    let tags = {}
     let ismousedown = false
     
     onMount(async () => {
         
         const stored = localStorage.getItem("settings")
         if(stored)
-
             Object.assign(settings, JSON.parse(stored))
 
         const mobileDetect = new MobileDetect(navigator.userAgent)
@@ -54,8 +47,6 @@
         refs.scene = new Scene()
         refs.scene.add(stars())
         refs.camera = new Camera(settings.fov, new Sphere(new Vector3(65,65,65), 800))
-        
-        // tagCtx = tagCanvas.getContext("2d")
 
         refs.renderer = new WebGLRenderer({ canvas: glCanvas, alpha: true, antialias: true, logarithmicDepthBuffer: true })
         refs.renderer.outputColorSpace = LinearSRGBColorSpace
@@ -80,7 +71,7 @@
         page.subscribe(handleNavigate)
 
         /* begin rendering */
-        refs.renderer.setAnimationLoop(renderLoop_)
+        refs.renderer.setAnimationLoop(renderLoop)
         refs.renderer.render(refs.scene, refs.camera)
         updateBg()
 
@@ -94,7 +85,7 @@
 
     })
 
-    function renderLoop_(t2){
+    function renderLoop(t2){
 
         const dt = (t2 - t1) / 1000
         t1 = t2
@@ -142,43 +133,55 @@
         
         }
 
-        //if the lowest depth plot that camera is inside of has no children, use next depth up for tags and loading
+        // if the lowest depth plot that camera is inside of has no children, use next depth up for tags and rendering
         if(inside.children.length === 0)
             inside = insideArr[insideArr.length - 2]
 
         //get k closest plots
-        const closest = inside.getKClosest(25, refs.camera)
-        refs.renderer.render( refs.scene, refs.camera )
+        const plots = inside.getKClosest(25, refs.camera)
 
-        _updateTags(t2, closest)
+        // update scene
+        updateTags(dt, plots)
+        refs.renderer.render( refs.scene, refs.camera )
+        updateBg()
 
         //update tags
-        if(closest.length == 0)
+        if(plots.length == 0)
             return
 
         //update speed
-        if(closest.length > 0){
+        const n = Math.min(plots.length, 5)
+        let distSum = 0
+        for(let i = 0; i < n; i++)
+            distSum += plots[i].dist
 
-            const n = Math.min(closest.length, 5)
-            let distSum = 0
+        distSum /= n
+        refs.camera.accelerationMagnitude = distSum * 10
 
-            for(let i = 0; i < n; i++)
+        //render plots
+        const plotIdSet = new Set(plots.map(a => a.plot.id.id))
+        for(let i = plots.length - 1; i >= 0; i--){
 
-                distSum += closest[i].dist
+            if(!refs.renderManager.hasAvailability())
+                break
 
-            distSum /= n
-            refs.camera.accelerationMagnitude = distSum * 10
+            refs.renderManager.managedRender(plots[i].plot, refs.camera, plotIdSet)
 
         }
-        
-
-        //if there are none, update tags and return
-        //if there are some, take aveage of first few as speed multiplier
-        //if    
     
     }
 
-    function _updateTags(t2, plots){
+    function updateTags(dt, plots){
+        
+        dt = dt * 10
+
+        //apply tag count setting
+        const n = Math.min(plots.length, settings.tagCount)
+        const lb = plots.length - n
+        const temp = new Array(n)
+        for(let i = lb; i < plots.length; i++)
+            temp[i - lb] = plots[i]
+        plots = temp
 
         const plotSet = new Set(plots.map(a => a.plot))
     
@@ -187,7 +190,7 @@
 
             const tag = tags[key]
             if(!plotSet.has(tag.plot)){
-                tag.t -= 0.1
+                tag.t -= dt
                 tag.z = 0
             }
 
@@ -207,7 +210,9 @@
 
                 const elem = document.createElement("button")
                 elem.classList.add("plot-tag")
+                elem.name = key
                 elem.innerText = plot.name || key
+                elem.onclick = handleTagClick
                 tagContainer.appendChild(elem)
 
                 tags[key] = {
@@ -215,14 +220,14 @@
                     elem,
                     dist,
                     t: 0,
-                    z: 0
+                    zIndex: 0
                 }
 
             }
             
             const tagData = tags[key]
-            tagData.z = z
-            tagData.t = Math.min(tagData.t + 0.1, 1)
+            tagData.zIndex = z
+            tagData.t = Math.min(tagData.t + dt, 1)
             tagData.dist = dist / plot.parent.blockSize
             z++
             updateTag(tags[key])
@@ -232,189 +237,41 @@
     }
 
     const quad = t => 1 - (t - 1)**2
-    function updateTag({plot, elem, dist, t, z}){
+    function updateTag({plot, elem, dist, t, zIndex}){
 
-        const v3 = plot.sphere.center
-        const v4 = new Vector4(v3.x, v3.y, v3.z, 1)
+        const v4 = plot.tagPosition.clone()
         v4.applyMatrix4(refs.camera.viewMatrix)
 
         const x = (v4.x / v4.w * 0.5 + 0.5) * window.innerWidth
         const y = (-v4.y / v4.w * 0.5 + 0.5) * window.innerHeight
+        const z = v4.z / v4.w
 
-        const MIN_SCALE = 0.5
+        if (z >= 1) {
+            elem.style.transform = `scale(0)`;
+            return
+        }
+
+        const MIN_SCALE = 0.25
         const MIN_OPACITY = 0.1
-        const MAX_SCALE = 1
-        const MAX_OPACITY = 1
-        const THRESHOLD = 50
 
-        let a = 1 / dist
-        a = Math.min(a, 1)
-        const opacity = (a * MIN_OPACITY + (1 - a) * MAX_OPACITY) * quad(a)
-        const scale = Math.max(a, 0.2) * quad(t)
+        let a = 1 / Math.max(dist, 1)
+        const opacity = Math.max(Math.min(a + 0.5, 1), MIN_OPACITY)
+        const scale = Math.max(Math.min(a, 1), MIN_SCALE) * quad(t) * settings.tagSize / 10
         
         elem.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${scale})`;
-        elem.style.zIndex = z
+        elem.style.opacity = opacity
+        elem.style.zIndex = zIndex
 
     }
 
-    function renderLoop(t2){
+    function handleTagClick(e){
 
-        const dt = (t2 - t1) / 1000
-        t1 = t2
-        
-        refs.renderManager.update(dt)
-        refs.camera.update(dt)
-            
-        const insideArr = [rootPlot]
+        const plotId = PlotId.fromHexString(e.srcElement.getAttribute("name"))
 
-        // find a plot that contains the camera
-        while(true){
-
-            const l = insideArr.length - 1
-
-            // get child plots that contains camera
-            const insideOf = insideArr[l].getContains(refs.camera.position)
-
-            let minDist = Infinity
-            let closest = null
-
-            for(let i = 0; i < insideOf.length; i++){
-
-                const dist = insideOf[i].sphere.center.distanceToSquared(refs.camera.position)
-
-                if(dist < minDist){
-
-                    minDist = dist
-                    closest = insideOf[i]
-
-                }
-
-            }
-
-            if(closest === null)
-
-                break
-
-            insideArr.push(closest)
-
-        }
-
-        //by default, camera is inside the smallest plot of all that contain it
-        let inside = insideArr[insideArr.length - 1]
-
-        //handle routing if camera in standard update mode (wasd move)
-        if(refs.camera.update === refs.camera.standard){
-
-            if(inside instanceof RootPlot){
-
-                if($insideOf !== null)
-                
-                    $insideOf = null
-            
-            } else {
-
-                if(inside !== $insideOf){
-                
-                    $insideOf = inside   
-
-                    //update page route if there was a change
-                    const plotIdParam = $page.url.searchParams.get("plotId")
-
-                    if(!plotIdParam || !PlotId.fromHexString(plotIdParam).equals(inside.id))
-
-                        goto(`/world?plotId=${inside.id.string()}`)
-
-                }
-            
-            }
-            
-        }
-
-        //if the lowest depth plot that camera is inside of has no children, use next depth up for tags and loading
-        if(!inside.children.length && insideArr.length && !inside.minted)
-        
-            inside = insideArr[insideArr.length - 2]
-
-        //update camera speed
-        const heap = new MaxHeap()
-        inside.getKClosest(refs.camera.position, 3, heap)
-
-        //average of closest plots
-        if(heap.length > 0){
- 
-            let distSum = 0
-
-            for(const elem of heap)
-
-                distSum += elem.dist
-
-            refs.camera.accelerationMagnitude = distSum / heap.length * 10
-
-        } else {
-
-            refs.camera.accelerationMagnitude = inside.blockSize * 150
-
-        }
-
-        //update tags
-        const r = 15 * inside.blockSize 
-        const plots = inside instanceof RootPlot ? inside.withinRadius(refs.camera.position, r) : inside.withinView()
-        const needsRender = new Array(plots.length)
-
-        for(let i = 0; i < plots.length; i++)
-
-            needsRender[i] = {
-                plot : plots[i],
-                dist : refs.camera.position.distanceTo(plots[i].pos)
-            }
-
-        //sort by closest to camera
-        needsRender.sort((a, b) => a.dist - b.dist)
-
-        //set tags, compute distance to look direction projected on sphere
-        const len = Math.min(needsRender.length, settings.tagCount)
-        const target = new Vector3()
-        refs.camera.getWorldDirection(target)
-        target.multiplyScalar(r).add(refs.camera.position)
-
-        tagData = new Array(len)
-
-        const a = 0.7, b = 0.3
-        for(let i = 0; i < needsRender.length; i++){
-
-            needsRender[i].dist = needsRender[i].dist * a + target.distanceTo(needsRender[i].plot.pos) * b
-        
-            if(i < len)
-
-                tagData[i] = needsRender[i].plot
-
-        }
-
-        //sort by closest to look direction projection
-        needsRender.sort((a, b) => a.dist - b.dist)
-
-        //render plots
-        for(let i = 0; i < needsRender.length; i++){
-
-            if(!refs.renderManager.hasAvailability())
-
-                break
-
-            if(inside instanceof RootPlot)
-
-                refs.renderManager.render(needsRender[i].plot)
-
-            else if(needsRender[i].plot.pos.distanceTo(refs.camera.position) <= r)
-            
-                refs.renderManager.render(needsRender[i].plot)
-
-        }
-
-        updateTags(dt)
-        updateBg()
-
-        /* render scene */
-        refs.renderer.render( refs.scene, refs.camera )
+        //update page route if there was a change
+        const plotIdParam = $page.url.searchParams.get("plotId")
+        if(!plotIdParam || !PlotId.fromHexString(plotIdParam).equals(plotId.id))
+            goto(`/world?plotId=${plotId.string()}`)
 
     }
 
@@ -431,55 +288,35 @@
         } else if (route === "/(app)/world") {
 
             const { searchParams } = to.url
-            const cameraParam = searchParams.get("camera")
-
-            if(cameraParam){
-
-                refs.camera.setFromB64URI(cameraParam)
-                refs.camera.update = refs.camera.standard
-                return
-
-            }
-
-
             const plotIdParam = searchParams.get("plotId")
-            let plotId 
-
+            
             if(!plotIdParam)
-
                 return
 
+            let plotId 
             try { 
-
                 plotId = PlotId.fromHexString(plotIdParam) 
-
             } catch { 
-                
                 pushNotification(notification, "Plot not found", `Plot "${plotIdParam}" does not exist.`)
                 return 
-
             }
 
             // if already inside plot or plot id is 0
             if($insideOf !== null && plotId.equals($insideOf.id))
-
                 return
 
             /* load plot */
-            //check that plot exist
             const ids = plotId.split()
             let plot = rootPlot
 
             for(const id of ids){
 
-                await plot.load()
-                await refs.renderManager.render(plot)
-
                 if(!plot.children.length)
-
                     break
 
                 plot = plot.children[id - 1] 
+                await plot.load()
+                await refs.renderManager.render(plot)
     
             }
 
@@ -539,138 +376,8 @@
             return
         
         const t = refs.camera.sphere.phi / Math.PI
-
         glCanvas.style.background = `linear-gradient(to top, rgba(26, 36, 66, ${t}), rgba(26, 36, 66, ${t * 0.5}))`
 
-    }
-
-    function updateTags(dt){
-
-        const tagDataKeys = new Set()
-        const v4 = new Vector4()
-        const quad = t => 1 - (t - 1) ** 2
-
-        const { width, height } = canvasContainer.getBoundingClientRect()
-
-        tagCtx.textAlign = "center"
-        tagCtx.textBaseline = "middle"
-        tagCtx.clearRect(0, 0, width, height)
-
-        for (let i = 0; i < tagData.length; i++) {
-
-            const plot = tagData[i]
-            const id = tagData[i].id.string()
-
-            if(!tags[id])
-
-                tags[id] = { t: 0, plot }
-
-            tagDataKeys.add(id)
-
-        }
-
-        tagBounds = []
-
-        Object.keys(tags).forEach( key => {
-
-            const tag = tags[key]
-            const center = tag.plot.boundingSphere.center.clone()
-
-            if(tag.plot.hasGeometry)
-
-                center.add(new Vector3(0,0.8,0).multiplyScalar(tag.plot.boundingSphere.radius))
-
-            const hasKey = tagDataKeys.has(key)
-
-            tag.t += (hasKey ? dt : -dt) * 10
-
-            v4.set(center.x, center.y, center.z, 1) 
-            v4.applyMatrix4(refs.camera.viewMatrix)
-
-            let content = tag.plot.name || `Plot ${key}`
-
-            if (content.length > 15)
-
-                content = content.slice(0, 12) + '...'
-
-            const z = v4.z / v4.w
-
-            if(tag.t <= 0 || z > 1){
-
-                delete tags[key]
-                return
-
-            }
-
-            tag.t = Math.min(tag.t, 1)
-
-            const dist = refs.camera.position.distanceTo(center)
-            
-            const fontSize = 12
-            const xPadding = 9
-            const yPadding = 7
-            
-            const distRatio = tag.plot.sphere.radius / dist
-            let scale = Math.max(distRatio, 0.1) * settings.tagSize / 2 * 2
-            scale = scale * quad(tag.t)
-
-            tagCtx.font = `${fontSize}px Arial`
-            const textMeasure = tagCtx.measureText(content)
-            const textHeight = textMeasure.actualBoundingBoxAscent + textMeasure.actualBoundingBoxDescent
-            const textYAdjust = (textMeasure.actualBoundingBoxAscent - textMeasure.actualBoundingBoxDescent) / 2;
-
-            tagBounds.push({ 
-                
-                plot: tag.plot,
-                content,
-                width2: (textMeasure.width / 2 + xPadding) * scale,
-                height2: (textHeight / 2 + yPadding) * scale,
-                fontSize: fontSize * scale,
-                textYAdjust: textYAdjust * scale,
-                a: distRatio * 2,
-                x: (v4.x / v4.w + 1) / 2 * width, 
-                y: (1 - (v4.y / v4.w + 1) / 2) * height, 
-                z
-            
-            })
-
-        })
-
-        tagBounds.sort((a, b) => b.z - a.z)
-
-        for(const bounds of tagBounds){
-
-            const x = bounds.x
-            const y = bounds.y
-            const w2 = bounds.width2
-            const h2 = bounds.height2
-            const fs = bounds.fontSize
-            const r = h2 / 1.2
-            const a = bounds.a
-
-            tagCtx.beginPath()
-            tagCtx.moveTo(x - w2 + r, y + h2)
-            tagCtx.lineTo(x + w2 - r, y + h2)
-            tagCtx.quadraticCurveTo(x + w2, y + h2, x + w2, y + h2 - r)
-            tagCtx.lineTo(x + w2, y - h2 + r)
-            tagCtx.quadraticCurveTo(x + w2, y - h2, x + w2 - r, y - h2)
-            tagCtx.lineTo(x - w2 + r, y - h2)
-            tagCtx.quadraticCurveTo(x - w2, y - h2, x - w2, y - h2 + r)
-            tagCtx.lineTo(x - w2, y + h2 - r)
-            tagCtx.quadraticCurveTo(x - w2, y + h2, x - w2 + r, y + h2)
-            tagCtx.closePath()
-
-            tagCtx.globalAlpha = Math.min(a, 1);
-            tagCtx.fillStyle = "#18181b"
-            tagCtx.fill()
-
-            tagCtx.globalAlpha = 1;
-            tagCtx.fillStyle = "#ffffff"
-            tagCtx.font = `normal ${fs}px Arial`
-            tagCtx.fillText(bounds.content, x, y + bounds.textYAdjust)
-
-        }
-    
     }
 
     function resize(){
@@ -685,32 +392,8 @@
 
     }
 
-    let tagClickedPlot
-
-    function getTagClicked(x, y){
-
-        for(let i = tagBounds.length - 1; i >= 0; i--){
-            
-            const t = tagBounds[i]
-
-            const xMin = t.x - t.width2
-            const xMax = t.x + t.width2
-            const yMin = t.y - t.height2
-            const yMax = t.y + t.height2
-
-            if(x > xMin && x < xMax && y > yMin && y < yMax)
-
-                return t.plot
-
-        }
-        
-        return null
-
-    }
-
     function mousedown(e){
 
-        tagClickedPlot = getTagClicked(e.x, e.y)
         ismousedown = true
 
         if( $page?.route?.id === "/(app)/world" && refs.camera.update === refs.camera.autoRotate )
@@ -721,25 +404,6 @@
 
     function mousecancel(e){
 
-        if(tagClickedPlot !== null && tagClickedPlot === getTagClicked(e.x, e.y)){
-
-            if($insideOf !== tagClickedPlot){
-
-                $insideOf = tagClickedPlot
-                moveToPlot(tagClickedPlot)
-
-            }
-
-            const searchParam = $page.url.searchParams.get("plotId")
-
-            //push browser state if change
-            if(!searchParam || !PlotId.fromHexString(searchParam).equals(tagClickedPlot.id))
-
-                goto(`/world?plotId=${tagClickedPlot.id.string()}`)
-
-        }
-            
-        tagClickedPlot = null
         ismousedown = false
 
     }
@@ -761,7 +425,7 @@
 <svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
 <div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$showMyPlots ? "blur-2xl" : ""}">
-    <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full"></canvas>
+    <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full" style="will-change: background;"></canvas>
     <div on:mousedown={mousedown} on:mousemove={mousemove} bind:this={tagContainer} class="fixed top-0 left-0 w-full h-full select-none"></div>
     <!-- <canvas bind:this={tagCanvas}  class="fixed top-0 left-0 w-full h-full"></canvas> -->
 </div>
@@ -794,14 +458,13 @@
 {#if $showHowItWorksModal}
     <HowItWorksModal on:close={() => $showHowItWorksModal = false}/>
 {/if}
-
+        
 <Notification store={notification}/>
 
 <style lang="postcss">
 
     :global(.plot-tag) {
-        @apply absolute will-change-transform px-2.5 py-1 bg-zinc-900 rounded-2xl text-2xl font-semibold;
-        backface-visibility: hidden;
+        @apply absolute p-4 bg-zinc-900 rounded-3xl text-5xl;
     }
 
 </style>

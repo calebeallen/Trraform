@@ -158,13 +158,13 @@ export default class Octree extends OctreeNode{
         this._getKClosestWithHeuristic(this, k, camera.position, camFwd, alpha, heap, frustum)
 
         if(heap.length <= 1)
-            return heap.map(a => a.node.worldPlot)
+            return heap.map(({node, dist}) => ({plot: node.worldPlot, dist}))
 
-        // compute distance without heuristic
-        for(const elem of heap)
-            elem.dist = camera.position.distanceTo(elem.node.worldPlot.sphere.center)
+        // // compute distance without heuristic
+        // for(const elem of heap)
+        //     elem.dist = camera.position.distanceTo(elem.node.worldPlot.sphere.center)
 
-        heap.heapify()
+        // heap.heapify()
 
         //sort in ascending order
         const n = heap.length

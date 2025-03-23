@@ -5,9 +5,9 @@ import Task from "./task/task"
 
 
 const CLEAN_UP_AMT = 10
-
+const THROTTLE = 5
 const DT_LOAD = 0.5 
-const dt_REFRESH = 0.5
+const DT_REFRESH = 0.5
 
 const material = new MeshBasicMaterial({vertexColors: true})
 
@@ -20,7 +20,8 @@ export default class RenderManager {
         this.totalTimeElapsed = 0
         this.lastLoadTimeStamp = 0
         this.lastRefreshTimeStamp = 0
-        this.throttle = Task.threadPool.length
+        this.throttle = THROTTLE
+        this.processing = 0
 
     }
 
@@ -38,12 +39,12 @@ export default class RenderManager {
 
         if(this.totalTimeElapsed - this.lastLoadTimeStamp >= DT_LOAD){
 
-            this.throttle = Task.threadPool.length
+            this.throttle = THROTTLE
             this.lastLoadTimeStamp = this.totalTimeElapsed
 
         }
 
-        if(this.totalTimeElapsed - this.lastRefreshTimeStamp >= dt_REFRESH){
+        if(this.totalTimeElapsed - this.lastRefreshTimeStamp >= DT_REFRESH){
 
             for(const { lod } of this.renderedChunks){
 
@@ -61,7 +62,7 @@ export default class RenderManager {
 
     hasAvailability(){
 
-        return this.throttle > 0
+        return this.throttle > 0 && this.processing < Task.threadPool.length
 
     }
 
@@ -104,14 +105,29 @@ export default class RenderManager {
 
     }
 
+    async managedRender(plot, camera, leaveRendered){
+
+        const {chunk} = plot
+        if(this.throttle <= 0 || this.processing >= Task.threadPool.length || this.renderedChunks.has(chunk))
+            return
+
+        this.processing += chunk.plots.length
+        this.throttle -= chunk.plots.length
+        await this.render(plot)
+
+        if(this.renderedBuildsCount > settings.renderLimit)
+            await this.cleanUp(camera, leaveRendered)
+
+        this.processing -= chunk.plots.length
+
+    }
+
     async render({ chunk, parent }){
 
-        if(this.throttle <= 0 || this.renderedChunks.has(chunk))
-
+        if(this.renderedChunks.has(chunk))
             return
 
         this.renderedChunks.add(chunk)
-        this.throttle -= chunk.plots.length
 
         // load all plots
         const loadPlots = chunk.plots.map(plot => plot.load())
@@ -195,31 +211,42 @@ export default class RenderManager {
         lod.update(refs.camera)
         refs.scene.add(lod)
         
-        chunk.center.copy(stdRes.position)
+        chunk.boundingSphere.center.copy(stdRes.position)
+        chunk.boundingSphere.radius = Math.hypot(...stdMD.dp)
         chunk.lod = lod        
 
         // add chunk to parent list
         if(chunk.parent !== null)
             chunk.parent.children.add(chunk)
 
-        console.log(this.renderedBuildsCount, settings.renderLimit)
-
-        if(this.renderedBuildsCount > settings.renderLimit)
-            await this.cleanUp()
-
     }
 
-    async cleanUp() {
+    async cleanUp(camera, leaveRendered) {
 
         //remove furthest chunks
         const heap = new MaxHeap()
         
-        for(const chunk of this.renderedChunks)
-            if(chunk.buildCount > 0)
-                heap.push({
-                    chunk,
-                    dist: refs.camera.position.distanceToSquared(chunk.center)
-                })
+        o: for(const chunk of this.renderedChunks){
+
+            if(chunk.buildCount == 0)
+                continue
+
+            // // could happen if parent plot gets called for unrender. 
+            // // In this case it would cause the child plots to be cleared even if they are in leaveRendered
+            if(chunk.boundingSphere.containsPoint(camera.position))
+                continue
+
+            // prevent unrender then rerender cycle
+            for(const plot of chunk.plots)
+                if(leaveRendered.has(plot.id.id))
+                    continue o
+                
+            heap.push({
+                chunk,
+                dist: refs.camera.position.distanceTo(chunk.boundingSphere.center) + chunk.boundingSphere.radius
+            })
+
+        }
 
         heap.heapify()
 

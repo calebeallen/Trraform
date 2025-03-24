@@ -131,7 +131,7 @@ async function getPlotData(id){
 
             }
 
-            // if plots unplaced, place on top surfaces
+            // if plots unplaced, place on random top surfaces
             if(plotsUnplaced > 0){
 
                 const topSurfaces = []
@@ -142,42 +142,30 @@ async function getPlotData(id){
                     const y = I2P(i, buildSize)[1]
                     const val = expanded[i]
 
-                    // don't check top plane
-                    if (y == buildSize - 1)
-                        break
-
-                    // open spot on ground
-                    if (y == 0 && val == 0) {
-                        topSurfaces.push({idx: i, rand: 0})
-                        continue
-                    }
-
-                    const aboveVal = expanded[i + bs2]
-                    if (aboveVal == 0 && val > PLOT_COUNT)
-                        topSurfaces.push({idx: i, rand: 0})
+                    if (val == 0 && (y == 0 || expanded[i - bs2] > PLOT_COUNT))
+                        topSurfaces.push(i)
 
                 }
 
                 // hash build data to generate seed
                 let hash = 0
-                const MAX_32 = 0xFFFFFFFF
-                for(let i = 0; i < buildData.length; i++){
-                    hash += buildData[i]
-                    hash %= MAX_32
-                }
-
-                for(let i = 0; i < topSurfaces.length; i++){
-                    const seed = (hash + i) % MAX_32
-                    topSurfaces[i].rand = seedRand(seed)
-                }
+                for(let i = 0; i < buildData.length; i++)
+                    hash = (hash + buildData[i]) % 2147483647
             
-                topSurfaces.sort((a, b) => a.rand - b.rand)
+                const rng = seededRNG(hash)
 
+                // shuffle
                 const n = Math.min(topSurfaces.length, plotsUnplaced)
+                for(let i = 0; i < n; i++){
+                    const j = Math.floor(rng() * topSurfaces.length)
+                    const temp = topSurfaces[j]
+                    topSurfaces[j] = topSurfaces[i]
+                    topSurfaces[i] = temp
+                }
+
                 for(let i = 0, j = 0; i < n; i++){
 
-                    const { idx } = topSurfaces[i]
-
+                    const idx = topSurfaces[i]
                     while(plotIndicies[j] != -1 && j < PLOT_COUNT) j++
 
                     if(j < PLOT_COUNT){
@@ -192,7 +180,6 @@ async function getPlotData(id){
 
         }
 
-        // if left over plots (and build not blank), place them on top surfaces
         // if left over plots, place in a grid
         const X0 = 1/12, Z0 = 3/12, S = 1/6
         let j = 0
@@ -268,115 +255,14 @@ async function getPlotData(id){
 
 }
 
-function seedRand(seed) {
-    let a = seed & 0xff
-    let b = (seed >> 8) & 0xff
-    let c = (seed >> 16) & 0xff
-    let d = (seed >> 24) & 0xff
-    let t = b << 9, r = (b * 5) << 7
-    c ^= a; d ^= b; b ^= c; a ^= d
-    c ^= t; d = (d << 11) | (d >>> 21)
-    return (r >>> 0) / 4294967296
-}
+function seededRNG(seed){
 
-async function generatePlot(id){
-
-    const plotId = new PlotId(id)
-    const encodedBuffer = await plotId.fetch()
-    if(encodedBuffer === null) // plot doesn't exist
-        
-        return [null, null]
-
-    const encoded = new Uint8Array(encodedBuffer)
-    const decoded = decodePlotData(encoded, plotId.depth(), true)
-    const buildData = decoded.buildData
-    const buildSize = buildData[1]
-
-    const v1 = new Vector3(), v2 = new Vector3()
-    const plotIndicies = new Array(PLOT_COUNT).fill(-1)
-    const X0 = 1/12, Z0 = 3/12, S = 1/6
-
-    for(let z = 0; z < 4; z++)
-    for(let x = 0; x < 6; x++){
-
-        v1.set(X0 + x * S, 0, Z0 + z * S)
-        v1.multiplyScalar(buildSize).floor()
-
-        const plotId = z * 6 + x
-        const ind = P2I(v1, buildSize)
-
-        plotIndicies[plotId] = ind
-
-    }
+    let state = seed
     
-    //override default plot indicies with plot indicies in build
-    let ind = 0
-
-    for(let i = 2; i < buildData.length; i++){
-
-        const val = buildData[i] >> 1
-
-        if (buildData[i] & 1) {
-
-            if(val <= PLOT_COUNT && val !== 0)
-
-                plotIndicies[val - 1] = ind
-
-            ind++
-
-        } else
-
-            ind += val
-
+    return function () {
+        state = (state * 16807) % 2147483647
+        return state / 2147483647;
     }
-    
-    const expanded = expand(buildData) // will throw error if build cannot be properly expanded, no need for verify function
-
-    const min = new Vector3(Infinity, Infinity, Infinity)
-    const max = new Vector3()
-
-    //place plots in build
-    for(let i = 0; i < plotIndicies.length; i++){
-
-        v1.set(...I2P(plotIndicies[i], buildSize))
-        min.min(v1)
-        max.max(v1)
-        expanded[plotIndicies[i]] = 0
-
-    }
-
-    const stdRes = reducePoly(expanded, buildSize)[0]
-    const lowRes = makeLowRes(expanded, buildSize, LOW_RES)
-    v2.set(...stdRes.dp)
-    v1.set(...stdRes.center)
-    v1.sub(v2)
-    min.min(v1)
-    v1.set(...stdRes.center)
-    v1.add(v2)
-    max.max(v1)
-
-    return [{
-        name : decoded.name,
-        desc : decoded.desc,
-        link : decoded.link,
-        linkLabel : decoded.linkLabel,
-        buildSize : buildData[1],
-        plotIndicies : plotIndicies,
-        chunkArr : createChunkArr(plotIndicies, buildSize, CHUNK_SIZE),
-        geometryData : {
-            max : max.toArray(),
-            min : min.toArray(),
-            stdRes,
-            lowRes
-        }
-    }, [
-        stdRes.position.buffer,
-        stdRes.color.buffer,
-        stdRes.index.buffer,
-        lowRes.position.buffer,
-        lowRes.color.buffer,
-        lowRes.index.buffer
-    ]]
 
 }
 

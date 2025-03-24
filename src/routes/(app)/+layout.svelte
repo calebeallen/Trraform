@@ -13,8 +13,8 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal } from "$lib/main/store"
-    import { MAX_DEPTH } from "$lib/common/constants"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal, leaderboard } from "$lib/main/store"
+    import { MAX_DEPTH, D0_PLOT_COUNT } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/_renderManager"
@@ -32,6 +32,7 @@
     let t1 = 0
     let tags = {}
     let ismousedown = false
+    let leaderboardPlots = []
     
     onMount(async () => {
         
@@ -81,9 +82,38 @@
 
             $walletConnection = connection
 
+        refreshLeaderboard()
+
         $loadScreenOpacity = 0
 
     })
+
+    async function refreshLeaderboard(){
+
+        $leaderboard = null
+
+        const res = await fetch("http://localhost:8080/leaderboard")
+        const { data } = await res.json()
+        const needsLoad = []
+        
+        $leaderboard = data.map( ({ id, votes }) => {
+            const plotId = new PlotId(id)
+            needsLoad.push(plotId)
+            return { plotId: plotId.string(), votes: votes.toLocaleString() }
+        })
+
+        const remaining = 10 - $leaderboard.length
+        for(let i = 0; i < remaining; i++){
+
+            const randId = Math.floor(Math.random() * D0_PLOT_COUNT) + 1;
+            const plotId = new PlotId(randId)
+            $leaderboard.push({ plotId: plotId.string(), votes: 0 })
+        
+        }
+
+        leaderboardPlots = await Promise.all(needsLoad.map(plotId => loadPlot(plotId)))
+
+    }
 
     function renderLoop(t2){
 
@@ -92,6 +122,24 @@
         
         refs.renderManager.update(dt)
         refs.camera.update(dt)
+
+        if($page?.route?.id === "/(app)"){
+
+            const sortedPlots = new Array(leaderboardPlots.length)
+            for(let i = 0; i < leaderboardPlots.length; i++){
+                const plot = leaderboardPlots[i]
+                const dist = plot.boundingSphere.center.distanceTo(refs.camera.position)
+                sortedPlots[i] = { plot, dist }
+            }
+
+            sortedPlots.sort((a, b) => b.dist - a.dist)
+
+            updateTags(dt, sortedPlots, false)
+            refs.renderer.render( refs.scene, refs.camera )
+            updateBg()
+            return
+            
+        }
             
         const insideArr = [rootPlot]
 
@@ -137,26 +185,26 @@
         if(inside.children.length === 0)
             inside = insideArr[insideArr.length - 2]
 
+        //update speed
+        const speedRefs = inside.getKClosest(5, refs.camera.position)
+        let distSum = 0
+        for(const ref of speedRefs)
+            distSum += ref.dist
+
+        distSum /= speedRefs.length
+        refs.camera.accelerationMagnitude = distSum * 10
+
         //get k closest plots
-        const plots = inside.getKClosest(25, refs.camera)
+        const plots = inside.getKClosestWithHeuristic(25, refs.camera, 0.5)
 
         // update scene
-        updateTags(dt, plots)
+        updateTags(dt, plots, true)
         refs.renderer.render( refs.scene, refs.camera )
         updateBg()
 
         //update tags
         if(plots.length == 0)
             return
-
-        //update speed
-        const n = Math.min(plots.length, 5)
-        let distSum = 0
-        for(let i = 0; i < n; i++)
-            distSum += plots[i].dist
-
-        distSum /= n
-        refs.camera.accelerationMagnitude = distSum * 10
 
         //render plots
         const plotIdSet = new Set(plots.map(a => a.plot.id.id))
@@ -171,7 +219,7 @@
     
     }
 
-    function updateTags(dt, plots){
+    function updateTags(dt, plots, attenuate){
         
         dt = dt * 10
 
@@ -198,7 +246,7 @@
                 delete tags[key]
                 tagContainer.removeChild(tag.elem)
             } else
-                updateTag(tag)
+                updateTag(tag, true)
 
         }
 
@@ -230,14 +278,14 @@
             tagData.t = Math.min(tagData.t + dt, 1)
             tagData.dist = dist / plot.parent.blockSize
             z++
-            updateTag(tags[key])
+            updateTag(tags[key], attenuate)
 
         }
 
     }
 
     const quad = t => 1 - (t - 1)**2
-    function updateTag({plot, elem, dist, t, zIndex}){
+    function updateTag({plot, elem, dist, t, zIndex}, attenuate){
 
         const v4 = plot.tagPosition.clone()
         v4.applyMatrix4(refs.camera.viewMatrix)
@@ -255,8 +303,14 @@
         const MIN_OPACITY = 0.1
 
         let a = 1 / Math.max(dist, 1)
-        const opacity = Math.max(Math.min(a + 0.5, 1), MIN_OPACITY)
-        const scale = Math.max(Math.min(a, 1), MIN_SCALE) * quad(t) * settings.tagSize / 10
+        let opacity, scale 
+        if(attenuate){
+            opacity = Math.max(Math.min(a + 0.5, 1), MIN_OPACITY)
+            scale = Math.max(Math.min(a, 1), MIN_SCALE) * quad(t) * settings.tagSize / 2
+        } else {
+            opacity = 1
+            scale = quad(t) * settings.tagSize / 5
+        }
         
         elem.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%) scale(${scale})`;
         elem.style.opacity = opacity
@@ -306,25 +360,33 @@
                 return
 
             /* load plot */
-            const ids = plotId.split()
-            let plot = rootPlot
-
-            for(const id of ids){
-
-                if(!plot.children.length)
-                    break
-
-                plot = plot.children[id - 1] 
-                await plot.load()
-                await refs.renderManager.render(plot)
-    
-            }
+            const plot = await loadPlot(plotId)
 
             $insideOf = plot
             moveToPlot(plot)
 
         }
  
+
+    }
+
+    async function loadPlot(plotId){
+
+        const ids = plotId.split()
+        let plot = rootPlot
+
+        for(const id of ids){
+
+            if(!plot.children.length)
+                break
+
+            plot = plot.children[id - 1] 
+            await plot.load()
+            await refs.renderManager.render(plot)
+
+        }
+
+        return plot
 
     }
 
@@ -464,7 +526,7 @@
 <style lang="postcss">
 
     :global(.plot-tag) {
-        @apply absolute p-4 bg-zinc-900 rounded-3xl text-5xl;
+        @apply absolute px-1 py-0.5 bg-zinc-900 rounded-lg text-sm;
     }
 
 </style>

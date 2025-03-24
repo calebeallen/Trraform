@@ -66,8 +66,6 @@
         else
             settings.renderLimit = nonLinear(settings.renderLimitLinear, 3, RENDER_LIMIT_MIN, RENDER_LIMIT_MAX)
 
-            console.log(settings.renderLimitLinear, settings.renderLimit)
-
         const newLowLODDist = parseInt(lowLODDistValue)
         refs.renderManager.setLodDistances( newLowLODDist / settings.lowLODDist )
         settings.lowLODDist = newLowLODDist

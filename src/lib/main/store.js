@@ -15,6 +15,7 @@ const insideOf = writable(null)
 const notification = writable([])
 const newPlots = writable(0)
 const loadScreenOpacity = writable(100)
+const leaderboard = writable(null)
 
 const refs = {
     tagCanvas: null,
@@ -37,4 +38,4 @@ const defaultSettings = {
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
-export { defaultSettings, settings, walletConnection, walletAddress, dbConnection, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, myPlots, showSettingsModal, showMyPlots, plotSearchFocused, notification, newPlots, loadScreenOpacity }
+export { defaultSettings, settings, walletConnection, walletAddress, dbConnection, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, myPlots, showSettingsModal, showMyPlots, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard }

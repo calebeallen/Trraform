@@ -220,20 +220,14 @@ export default class Plot extends PlotData {
 
     }
 
-    getKClosest(k, camera){
+    getKClosest(k, target){
 
-        const { position, viewMatrix } = camera
         const heap = new MaxHeap()
-
-        const frustum = new Frustum()
-        frustum.setFromProjectionMatrix(viewMatrix)
 
         for(const child of this.children){
 
-            if(!frustum.intersectsSphere(child.sphere))
-                continue
-
-            const dist = child.sphere.center.distanceTo(position)
+            const { center } = child.boundingSphere
+            const dist = center.distanceTo(target)
 
             if(heap.length < k)
                 heap.add({plot: child, dist})
@@ -244,38 +238,51 @@ export default class Plot extends PlotData {
 
         const n = heap.length
         const sorted = new Array(n)
-        for(let i = 0; i < n; i++)
+        for(let i = sorted.length - 1; i >= 0; i--)
             sorted[i] = heap.popHead()
         
         return sorted
 
     }
 
-    withinView(){
+    getKClosestWithHeuristic(k, camera, alpha){
 
-        const found = []
+        const { position, viewMatrix } = camera
+        const heap = new MaxHeap()
 
-        for(const child of this.children)
+        const frustum = new Frustum()
+        frustum.setFromProjectionMatrix(viewMatrix)
 
-            if(this._inView(child.sphere.center))
+        const camFwd = new Vector3()
+        camera.getWorldDirection(camFwd)
 
-                found.push(child)
+        for(const child of this.children){
 
-        return found
+            if(!frustum.intersectsSphere(child.sphere))
+                continue
+
+            const { center, radius } = child.sphere
+            const dist = center.distanceTo(position)
+            const camToCenter = center.clone().sub(position)
+            const camDistToSurface = camToCenter.length() - radius
+            const proj = camToCenter.clone().projectOnVector(camFwd)
+            const projToCenter = camToCenter.sub(proj)
+            const projDistToSurface = projToCenter.length() - radius
+            const heuristic = camDistToSurface + projDistToSurface * alpha
+
+            if(heap.length < k)
+                heap.add({plot: child, dist: heuristic})
+            else if(dist < heap[0].dist)
+                heap.addAndPopHead({plot: child, dist: heuristic})
+
+        }
+
+        const n = heap.length
+        const sorted = new Array(n)
+        for(let i = 0; i < n; i++)
+            sorted[i] = heap.popHead()
         
-    }
-
-    withinRadius(center, radius){
-
-        const found = []
-
-        for(const child of this.children)
-
-            if(center.distanceTo(child.sphere.center) < radius * this.blockSize && this._inView(child.sphere.center))
-
-                found.push(child)
-
-        return found
+        return sorted
 
     }
 

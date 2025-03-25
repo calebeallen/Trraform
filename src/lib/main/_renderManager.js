@@ -105,6 +105,14 @@ export default class RenderManager {
 
     }
 
+    async refresh(plot){
+
+        const chunk = plot.chunk
+        await this.unrenderChunk(chunk)
+        await this.render(plot)
+
+    }
+
     async managedRender(plot, camera, leaveRendered){
 
         const {chunk} = plot

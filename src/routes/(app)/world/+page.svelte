@@ -141,6 +141,8 @@
 
             return
 
+        refs.camera.update = refs.camera.orbit
+
         const { touches } = e
 
         if(lastTouches.length === 1){
@@ -241,9 +243,7 @@
 
     function refresh(){
 
-        refs.renderManager.unrenderChunkById($insideOf.chunk.id)
-        $insideOf.clear()
-        $insideOf = $insideOf
+        refs.renderManager.refresh($insideOf)
 
     }
 
@@ -351,7 +351,7 @@
             {#if canVote}
                 <button class="button" on:click={() => castVote(id)}>Cast Vote</button>
             {/if}
-        {:else if !$isMobileBrowser}
+        {:else}
             <button class="button" on:click={() => showClaimModal = true}>Claim</button>
         {/if}
     {/await}

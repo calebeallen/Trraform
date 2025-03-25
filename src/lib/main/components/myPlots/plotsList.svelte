@@ -35,14 +35,14 @@
 
         if(scrollTop + clientHeight + deltaY >= scrollHeight - 240){
 
-            if($myPlots.length >= $walletConnection.plotIterator){
+            if($myPlots.length >= $walletConnection.myPlotsIterator){
 
                 const w = clientWidth + 12
-                const widgetW = 252
+                const widgetW = 224
                 const fitX = Math.floor(w / widgetW)
 
                 //load 2 more rows + the rest of the remaining row (if there is anything)
-                const fillRow = Math.ceil($walletConnection.plotIterator / fitX) * fitX
+                const fillRow = Math.ceil($walletConnection.myPlotsIterator / fitX) * fitX
                 const range = fillRow + fitX * 2
 
                 $walletConnection.loadMyPlots(range)

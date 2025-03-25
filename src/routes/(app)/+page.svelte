@@ -39,7 +39,21 @@
     </svelte:head>
 
     <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full p-2 sm:p-2 sm:max-w-max">
-        <h1 class="text-4xl font-bold sm:text-5xl">Millions of Worlds</h1>
+        <div class="flex items-center gap-2 opacity-70">
+            <a class="w-4 aspect-square" href="https://discord.gg/KGYYePyfuQ" target="_blank">
+                <img  src="/discord.svg" alt="">
+            </a>
+            <a class="w-4 aspect-square" href="https://www.instagram.com/trraform_" target="_blank">
+                <img src="/instagram.svg" alt="">
+            </a>
+            <a class="w-4 aspect-square" href="https://x.com/trraform" target="_blank">
+                <img src="/x.svg" alt="">
+            </a>
+            <a class="w-4 aspect-square" href="https://www.tiktok.com/@trraform" target="_blank">
+                <img src="/tiktok.svg" alt=""> 
+            </a>
+        </div>
+        <h1 class="mt-1 text-4xl font-bold sm:text-5xl">Millions of Worlds</h1>
         <h4 class="mt-1 text-sm font-semibold sm:text-base">Powered by <b>Polygon</b></h4>
         <nav class="w-full mt-3 space-y-3">
             <button on:click={() => {
@@ -59,20 +73,6 @@
                 <div class="w-px h-3.5 sm:h-4 bg-white"></div>
                 <button on:click={() => $showHowItWorksModal = true}>How it works</button>
                 <div class="hidden w-px h-4 bg-white sm:block"></div>
-            </div>
-            <div class="flex items-center justify-center gap-2">
-                <a class="sm:w-4 w-3.5 aspect-square" href="https://discord.gg/KGYYePyfuQ" target="_blank">
-                    <img  src="/discord.svg" alt="">
-                </a>
-                <a class="sm:w-4 w-3.5 aspect-square" href="https://www.instagram.com/trraform_" target="_blank">
-                    <img src="/instagram.svg" alt="">
-                </a>
-                <a class="sm:w-4 w-3.5 aspect-square" href="https://x.com/trraform" target="_blank">
-                    <img src="/x.svg" alt="">
-                </a>
-                <a class="sm:w-4 w-3.5 aspect-square" href="https://www.tiktok.com/@trraform" target="_blank">
-                    <img src="/tiktok.svg" alt=""> 
-                </a>
             </div>
         </div>
     </div>

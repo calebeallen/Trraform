@@ -92,7 +92,7 @@
 
         $leaderboard = null
 
-        const res = await fetch("http://localhost:8080/leaderboard")
+        const res = await fetch("https://api.trraform.com/leaderboard")
         const { data } = await res.json()
         const needsLoad = []
         
@@ -123,7 +123,7 @@
         refs.renderManager.update(dt)
         refs.camera.update(dt)
 
-        if($page?.route?.id === "/(app)"){
+        if(refs.camera.update === refs.camera.autoRotate){
 
             const sortedPlots = new Array(leaderboardPlots.length)
             for(let i = 0; i < leaderboardPlots.length; i++){
@@ -447,9 +447,9 @@
         const { width, height } = canvasContainer.getBoundingClientRect()
 
         refs.renderer.setPixelRatio(window.devicePixelRatio)
-        refs.renderer.setSize(width, height, false)
+        refs.renderer.setSize(window.innerWidth, window.innerHeight, false)
 
-        refs.camera.aspect = width / height
+        refs.camera.aspect = window.innerWidth / window.innerHeight
         refs.camera.updateProjectionMatrix()
 
     }
@@ -489,7 +489,6 @@
 <div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$showMyPlots ? "blur-2xl" : ""}">
     <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full" style="will-change: background;"></canvas>
     <div on:mousedown={mousedown} on:mousemove={mousemove} bind:this={tagContainer} class="fixed top-0 left-0 w-full h-full select-none"></div>
-    <!-- <canvas bind:this={tagCanvas}  class="fixed top-0 left-0 w-full h-full"></canvas> -->
 </div>
 <div class="w-full {$showMyPlots ? "blur-2xl" : ""}">
     <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2 pointer-events-none">

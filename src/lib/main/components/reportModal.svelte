@@ -50,12 +50,11 @@
 </script>
 
 
-<Modal class="max-w-screen-sm" header="Report Plot {plotIdStr}?" on:close>
+<Modal class="max-w-lg" header="Report Plot {plotIdStr}?" on:close>
     <div class="space-y-3 text-xs sm:text-sm">
         <p>We appreciate your help with make Trraform a better place for everyone. <b>We do not take actions on reports unless they are highly serious. </b>Spam and abuse of our report system will be automatically filtered.</p>
-        <p>Describe your report in detail. If this report involves your personal information, please provide your Discord username.</p>
         <div class="relative w-full">
-            <textarea maxlength="500" bind:value={message} class="w-full p-1 m-0 mt-1 text-xs align-top transition-colors rounded-lg resize-none sm:text-sm outline outline-1 outline-zinc-800 bg-zinc-900" rows="6" placeholder="Minimum 250 characters, maximum 500 characters."></textarea>
+            <textarea maxlength="500" bind:value={message} class="w-full p-1 m-0 mt-1 text-xs align-top transition-colors rounded-lg resize-none sm:text-sm outline outline-1 outline-zinc-700 bg-zinc-900" rows="6" placeholder="Minimum 250 characters, maximum 500 characters."></textarea>
             <span class="absolute text-xs opacity-50 bottom-1 right-1 {charCount >= 0 ? "text-green-500" : ""}">{charCount}</span>
         </div>
         <button on:click={submit} class="button0 w-full {charCount < 0 ? "pointer-events-none opacity-50" : ""}">Submit</button>

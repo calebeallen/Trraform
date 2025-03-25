@@ -122,19 +122,6 @@ export default class RenderManager{
 
     }
 
-    _memoryFootprint(geomData){
-
-        let total = 0
-        total += geomData.stdRes.position.length * 4
-        total += geomData.stdRes.color.length
-        total += geomData.stdRes.index.length * 4
-        total += geomData.lowRes.position.length * 4
-        total += geomData.lowRes.color.length
-        total += geomData.lowRes.index.length * 4
-        return total
-
-    }
-
     _createMesh(position, color, index, pos, radius, scale){
 
         const geometry = new BufferGeometry()

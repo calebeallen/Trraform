@@ -139,17 +139,6 @@ class WalletConnection {
 
     }
 
-    static async txSuccess(hash){
-
-        const { publicCli } = this.connection
-        const receipt = await publicCli.waitForTransactionReceipt({ hash })
-
-        if(receipt.status !== "success")
-
-            throw new Error("Transaction failed")
-
-    }
-
     constructor(){
 
         this.myPlotsCount = 0
@@ -157,6 +146,14 @@ class WalletConnection {
         this.walletCli = null
         this.connector = null
         this.connected = false
+
+    }
+
+
+    async txSuccess(hash){
+
+        const receipt = await publicCli.waitForTransactionReceipt({ hash })
+        return receipt.status === "success"
 
     }
 
@@ -349,7 +346,7 @@ class WalletConnection {
             account: this.address
         });
 
-        const res = await this.walletCli.writeContract({
+        return await this.walletCli.writeContract({
             address: PROXY_CONTRACT_ADDRESS,
             abi: PROXY_CONTRACT_ABI,
             account: this.address,

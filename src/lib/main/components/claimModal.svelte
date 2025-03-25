@@ -3,13 +3,17 @@
 
     import Modal from "$lib/common/components/modal.svelte"
     import Tip from "$lib/common/components/tip.svelte";
-    import { onDestroy, onMount } from "svelte";
+    import { onDestroy, onMount, createEventDispatcher } from "svelte";
     import { fly } from "svelte/transition";
     import { WalletConnection } from "$lib/main/walletConnection";
     import { formatEther } from "viem";
-    import { walletConnection,loadScreenOpacity, showConnectWalletModal } from "$lib/main/store"
+    import { walletConnection,loadScreenOpacity, showConnectWalletModal, notification, isMobileBrowser } from "$lib/main/store"
     import { MAX_BUILD_SIZES } from "$lib/common/constants";
+    import { pushNotification } from "$lib/common/utils";
+    import { confetti } from "$lib/main/decoration"
+    import { insideOf, refs } from "../store";
 
+    const dispatcher = createEventDispatcher()
     const MINT_PRICE = [10, 10, 6]
 
     export let plot
@@ -101,15 +105,10 @@
         }
 
         if (availability === "Available" || availability === "Loading")
-
             refreshAvailability()
-
-        if (paymentMethod === "POL") {
-
+        if (paymentMethod === "POL")
             refreshPOLQuote()
-           
-        } else
-
+        else
             quote = price
 
 
@@ -125,6 +124,13 @@
 
     async function claim(){
 
+        if($isMobileBrowser){
+
+            pushNotification(notification, "Desktop browser required", "Connect a wallet through desktop browser to claim plots.")
+            return
+
+        }
+
         if($walletConnection === null){
 
             $showConnectWalletModal = true
@@ -133,16 +139,42 @@
         }
 
         $loadScreenOpacity = 50
+        let txHash
 
-        if(paymentMethod === "POL"){
+        try {
 
-            await $walletConnection.claimWithPOL(plot.id, mintLockChecked, price * 1e6)
+            if(paymentMethod === "POL")
+                txHash = await $walletConnection.claimWithPOL(plot.id, mintLockChecked, price * 1e6)
+            else if (paymentMethod === "USDC") 
+                txHash = await $walletConnection.claimWithUSDC(plot.id, mintLockChecked, price * 1e6)
 
-        } else if (paymentMethod === "USDC") {
+        } catch {
 
-            await $walletConnection.claimWithUSDC(plot.id, mintLockChecked, price * 1e6)
+            pushNotification(notification, "Transaction error", "Transaction could not be completed.")
+            $loadScreenOpacity = 0
+            return
 
         }
+
+        //sleep for 2s. Checking for tx success fails sometimes cause the block is too new.
+        await new Promise(resolve => setTimeout(resolve, 2000))
+
+        pushNotification(notification, "Processing transaction", "This may take a minute...")
+        const success = await $walletConnection.txSuccess(txHash)
+        const txLink = `https://polygonscan.com/tx/${txHash}`
+
+        if(success){
+
+            pushNotification(notification, "Plot claimed!", "Click to view your transaciton.", () => window.open(txLink, '_blank'))
+            dispatcher("close")
+            setTimeout(() => confetti(plot.pos, plot.parent.blockSize), 1000)
+            setTimeout(async () => {
+                await refs.renderManager.refresh(plot)
+                $insideOf = $insideOf
+            }, 3000)
+           
+        } else 
+            pushNotification(notification, "Transaction failed", "Click to view your transaciton.", () => window.open(txLink, '_blank'))
 
         $loadScreenOpacity = 0
 
@@ -208,13 +240,13 @@
             <div class="relative select-none">
                 <button bind:this={expandPaymentMethodsButton} on:click={() => paymentMethodsExpanded = !paymentMethodsExpanded} class="flex items-center gap-1.5 p-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-zinc-900 outline outline-1 outline-zinc-700">
                     {#if paymentMethod === "USDC"}
-                        <img class="h-4 rounded-full sm:w-5 aspect-square" src="/usdcLogo.png" alt="">
+                        <img class="w-4 rounded-full sm:w-5 aspect-square" src="/usdcLogo.png" alt="">
                         <div>USDC</div>
                     {:else if paymentMethod === "POL"}
-                        <img class="h-4 rounded-full sm:w-5 aspect-square" src="/polygonLogoBg.png" alt="">
+                        <img class="w-4 rounded-full sm:w-5 aspect-square" src="/polygonLogoBg.png" alt="">
                         <div>POL</div>
                     {/if}
-                    <img class="h-3 pointer-events-none sm:w-4 aspect-square" src="/dropdown.svg" alt="">
+                    <img class="w-3 pointer-events-none sm:w-4 aspect-square" src="/dropdown.svg" alt="">
                 </button>
                 {#if paymentMethodsExpanded}
                     <div bind:this={paymentMethodsContainer} transition:fly={{ y: -5, duration: 100}} class="absolute left-0 right-0 z-10 overflow-hidden text-xs font-semibold translate-y-full rounded-lg sm:text-sm -bottom-1 bg-zinc-900">
@@ -223,7 +255,7 @@
                             paymentMethodsExpanded = false
                             refresh()
                         }} class="flex w-full gap-1.5 p-1.5 hover:bg-zinc-800 bg-opacity-50 transition-colors items-center">
-                            <img class="h-4 rounded-full sm:w-5 aspect-square" src="/usdcLogo.png" alt="">
+                            <img class="w-4 rounded-full sm:w-5 aspect-square" src="/usdcLogo.png" alt="">
                             <div>USDC</div>
                         </button>
                         <button on:click={() => {
@@ -231,7 +263,7 @@
                             paymentMethodsExpanded = false
                             refresh()
                         }} class="flex w-full gap-1.5 p-1.5 hover:bg-zinc-800 bg-opacity-50 transition-colors items-center">
-                            <img class="h-4 rounded-full sm:w-5 aspect-square" src="/polygonLogoBg.png" alt="">
+                            <img class="w-4 rounded-full sm:w-5 aspect-square" src="/polygonLogoBg.png" alt="">
                             <div>POL</div>
                         </button>
                     </div>

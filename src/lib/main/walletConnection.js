@@ -37,6 +37,7 @@ const wagmiConfig = createConfig({
         coinbaseWallet({
             appName: "Trraform",
             reloadOnDisconnect: false,
+            enableMobileWalletLink: false
         })
     ],
     transports: {

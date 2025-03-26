@@ -5,6 +5,7 @@ import { ColorLibrary } from "$lib/common/colorLibrary"
 import { PLOT_COUNT } from "$lib/common/constants"
 import { PLOTS_PLACED, REFS, SELECTED } from "$lib/editor/store"
 import { GridGeometry } from "$lib/editor/geometries/gridGeometry"
+import { COLOR_INDEX } from "./store"
 
 const basicMaterial = new MeshBasicMaterial({ vertexColors: true })
 const dx = [0,0,0,0,-1,1]
@@ -198,6 +199,17 @@ export default class Build {
                 plot.position.copy(new Vector3(...I2P(ind, REFS.buildSize))).addScalar(0.5)
 
                 REFS.scene1.add(plot)
+
+                for(let i = 0; i < arr.length; i++)
+
+                    if(arr[i] === false){
+
+                        COLOR_INDEX.set(i + 1)
+                        
+                        break
+
+                    }
+
 
                 return arr
 

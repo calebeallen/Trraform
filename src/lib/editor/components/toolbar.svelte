@@ -2,7 +2,7 @@
 <script>
 
     import { InitTransformable, ModifyEvent, TransformEvent, COLOR_SELECT, MODE, OBJECT_SELECT, OVERLAP, REFS, SHOW_BLOCK_PANEL, CONVERTING, addEvent, NEW_BUILD_MODAL, EndTransformable, ConvertEvent, SELECTED, DOWNLOAD_MODAL, NOTIFICATION, COLOR_INDEX } from "$lib/editor/store"
-    import { I2P, expand, verifyBuild, pushNotification } from "$lib/common/utils";
+    import { I2P, expand, validateBuildData, pushNotification } from "$lib/common/utils";
     import GLBConverter from "$lib/editor/glb/glbConverter"
     import { TransformableObject, TransformableGlb } from "$lib/editor/transform"
     import { ColorLibrary } from "$lib/common/colorLibrary"
@@ -171,10 +171,14 @@
 
                     const u16 = new Uint16Array(res.target.result)
 
-                    if(!verifyBuild(u16))
+                    if(u16.length == 2){
+                        pushNotification(NOTIFICATION, "Import failed", `${file.name} is an empty build.`)
+                        return
+                    }
+
+                    if(!validateBuildData(u16))
 
                         throw null
-
                     
                     beforeModeSwitch({ detail : "place" })
                     
@@ -184,7 +188,7 @@
 
                     for(let i = 1; i < expanded.length; i++)
 
-                        if(expanded[i] !== 0)
+                        if(expanded[i] > PLOT_COUNT)
 
                             blocks.push( [ expanded[i], I2P(i, buildSize) ] )
 
@@ -196,9 +200,9 @@
 
                     setTimeout( () => $MODE = "transform-imported-object", 1 )
 
-                } catch {
-
-                    pushNotification(NOTIFICATION, "Import Failed", `Could not import ${file.name}; this file is not supported.`)
+                } catch(e) {
+                    console.log(e)
+                    pushNotification(NOTIFICATION, "Import failed", `Could not import ${file.name}, this file is not supported.`)
 
                 }
 

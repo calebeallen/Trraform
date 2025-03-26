@@ -3,7 +3,7 @@
 
     import { fly } from "svelte/transition";
     import { goto } from "$app/navigation"
-    import { dbConnection, notification, isMobileBrowser, walletConnection, showConnectWalletModal, plotSearchFocused, showMyPlots, showSettingsModal } from "$lib/main/store";
+    import { dbConnection, notification, isMobileBrowser, walletConnection, showConnectWalletModal, plotSearchFocused, showMyPlots, showSettingsModal, newPlots } from "$lib/main/store";
     import PlotId from "$lib/common/plotId"
     import DbConnection from "$lib/main/dbConnection"
     import { pushNotification } from "$lib/common/utils";
@@ -182,8 +182,11 @@
                     <div class="absolute text-red-400 select-none">Disconnect</div>
                 </div>
             </button>
-            <button on:click={() => $showMyPlots = true} class="transition-opacity opacity-50 shrink-0 w-7 h-7 hover:opacity-80 focus:outline-none">
-                <img class="pointer-events-none select-none" src="/plot1.svg" alt="">
+            <button on:click={() => $showMyPlots = true} class="relative transition-opacity shrink-0 w-7 h-7 group focus:outline-none">
+                <img class="opacity-50 pointer-events-none select-none group-hover:opacity-80" src="/plot1.svg" alt="">
+                {#if $newPlots}
+                    <span class="absolute top-0 translate-x-1/3 -translate-y-1/3 right-0 px-1 py-px text-[9px] font-semibold bg-blue-700 rounded-full">new</span>
+                {/if}
             </button>
         {/if}
     {/if}

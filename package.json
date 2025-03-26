@@ -23,14 +23,14 @@
 		"@supabase/supabase-js": "^2.49.1",
 		"@uniswap/sdk-core": "^7.7.0",
 		"@uniswap/v4-sdk": "^1.21.0",
-		"@wagmi/connectors": "^5.7.1",
-		"@wagmi/core": "^2.16.1",
+		"@wagmi/connectors": "^5.7.11",
+		"@wagmi/core": "^2.16.7",
 		"ethers": "^6.13.4",
 		"mobile-detect": "^1.4.5",
 		"pngjs": "^7.0.0",
 		"three": "^0.172.0",
 		"tweetnacl": "^1.0.3",
 		"validator": "^13.12.0",
-		"viem": "^2.21.57"
+		"viem": "^2.23.15"
 	}
 }

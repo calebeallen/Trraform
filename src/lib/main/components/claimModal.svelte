@@ -7,11 +7,11 @@
     import { fly } from "svelte/transition";
     import { WalletConnection } from "$lib/main/walletConnection";
     import { formatEther } from "viem";
-    import { walletConnection,loadScreenOpacity, showConnectWalletModal, notification, isMobileBrowser } from "$lib/main/store"
+    import { walletConnection,loadScreenOpacity, showConnectWalletModal, notification, isMobileBrowser, myPlots,  insideOf, newPlots, refs } from "$lib/main/store"
     import { MAX_BUILD_SIZES } from "$lib/common/constants";
     import { pushNotification } from "$lib/common/utils";
     import { confetti } from "$lib/main/decoration"
-    import { insideOf, refs } from "../store";
+    import MyPlot from "$lib/main/plot/myPlot"
 
     const dispatcher = createEventDispatcher()
     const MINT_PRICE = [10, 10, 6]
@@ -148,8 +148,9 @@
             else if (paymentMethod === "USDC") 
                 txHash = await $walletConnection.claimWithUSDC(plot.id, mintLockChecked, price * 1e6)
 
-        } catch {
+        } catch(e) {
 
+            console.log(e)
             pushNotification(notification, "Transaction error", "Transaction could not be completed.")
             $loadScreenOpacity = 0
             return
@@ -171,6 +172,8 @@
             setTimeout(async () => {
                 await refs.renderManager.refresh(plot)
                 $insideOf = $insideOf
+                $myPlots.unshift(new MyPlot(plot.id, true))
+                $newPlots = true
             }, 3000)
            
         } else 

@@ -72,7 +72,6 @@
                 <a href="/privacy-policy" target="_blank">Privacy policy</a>
                 <div class="w-px h-3.5 sm:h-4 bg-white"></div>
                 <button on:click={() => $showHowItWorksModal = true}>How it works</button>
-                <div class="hidden w-px h-4 bg-white sm:block"></div>
             </div>
         </div>
     </div>

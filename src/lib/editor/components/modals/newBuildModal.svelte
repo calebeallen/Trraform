@@ -2,7 +2,7 @@
 <script>
     
 	import { GRID_SIZING, NEW_BUILD_MODAL, NOTIFICATION, REFS } from "$lib/editor/store";
-	import { verifyBuild, pushNotification } from "$lib/common/utils";
+	import { validateBuildData, pushNotification } from "$lib/common/utils";
     import Modal from "$lib/common/components/modal.svelte"
 
     let importInput
@@ -29,7 +29,7 @@
                     //verify data first
                     const dat = new Uint16Array(res.target.result)
 
-                    if(!verifyBuild(dat))
+                    if(!validateBuildData(dat))
 
                         throw null
 

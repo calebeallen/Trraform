@@ -13,7 +13,7 @@ const isMobileBrowser = writable(false)
 const dbConnection = writable(null)
 const insideOf = writable(null)
 const notification = writable([])
-const newPlots = writable(0)
+const newPlots = writable(false)
 const loadScreenOpacity = writable(100)
 const leaderboard = writable(null)
 

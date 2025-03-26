@@ -1,11 +1,23 @@
 
 <script>
     
-	import { DOWNLOAD_MODAL, REFS } from "$lib/editor/store";
+	import { DOWNLOAD_MODAL, REFS, PLOTS_PLACED } from "$lib/editor/store";
     import { condense } from "$lib/common/utils"
     import Modal from "$lib/common/components/modal.svelte"
+    import { onMount } from "svelte";
 
     let name = ""
+    let showWarning = false
+
+    onMount(() => {
+
+        for(const placed of $PLOTS_PLACED)
+            if(!placed){
+                showWarning = true
+                return
+            }
+
+    })
 
     function download(){
 
@@ -29,7 +41,10 @@
 
 <Modal class="max-w-xs" header="Download Build" on:close={() => $DOWNLOAD_MODAL = false}>
     <div>
-        <div class="flex items-end">
+        {#if showWarning}
+        <div class="text-xs text-yellow-300">One or more subplots have not been placed. If this build is uploaded to a depth 0 or 1 plot, unplaced subplots will be placed randomly.</div>
+        {/if}
+        <div class="flex items-end mt-2">
             <img class="w-6 h-6" src="/pencil.svg" alt="pencil">
             <input bind:value={name} type="text" placeholder="New Build" class="flex-1 m-0 mr-2 text-sm transition-colors bg-transparent border-b border-transparent focus:outline-none hover:border-zinc-700 focus:border-zinc-700">
         </div>

@@ -14,6 +14,7 @@
     import { confetti } from "$lib/main/decoration"
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
     import ClaimModal from "$lib/main/components/claimModal.svelte";
+    import { fly } from "svelte/transition";
 
     export let data 
     let lastTouches = []
@@ -24,6 +25,8 @@
     let showProfile = false
 
     let canVote = false
+
+    let plusOneAnimation = false
 
     onMount(() => {
 
@@ -249,6 +252,9 @@
 
     async function castVote(id){
 
+        plusOneAnimation = true
+        setTimeout(() => plusOneAnimation = false, 1)
+
         if(getCookie("voted") == ""){
 
             canVote = false
@@ -300,62 +306,67 @@
 />
 
 
-<div class="p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 flex flex-col gap-1 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    {#await profile}
-        <div class="w-full h-20 animate-pulse">
-            <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
-            <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
-        </div>
-    {:then { id, minted, name, desc, link, linkLabel } }
-        <div>
-            <div class="flex items-center justify-between gap-1">
-                <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name}</h3>
-                <div class="select-none">
-                    <button on:click={refresh} class="relative w-3.5 sm:w-4 select-none aspect-square group focus:outline-none">
-                        <img src="/refresh.svg" alt="report">   
-                        <span class="plot-option-tag">Refresh</span>
-                    </button>
-                    <button on:click={() => {
-                        sharePlotId = id
-                        showShareModal = true
-                    }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
-                        <img src="/share.svg" alt="report">   
-                        <span class="plot-option-tag">Share</span>
-                    </button>
-                    {#if minted}
-                        <button on:click={() => {
-                            reportPlotId = id
-                            showReportModal = true
-                        }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
-                            <img src="/report.svg" alt="report">
-                            <span class="plot-option-tag">Report</span>
+<div class=" fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
+    <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-1">
+        {#await profile}
+            <div class="w-full h-20 animate-pulse">
+                <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
+                <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
+            </div>
+        {:then { id, minted, name, desc, link, linkLabel } }
+            <div>
+                <div class="flex items-center justify-between gap-1">
+                    <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name}</h3>
+                    <div class="select-none">
+                        <button on:click={refresh} class="relative w-3.5 sm:w-4 select-none aspect-square group focus:outline-none">
+                            <img src="/refresh.svg" alt="report">   
+                            <span class="plot-option-tag">Refresh</span>
                         </button>
-                    {/if}
+                        <button on:click={() => {
+                            sharePlotId = id
+                            showShareModal = true
+                        }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
+                            <img src="/share.svg" alt="report">   
+                            <span class="plot-option-tag">Share</span>
+                        </button>
+                        {#if minted}
+                            <button on:click={() => {
+                                reportPlotId = id
+                                showReportModal = true
+                            }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
+                                <img src="/report.svg" alt="report">
+                                <span class="plot-option-tag">Report</span>
+                            </button>
+                        {/if}
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="text-xs opacity-70">id: {id}</div>
-        {#if (!minted || desc || link) && !$isMobileBrowser}
-            <div class="w-full h-px bg-zinc-800"></div>
-        {/if}
-        {#if minted}
-            {#if desc}
-                <p>{desc}</p>
+            <div class="text-xs opacity-70">id: {id}</div>
+            {#if (!minted || desc || link) && !$isMobileBrowser}
+                <div class="w-full h-px bg-zinc-800"></div>
             {/if}
-            {#if link}
-                <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity opacity-70 active:opacity-40">
-                    <img class="w-4 h-4" src="/link.svg" alt="link">
-                    <p>{linkLabel}</p>
-                </a>
+            {#if minted}
+                {#if desc}
+                    <p>{desc}</p>
+                {/if}
+                {#if link}
+                    <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity w-max opacity-70 active:opacity-40">
+                        <img class="w-4 h-4" src="/link.svg" alt="link">
+                        <p>{linkLabel}</p>
+                    </a>
+                {/if}
+                {#if canVote}
+                    <button class="button" on:click={() => castVote(id)}>Cast Vote</button>
+                {/if}
+            {:else}
+                <button class="button" on:click={() => showClaimModal = true}>Claim</button>
             {/if}
-            {#if canVote}
-                <button class="button" on:click={() => castVote(id)}>Cast Vote</button>
-            {/if}
-        {:else}
-            <button class="button" on:click={() => showClaimModal = true}>Claim</button>
-        {/if}
-    {/await}
-</div>
+        {/await}
+    </div>
+    {#if plusOneAnimation == true}
+        <div out:fly={{ y: -150, opacity: 0, duration: 2000 }} class="absolute top-0 left-0 w-full text-3xl font-bold text-center pointer-events-none rotate-12 -z-10">+1</div>
+    {/if}
+</div> 
 
 {#if showShareModal}
     <ShareModal bind:plotIdStr={sharePlotId} on:close={() => showShareModal = false}/>

@@ -303,45 +303,6 @@ function validateBuildData(data) {
 }
   
 
-function verifyBuild(buffer){
-
-    //verify that editor version is vaild
-    if( buffer[0] > 0 )
-
-        return false
-
-    const buildSize = buffer[1]
-    const build = buffer.subarray(2)
-
-    let blkCount = 0
-
-    for(let i = 0; i < build.length; i++){
-
-        const write = build[i] & 1
-        const val = build[i] >> 1
-
-        if (write) {
-        
-            if(val >= ColorLibrary.colors.length)
-
-                return false
-
-            blkCount++
-
-        } else
-
-            blkCount += val
-
-    }
-
-    if(blkCount > buildSize ** 3)
-
-        return false
-
-    return true
-
-}
-
 // does not do an in-depth validation
 function decodePlotData(bytes){
 

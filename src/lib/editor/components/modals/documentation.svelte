@@ -18,7 +18,7 @@
         </section>
         <h2>3D Model Conversion (Beta)</h2>
         <section>
-            <p>You can import 3D models in the GLB format and use our converter tool to resize and reposition your model before transforming it into blocks. This feature is currently in beta, so if you encounter any issues, we’d greatly appreciate your bug reports via Discord.</p>
+            <p>You can import GLB format 3D models and use our converter tool to resize and reposition your model before transforming it into blocks. This feature is currently in beta, so if you encounter any issues, we’d greatly appreciate your bug reports via Discord.</p>
             <p>If your 3D model isn’t in GLB format, we recommend using a tool like <a class="font-semibold" target="_blank" href="https://www.blender.org">Blender</a> for conversion. Simply import your file into Blender and export it as a .glb. Ensure that textures are included in the exported file.</p>
             <p>For models relying on lighting effects, <b>you’ll need to bake those effects into the model’s textures</b>, as our converter currently does not compute lighting and will remove any lighting information from the file. Blender can also be used to bake lighting effects into textures before conversion.</p>
         </section>
@@ -67,24 +67,24 @@
         <section>
             <h3>Place</h3>
             <p>The mode for placing blocks. It is not an explicit option on the toolbar, but is the default mode when no other mode is selected.</p>
-            <p><b>With Overlap On:</b> Placed blocks will replace any existing blocks occupying the same positions.</p>
+            <p><b>With overlap on:</b> Placed blocks will replace any existing blocks occupying the same positions.</p>
             <h3>Delete</h3>
-            <p><b>With Color Select On:</b> Blocks within the affected area will be deleted if they match the color of the block that was clicked.</p>
-            <p><b>With Object Select On:</b> All blocks connected to the block that was clicked will be deleted.</p>
-            <p><b>With Color Select and Object Select On:</b> All blocks connected to and of the same color as the block that was clicked will be deleted.</p>
+            <p><b>With color select on:</b> Blocks within the affected area will be deleted if they match the color of the block that was clicked.</p>
+            <p><b>With object select on:</b> All blocks connected to the block that was clicked will be deleted.</p>
+            <p><b>With color select and object select on:</b> All blocks connected to and of the same color as the block that was clicked will be deleted.</p>
             <h3>Paint</h3>
             <p>Change the color of existing blocks.</p>
-            <p><b>With Color Select On:</b> Blocks within the affected area will be painted if they match the color of the block that was clicked.</p>
-            <p><b>With Object Select On:</b> All blocks connected to the block that was clicked will be painted.</p>
-            <p><b>With Color Select and Object Select On:</b> All blocks connected to and of the same color as the block that was clicked will be painted.</p>
+            <p><b>With color select on:</b> Blocks within the affected area will be painted if they match the color of the block that was clicked.</p>
+            <p><b>With object select on:</b> All blocks connected to the block that was clicked will be painted.</p>
+            <p><b>With color select and object select on:</b> All blocks connected to and of the same color as the block that was clicked will be painted.</p>
             <h3>Select</h3>
             <p>Works in conjunction with the transform tool.</p>
-            <p><b>With Color Select On:</b> Blocks within the affected area will be selected if they match the color of the block that was clicked.</p>
-            <p><b>With Object Select On:</b> All blocks connected to the block that was clicked will be selected.</p>
-            <p><b>With Color Select and Object Select On:</b> All blocks connected to and of the same color as the block that was clicked will be selected.</p>
+            <p><b>With color select on:</b> Blocks within the affected area will be selected if they match the color of the block that was clicked.</p>
+            <p><b>With object select on:</b> All blocks connected to the block that was clicked will be selected.</p>
+            <p><b>With color select and object select on:</b> All blocks connected to and of the same color as the block that was clicked will be selected.</p>
             <h3>Transform</h3>
             <p>Translate, rotate, or duplicate selected blocks.</p>
-            <p><b>With Overlap On:</b> Duplicating or confirming a transformed structure will replace any existing blocks that overlap with the structure.</p>
+            <p><b>With overlap on:</b> Duplicating or confirming a transformed structure will replace any existing blocks that overlap with the structure.</p>
         </section>
         <a href="https://discord.gg/KGYYePyfuQ" target="_blank" class="mx-auto documentation-note">
             <h2>Have Questions? Feel free to ask on our Discord!</h2>

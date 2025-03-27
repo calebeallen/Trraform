@@ -8,7 +8,7 @@
     
 </script>
 
-<input class="slider" type="range" bind:value={value} min={min} max={max} step={stepSize}> 
+<input class="slider" type="range" on:input bind:value={value} min={min} max={max} step={stepSize}> 
 
 <style lang="postcss">
 

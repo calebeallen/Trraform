@@ -14,6 +14,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import OnboardingModal from "$lib/editor/components/modals/onboardingModal.svelte";
     import Documentation from "$lib/editor/components/modals/documentation.svelte";
+    import GridPosSlider from "$lib/editor/components/gridPosSlider.svelte";
     
 </script>
 
@@ -54,6 +55,7 @@
 {#if !$GRID_SIZING}
     <CameraControls/>
     <Toolbar/>
+    <GridPosSlider/>
     <div class="fixed text-xs opacity-50 pointer-events-none bottom-2 left-2">
         Build Size: {$BUILD_SIZE}x{$BUILD_SIZE}x{$BUILD_SIZE}
     </div>
@@ -85,5 +87,6 @@
 {#if $LOADING}
     <Loading/>
 {/if}
+
 
 <Notification store={NOTIFICATION}/>

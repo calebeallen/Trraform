@@ -10,7 +10,7 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
     import { WebGLRenderer, Scene, Color, LineSegments, MeshBasicMaterial, Vector3, LinearSRGBColorSpace, Vector2, Spherical, Raycaster, Sphere } from "three";
-    import { BUILD_SIZE, COLOR_INDEX, COLOR_SELECT, EYEDROP, GRID_SIZING, MODE, ModifyEvent, OBJECT_SELECT, OVERLAP, REFS, addEvent, LOADING, SHOW_ONBOARDING_MODAL } from "$lib/editor/store";
+    import { BUILD_SIZE, COLOR_INDEX, COLOR_SELECT, EYEDROP, GRID_SIZING, MODE, ModifyEvent, OBJECT_SELECT, OVERLAP, REFS, addEvent, LOADING, SHOW_ONBOARDING_MODAL, GRID_Y_POS } from "$lib/editor/store";
     import { GridGeometry } from "$lib/editor/geometries/gridGeometry" 
     import Build from "$lib/editor/build"
     import Octree from "$lib/editor/structures/octree"
@@ -90,6 +90,7 @@
         REFS.buildSize = data[1]
         $BUILD_SIZE = data[1]
         REFS.build = new Build(data)
+        $GRID_Y_POS = 0
 
         REFS.eventQueue = []
         REFS.eventIndex = -1
@@ -102,6 +103,7 @@
         const gridMat =  new MeshBasicMaterial( { transparent: true, opacity: 0.2 } )
         grid = new LineSegments(gridGeom, gridMat)
         grid.position.set(REFS.buildSize / 2, 0, REFS.buildSize / 2)
+        REFS.grid = grid
         REFS.scene1.add(grid)
 
         const spherical = new Spherical().setFromVector3(REFS.camera.position)

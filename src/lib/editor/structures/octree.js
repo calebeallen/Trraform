@@ -1,6 +1,8 @@
 
 import { Box3, Raycaster, Vector2, Vector3 } from "three"
 import { getFaceIndex } from "$lib/common/utils"
+import { GRID_Y_POS } from "$lib/editor/store"
+import { get } from "svelte/store"
 
 const dx = [0,0,0,0,-1,1]
 const dy = [-1,1,0,0,0,0]
@@ -47,9 +49,10 @@ export default class Octree {
         this.raycaster.setFromCamera( this.vect2, this.camera )
 
         //check for grid intersections
-        this.V1.set( 0, 0, 0 )
-        this.V2.set( 0, 0, this.size )
-        this.V3.set( this.size, 0, 0 )
+        const gridY = get(GRID_Y_POS)
+        this.V1.set( 0, gridY, 0 )
+        this.V2.set( 0, gridY, this.size )
+        this.V3.set( this.size, gridY, 0 )
 
         if( this.raycaster.ray.intersectTriangle( this.V1, this.V2, this.V3, true, this.target ) )
 
@@ -58,9 +61,9 @@ export default class Octree {
         //only check other half of grid if intersection wasn't already found
         else{
 
-            this.V1.set( this.size, 0, this.size )
-            this.V2.set( this.size, 0, 0 )
-            this.V3.set( 0, 0, this.size )
+            this.V1.set( this.size, gridY, this.size )
+            this.V2.set( this.size, gridY, 0 )
+            this.V3.set( 0, gridY, this.size )
 
             if( this.raycaster.ray.intersectTriangle( this.V1, this.V2, this.V3, true, this.target ) )
 

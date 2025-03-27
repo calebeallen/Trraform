@@ -45,8 +45,8 @@
         <div class="text-xs text-yellow-300">One or more subplots have not been placed. If this build is uploaded to a depth 0 or 1 plot, unplaced subplots will be placed randomly.</div>
         {/if}
         <div class="flex items-end mt-2">
-            <img class="w-6 h-6" src="/pencil.svg" alt="pencil">
-            <input bind:value={name} type="text" placeholder="New Build" class="flex-1 m-0 mr-2 text-sm transition-colors bg-transparent border-b border-transparent focus:outline-none hover:border-zinc-700 focus:border-zinc-700">
+            <img class="w-6 h-6 opacity-50" src="/pencil.svg" alt="pencil">
+            <input bind:value={name} type="text" placeholder="Name" class="flex-1 m-0 mr-2 text-sm transition-colors bg-transparent border-b border-transparent focus:outline-none hover:border-zinc-700 focus:border-zinc-700">
         </div>
         <div class="flex w-full mt-2">
             <button on:click={download} class="relative w-full h-20 transition-colors bg-black bg-opacity-0 rounded-lg outline outline-1 outline-zinc-700 group hover:bg-opacity-10">

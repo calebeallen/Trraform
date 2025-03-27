@@ -2,7 +2,7 @@
 <script>
 
     import { Vector2, Vector3, Raycaster } from "three";
-    import { REFS } from "$lib/editor/store";
+    import { REFS, GRID_Y_POS } from "$lib/editor/store";
 	import { onMount } from "svelte";
 	import { fly } from "svelte/transition";
 
@@ -133,6 +133,7 @@
         const y = 1 - e.clientY / window.innerHeight * 2
 
         const center = new Vector3(1,0,1).multiplyScalar(REFS.buildSize / 2)
+        center.y = $GRID_Y_POS
 
         lastMousePos = { x, y }
 

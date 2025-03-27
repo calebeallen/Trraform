@@ -21,6 +21,7 @@ const GRID_SIZING = writable(false)
 const SELECTED = writable(false)
 const SHOW_ONBOARDING_MODAL = writable(false)
 const SHOW_DOCUMENTATION = writable(false)
+const GRID_Y_POS = writable(0)
 
 const CONVERTING = writable(false)
 const FACES_CONVERTED = writable(0)
@@ -37,6 +38,7 @@ const REFS = {
     scene1: null,
     scene2: null,
     gridSizingScene: null,
+    grid: null,
     build: null,
     camera: null,
     transform: null,
@@ -116,4 +118,4 @@ class ConvertEvent {
 
 }
 
-export { BUILD_SIZE, LOADING, EDITOR_VERSION, GRID_SIZING, MODE, COLOR_INDEX, EYEDROP, OBJECT_SELECT, COLOR_SELECT, OVERLAP, SELECTED_PLOT, SHOW_BLOCK_PANEL, PLOTS_PLACED, CONVERTING, SELECTED, DOWNLOAD_MODAL, NEW_BUILD_MODAL, REFS, FACES_CONVERTED, TOTAL_CONVERT, NOTIFICATION, SHOW_DOCUMENTATION, SHOW_ONBOARDING_MODAL, updateTransformUi, addEvent, ModifyEvent, InitTransformable, TransformEvent, EndTransformable, ConvertEvent }
+export { BUILD_SIZE, LOADING, EDITOR_VERSION, GRID_SIZING, MODE, COLOR_INDEX, EYEDROP, OBJECT_SELECT, COLOR_SELECT, OVERLAP, SELECTED_PLOT, SHOW_BLOCK_PANEL, PLOTS_PLACED, CONVERTING, SELECTED, DOWNLOAD_MODAL, NEW_BUILD_MODAL, REFS, FACES_CONVERTED, TOTAL_CONVERT, NOTIFICATION, SHOW_DOCUMENTATION, SHOW_ONBOARDING_MODAL, updateTransformUi, addEvent, ModifyEvent, InitTransformable, TransformEvent, EndTransformable, ConvertEvent, GRID_Y_POS }

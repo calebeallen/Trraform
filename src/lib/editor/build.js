@@ -200,15 +200,15 @@ export default class Build {
 
                 REFS.scene1.add(plot)
 
-                for(let i = 0; i < arr.length; i++)
+                // for(let i = 0; i < arr.length; i++)
 
-                    if(arr[i] === false){
+                //     if(arr[i] === false){
 
-                        COLOR_INDEX.set(i + 1)
+                //         COLOR_INDEX.set(i + 1)
                         
-                        break
+                //         break
 
-                    }
+                //     }
 
 
                 return arr

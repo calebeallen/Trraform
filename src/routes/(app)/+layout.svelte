@@ -260,6 +260,7 @@
                 elem.classList.add("plot-tag")
                 elem.name = key
                 elem.innerText = plot.name || key
+                elem.tabIndex = -1
                 elem.onclick = handleTagClick
                 tagContainer.appendChild(elem)
 
@@ -443,8 +444,6 @@
     }
 
     function resize(){
-
-        const { width, height } = canvasContainer.getBoundingClientRect()
 
         refs.renderer.setPixelRatio(window.devicePixelRatio)
         refs.renderer.setSize(window.innerWidth, window.innerHeight, false)

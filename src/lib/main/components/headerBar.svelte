@@ -135,7 +135,7 @@
 
 <div class="flex items-center gap-1 p-1 text-xs pointer-events-auto sm:gap-2 sm:p-2 bg-zinc-900 outline-1 outline outline-zinc-800 sm:rounded-2xl rounded-xl sm:text-sm">
     <div bind:this={searchContainer} class="relative flex items-center gap-1 p-1 bg-transparent">
-        <img class="w-4 h-4 pointer-events-none select-none" src="/search.svg" alt="search">
+        <img class="w-4 h-4 pointer-events-none select-none opacity-70" src="/search.svg" alt="search">
         <form class="inline-flex p-0 m-0" on:submit|preventDefault={search}>
             <input on:focus={() => $plotSearchFocused = true} on:blur={() => $plotSearchFocused = false} bind:value={plotSearchValue} on:focu class="w-full bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
             <button tabindex="-1" class="hidden" type="submit"></button>

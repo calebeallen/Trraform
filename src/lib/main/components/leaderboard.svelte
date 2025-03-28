@@ -7,6 +7,7 @@
 
 </script>
 
+{#if $leaderboard instanceof Array && $leaderboard.length != 0}
 <div transition:fly={ { x: 500, opacity: 1, delay: 50 } } class="p-2.5 bg-zinc-900 space-y-1 outline-1 outline outline-zinc-800 rounded-2xl w-72">
     <div class="font-semibold">🔥Leaderboard🔥</div>
     <div class="flex items-center gap-2 py-1 justify-evenly">
@@ -49,9 +50,4 @@
         {/if}
     </div>
 </div>
-
-<style lang="postcss">
-
-
-
-</style>
+{/if}

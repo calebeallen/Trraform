@@ -6,6 +6,7 @@ const walletConnection = writable(null)
 const showConnectWalletModal = writable(false)
 const showSettingsModal = writable(false)
 const showHowItWorksModal = writable(false)
+const showNextStepsModal = writable(false)
 const showMyPlots = writable(false)
 const myPlots = writable([])
 const plotSearchFocused = writable(false)
@@ -38,4 +39,4 @@ const defaultSettings = {
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
-export { defaultSettings, settings, walletConnection, walletAddress, dbConnection, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, myPlots, showSettingsModal, showMyPlots, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard }
+export { defaultSettings, settings, walletConnection, walletAddress, dbConnection, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, myPlots, showSettingsModal, showMyPlots, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard, showNextStepsModal }

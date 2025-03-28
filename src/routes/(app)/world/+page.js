@@ -8,20 +8,9 @@ export async function load({ url }) {
     try {
 
         const searchParams = url.searchParams
-        const camera = searchParams.get("camera")
         const plotIdParam = searchParams.get("plotId")
 
-        if (camera) {
-
-            const { x, y, z, phi, theta } = Camera.decodeCameraB64(camera)
-
-            return {
-                ogUrl: `https://trraform.com/world`,
-                ogTitle: `Trraform | Camera Position`,
-                ogDesc: `x: ${x}, y: ${y}, z: ${z}, phi: ${phi}, theta: ${theta}`
-            }
-
-        } else if (plotIdParam) {
+        if (plotIdParam) {
         
             const plotId = PlotId.fromHexString(plotIdParam)
 
@@ -36,6 +25,8 @@ export async function load({ url }) {
             }
 
         }
+
+        return {}
 
     } catch(e) {
 

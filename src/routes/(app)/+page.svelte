@@ -57,8 +57,8 @@
         <h4 class="mt-1 text-sm font-semibold sm:text-base">Powered by <b>Polygon</b></h4>
         <nav class="w-full mt-3 space-y-3">
             <button on:click={() => {
-                $showHowItWorksModal = getCookie("showHowItWorks") == ""
-                setCookie("showHowItWorks", "false", 99999)
+                $showHowItWorksModal = localStorage.getItem("showHowItWorks") === null
+                localStorage.setItem("showHowItWorks", "")
                 goto("/world")
             }} class="nav-option" href="/world">Explore</button>
             {#if !$isMobileBrowser}
@@ -76,7 +76,6 @@
         </div>
     </div>
     
-
     <div class="fixed hidden bottom-2 right-2 md:block">
         <Leaderboard/>
     </div>

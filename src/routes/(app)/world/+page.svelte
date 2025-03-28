@@ -23,14 +23,14 @@
     let profile = {}
     let showProfile = false
 
-    let canVote = false
-
     let plusOneAnimation = false
+
+    let canVote = false
+    let minTillVote = ""
 
     onMount(() => {
 
         cancelKeyEvent()
-        canVote = getCookie("voted") == ""
 
     })
 
@@ -234,6 +234,25 @@
             })
 
         })
+
+        const lastVote = localStorage.getItem("tsLastVote")
+
+
+        if(lastVote === null){
+            canVote = true
+        } else {
+            const tsLastVote = parseInt(lastVote)
+            const MIN_5 = 5 * 60 * 1000;
+            const timeLeft = MIN_5 - (Date.now() - tsLastVote)
+
+            if(timeLeft < 0)
+                canVote = true
+            else {
+                canVote = false
+                minTillVote = Math.ceil((timeLeft) / 1000 / 60)
+            }
+        }
+
         showProfile = true
        
 
@@ -254,13 +273,12 @@
         plusOneAnimation = true
         setTimeout(() => plusOneAnimation = false, 1)
 
-        if(getCookie("voted") == ""){
 
-            canVote = false
-            setCookie("voted", "true", 1)
-            await fetch(`https://api.trraform.com/cast-vote?plotId=${id}`, { method: "POST" })
+        canVote = false
+        localStorage.setItem("tsLastVote", Date.now())
+        minTillVote = 5
+        await fetch(`https://api.trraform.com/cast-vote?plotId=${id}`, { method: "POST" })
 
-        }
 
     }
 
@@ -355,10 +373,12 @@
                     </a>
                 {/if}
                 {#if canVote}
-                    <button class="button" on:click={() => castVote(id)}>Cast Vote</button>
+                    <button class="mt-1 button0" on:click={() => castVote(id)}>Cast Vote</button>
+                {:else}
+                    <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
                 {/if}
             {:else}
-                <button class="button" on:click={() => showClaimModal = true}>Claim</button>
+                <button class="mt-1 button0" on:click={() => showClaimModal = true}>Claim</button>
             {/if}
         {/await}
     </div>

@@ -1,15 +1,15 @@
-import { coinbaseWallet } from "@wagmi/connectors"
+
 import { createConfig, getConnectors, getWalletClient, getPublicClient } from "@wagmi/core"
 import { polygon } from "@wagmi/core/chains"
 import { parseAbi } from 'abitype'
-import { parseEther, http } from "viem"
+import { http } from "viem"
 import { myPlots } from "$lib/main/store"
 import QuoterV2 from '@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json'
 import PlotId from "../common/plotId"
 import MyPlot from "./plot/myPlot"
 
-const PROXY_CONTRACT_ADDRESS = "0x82163c63A889A8B8631fFd854114456aA93ec33B"
-const IMPLEMENTATION_CONTRACT_ADDRESS = "0xE16AfC1CB2328620948f5a960D20E782e540222E"
+const PROXY_CONTRACT_ADDRESS = "0x305e69fdA0ad96742671d31b05dA4A735DDc00e8"
+const IMPLEMENTATION_CONTRACT_ADDRESS = "0x19ECd1BCA12EA205CdA16747fbd1Cb6004fd5775"
 const UNISWAP_QUOTER_CONTRACT_ADDRESS = "0x61fFE014bA17989E743c5F6cB21bF9697530B21e"
 const WMATIC_CONTRACT_ADDRESS = "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"
 const USDC_CONTRACT_ADDRESS = "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359"
@@ -33,13 +33,6 @@ const USDC_ABI = parseAbi([
 
 const wagmiConfig = createConfig({
     chains: [polygon],
-    // connectors: [
-    //     coinbaseWallet({
-    //         appName: "Trraform",
-    //         reloadOnDisconnect: false,
-    //         enableMobileWalletLink: false
-    //     })
-    // ],
     transports: {
         [polygon.id]: http()
     },

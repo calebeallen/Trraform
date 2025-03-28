@@ -7,11 +7,12 @@
     import { fly } from "svelte/transition";
     import { WalletConnection } from "$lib/main/walletConnection";
     import { formatEther } from "viem";
-    import { walletConnection,loadScreenOpacity, showConnectWalletModal, notification, isMobileBrowser, myPlots,  insideOf, newPlots, refs } from "$lib/main/store"
+    import { walletConnection,loadScreenOpacity, showConnectWalletModal, notification, isMobileBrowser, myPlots,  insideOf, newPlots, refs, showNextStepsModal } from "$lib/main/store"
     import { MAX_BUILD_SIZES } from "$lib/common/constants";
     import { pushNotification } from "$lib/common/utils";
     import { confetti } from "$lib/main/decoration"
     import MyPlot from "$lib/main/plot/myPlot"
+    import { setCookie, getCookie } from "$lib/common/cookie"
 
     const dispatcher = createEventDispatcher()
     const MINT_PRICE = [10, 10, 6]
@@ -97,7 +98,7 @@
 
             const quoteInt = await WalletConnection.getQuotePOL(price * 1e6)
             let quoteVal = Number(formatEther(quoteInt))
-            quoteVal *= 1.03
+            quoteVal *= 1.05
             quote = quoteVal.toFixed(3)
 
             refreshingQuote = false
@@ -170,6 +171,14 @@
             dispatcher("close")
             setTimeout(() => confetti(plot.pos, plot.parent.blockSize), 1000)
             setTimeout(async () => {
+
+                $showNextStepsModal = localStorage.getItem("showNextStepsModal") === null
+                localStorage.setItem("showNextStepsModal", "")
+                
+                if(plot.id.depth() < 2)
+
+                    pushNotification(notification, "You're earning royalties!", `When one of plot ${plot.id.string()}'s subplots are claimed, you'll automatically receive 60% of the sale.`)
+
                 await refs.renderManager.refresh(plot)
                 $insideOf = $insideOf
                 $myPlots.unshift(new MyPlot(plot.id, true))

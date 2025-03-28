@@ -13,8 +13,8 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal, leaderboard } from "$lib/main/store"
-    import { MAX_DEPTH, D0_PLOT_COUNT } from "$lib/common/constants"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal, leaderboard, showNextStepsModal } from "$lib/main/store"
+    import { MAX_DEPTH } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/_renderManager"
@@ -25,6 +25,7 @@
     import { WalletConnection } from "$lib/main/walletConnection"
     import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
     import HowItWorksModal from "../../lib/main/components/howItWorksModal.svelte"
+    import NextStepsModal from "../../lib/main/components/nextStepsModal.svelte";
 
     let rootPlot
     let canvasContainer, glCanvas
@@ -78,13 +79,13 @@
 
         $loadScreenOpacity = 0
 
+        refreshLeaderboard()
+
         //reconnect wallet
         const connection = new WalletConnection()
         if(await connection.reconnect())
 
             $walletConnection = connection
-
-        refreshLeaderboard()
 
         
 
@@ -116,7 +117,6 @@
         for(let i = 0; i < n; i++){
 
             const plot = plots[i]
-            console.log(plot.id.string(), plot.id)
             const idStr = plot.id.string()
             const name = plot.name || `Plot ${idStr}`
             $leaderboard[i] = { 
@@ -532,6 +532,10 @@
 
 {#if $showHowItWorksModal}
     <HowItWorksModal on:close={() => $showHowItWorksModal = false}/>
+{/if}
+
+{#if $showNextStepsModal}
+    <NextStepsModal on:close={() => $showNextStepsModal = false}/>
 {/if}
         
 <Notification store={notification}/>

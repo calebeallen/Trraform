@@ -11,7 +11,6 @@
     import ReportModal from "$lib/main/components/reportModal.svelte";
     import { setCookie, getCookie } from "$lib/common/cookie"
 
-    import { confetti } from "$lib/main/decoration"
     import ShareModal from "$lib/main/components/share/shareModal.svelte";
     import ClaimModal from "$lib/main/components/claimModal.svelte";
     import { fly } from "svelte/transition";
@@ -259,7 +258,7 @@
 
             canVote = false
             setCookie("voted", "true", 1)
-            await fetch(`http://localhost:8080/cast-vote?plotId=${id}`, { method: "POST" })
+            await fetch(`https://api.trraform.com/cast-vote?plotId=${id}`, { method: "POST" })
 
         }
 
@@ -271,22 +270,22 @@
     
     <!-- HTML Meta Tags -->
     <title>Trraform</title>
-    <meta name="description" content="Millions of worlds powered by Ethereum.">
+    <meta name="description" content="Millions of worlds powered by Polygon.">
 
     <!-- Facebook Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta property="og:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds powered by Ethereum."}>
-    <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
+    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds powered by Polygon."}>
+    <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/banner.png"}>
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta property="twitter:domain" content="trraform.com">
     <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta name="twitter:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds powered by Ethereum."}>
-    <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/ogImage.png"}>
+    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds powered by Polygon."}>
+    <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/banner.png"}>
 
 </svelte:head>
 
@@ -306,7 +305,7 @@
 />
 
 
-<div class=" fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
+<div class="fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
     <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-1">
         {#await profile}
             <div class="w-full h-20 animate-pulse">

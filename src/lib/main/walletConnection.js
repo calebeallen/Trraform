@@ -33,13 +33,13 @@ const USDC_ABI = parseAbi([
 
 const wagmiConfig = createConfig({
     chains: [polygon],
-    connectors: [
-        coinbaseWallet({
-            appName: "Trraform",
-            reloadOnDisconnect: false,
-            enableMobileWalletLink: false
-        })
-    ],
+    // connectors: [
+    //     coinbaseWallet({
+    //         appName: "Trraform",
+    //         reloadOnDisconnect: false,
+    //         enableMobileWalletLink: false
+    //     })
+    // ],
     transports: {
         [polygon.id]: http()
     },
@@ -110,33 +110,15 @@ class WalletConnection {
 
     }
 
-    static getConnectors() {
+    static detectConnectors() {
     
-        const connectors = getConnectors(wagmiConfig)
-        const cs = []
+        const connArr = getConnectors(wagmiConfig)
+        const connectors = {}
 
-        for (const c of connectors) {
+        for(const connector of connArr)
+            connectors[connector.id] = connector
 
-            const connector = {
-                id: c.id,
-                name: c.name,
-                isLastConnected: c.id === localStorage.getItem("last-connector"),
-                connector: c
-            }
-
-            if (c.id === "coinbaseWalletSDK")
-
-                connector.icon = "/coinbase.svg"
-            
-            else
-
-                connector.icon = c.icon || null
-
-            cs.push(connector)
-
-        }
-
-        return cs
+        return connectors
 
     }
 

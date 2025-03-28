@@ -9,11 +9,11 @@
 
     export let connectedId
     export let connectingId
-
     export let id
     export let name
     export let icon
-    export let isLastConnected
+    export let recent
+    export let detected
 
 </script>
 
@@ -30,8 +30,10 @@
                 <div class="w-6 h-6">
                     <LogoAnimated/> 
                 </div>
-            {:else if isLastConnected}
-                <div class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full">Last connected</div>
+            {:else if recent}
+                <div class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full">Recent</div>
+            {:else if detected}
+                <div class="px-1.5 py-px text-xs text-zinc-300 font-semibold bg-zinc-700 rounded-full">Detected</div>  
             {/if}
         </div>
     </button>

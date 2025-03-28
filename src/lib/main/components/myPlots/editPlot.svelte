@@ -204,7 +204,7 @@
             }
             
             //update
-            const res = await fetch("http://localhost:8080/update-plot", { 
+            const res = await fetch("https://api.trraform.com/update-plot", { 
                 method: "POST",
                 body: form
             })

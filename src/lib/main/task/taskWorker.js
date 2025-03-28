@@ -192,7 +192,7 @@ async function getPlotData(id){
 
             const idx = P2I(v1, buildSize)
     
-            if (expanded[idx] > 0 && expanded[idx] <= PLOT_COUNT)
+            if (expanded !== null && expanded[idx] > 0 && expanded[idx] <= PLOT_COUNT)
                 continue
 
             while (plotIndicies[j] != -1 && j < PLOT_COUNT) j++

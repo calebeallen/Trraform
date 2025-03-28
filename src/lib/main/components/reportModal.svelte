@@ -23,7 +23,7 @@
 
             try {
 
-                await fetch( `http://localhost:8080/report-plot?plotId=${plotIdStr}`, { 
+                await fetch( `https://api.trraform.com/report-plot?plotId=${plotIdStr}`, { 
                     method: "POST",
                     body: JSON.stringify({ reportMsg: message }),
                     headers: { "Content-Type" : "application/json" }

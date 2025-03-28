@@ -16,7 +16,7 @@
     </div>
     <div>
         {#if $leaderboard === null}
-            {#each new Array(10) as _, i }
+            {#each new Array(5) as _, i }
                 <div class="flex gap-1 p-0.5 text-sm w-full">
                     <div class="w-5 font-semibold text-center shrink-0">
                         {#if i == 0}🥇
@@ -31,7 +31,7 @@
                 </div>
             {/each}
         {:else}
-            {#each $leaderboard as { plotId, votes }, i }
+            {#each $leaderboard as { name, plotId, votes }, i }
                 <button on:click={() => {
                     goto(`/world?plotId=${plotId}`)
                 }} class="flex items-center gap-1 p-0.5 text-sm w-full hover:bg-zinc-800 transition-colors rounded-lg focus:outline-none ">
@@ -42,7 +42,7 @@
                         {:else}{i + 1}.
                         {/if}
                     </div>
-                    <div class="flex-1 text-left">Plot {plotId}</div>
+                    <div class="flex-1 text-left">{name}</div>
                     <div class="px-1 text-right">{votes}</div>
                 </button>
             {/each}

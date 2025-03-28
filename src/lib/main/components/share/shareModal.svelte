@@ -35,7 +35,7 @@
             plotImgSrc = "/default.png"
 
         const encoded = encodeURI(`https://trraform.com/world?plotId=${plotIdStr}`)
-        const message = encodeURIComponent("Check out this plot on Trraform!")
+        const message = encodeURIComponent("Check out this plot on #trraform")
         const param = `?url=${encoded}&text=${message}`
 
         xPostIntent = `https://twitter.com/intent/tweet${param}`

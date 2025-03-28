@@ -76,7 +76,9 @@
         refs.renderer.render(refs.scene, refs.camera)
         updateBg()
 
-        //r econnect wallet
+        $loadScreenOpacity = 0
+
+        //reconnect wallet
         const connection = new WalletConnection()
         if(await connection.reconnect())
 
@@ -84,34 +86,47 @@
 
         refreshLeaderboard()
 
-        $loadScreenOpacity = 0
+        
 
     })
 
     async function refreshLeaderboard(){
 
         $leaderboard = null
-
+        
         const res = await fetch("https://api.trraform.com/leaderboard")
         const { data } = await res.json()
-        const needsLoad = []
-        
-        $leaderboard = data.map( ({ id, votes }) => {
+        const n =  Math.min(data.length, 5)
+        const votesArr = new Array(n)
+        const loadPlots = new Array(n)
+
+        for(let i = 0; i < n; i++){
+
+            const { id, votes } = data[i]
             const plotId = new PlotId(id)
-            needsLoad.push(plotId)
-            return { plotId: plotId.string(), votes: votes.toLocaleString() }
-        })
+            votesArr[i] = votes
+            loadPlots[i] = loadPlot(plotId)
 
-        const remaining = 10 - $leaderboard.length
-        for(let i = 0; i < remaining; i++){
-
-            const randId = Math.floor(Math.random() * D0_PLOT_COUNT) + 1;
-            const plotId = new PlotId(randId)
-            $leaderboard.push({ plotId: plotId.string(), votes: 0 })
-        
         }
+        const plots = await Promise.all(loadPlots)
 
-        leaderboardPlots = await Promise.all(needsLoad.map(plotId => loadPlot(plotId)))
+        $leaderboard = new Array(n)
+        leaderboardPlots = new Array(n)
+
+        for(let i = 0; i < n; i++){
+
+            const plot = plots[i]
+            console.log(plot.id.string(), plot.id)
+            const idStr = plot.id.string()
+            const name = plot.name || `Plot ${idStr}`
+            $leaderboard[i] = { 
+                name, 
+                votes: votesArr[i],
+                plotId: idStr
+            }
+            leaderboardPlots[i] = plot
+
+        }
 
     }
 

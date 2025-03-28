@@ -23,7 +23,7 @@
     let refreshInterval
     let refreshingAvailability = false, refreshingQuote = false
     let availability = "Loading"
-    let paymentMethod = "USDC"
+    let paymentMethod = "POL"
     let isParentOwner = false
     let mintLockChecked = false
     let price = 0
@@ -278,7 +278,7 @@
                 <div class="text-sm font-semibold sm:text-base">Subtotal</div>
                 <div class="text-xs text-zinc-400">*Does not include gas fee</div>
             </div>
-            <div class="flex items-baseline gap-1">
+            <div class="flex items-center gap-1">
                 {#if paymentMethod === "POL"}
                 <Tip class="bottom-0 right-4" text="POL payments are converted to USDC under the hood with Uniswap's v3 protocol. The price shown here is inflated by 3% to account for slippage and pool fees needed for the swap. Any POL not used will be automatically refunded."/>
                 {/if}
@@ -286,6 +286,12 @@
                 <div class="text-xs text-zinc-300">{paymentMethod}</div>
             </div>
         </div>
+        {#if paymentMethod === "POL"}
+            <a href="https://www.coinbase.com/price/polygon-pol" target="_blank" class="p-1 mt-1 text-sm font-semibold text-center transition-colors bg-[#6C00F6] rounded-lg outline outline-1 outline-[#7622e3] hover:bg-[#7622e3] sm:text-base flex items-center justify-center gap-1">
+                <span>Get POL</span>
+                <img class="w-3.5 sm:w-4 aspect-square" src="/polygonLogo.svg" alt="polygon logo">
+            </a>
+        {/if}
         <button on:click={claim} class="p-1 mt-1 text-sm font-semibold text-center transition-colors bg-blue-700 rounded-lg outline outline-1 outline-blue-600 hover:bg-blue-600 sm:text-base">Claim</button>
     </div> 
 </Modal>

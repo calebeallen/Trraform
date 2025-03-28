@@ -38,7 +38,7 @@
                     
                 } catch {
 
-                    pushNotification(NOTIFICATION, "Import Failed", `Could not import ${file.name}.`)
+                    pushNotification(NOTIFICATION, "Import failed", `Could not import ${file.name}.`)
 
                 }
 

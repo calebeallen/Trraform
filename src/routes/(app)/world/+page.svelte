@@ -331,10 +331,9 @@
                 <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
             </div>
         {:then { id, minted, name, desc, link, linkLabel } }
-            <div>
-                <div class="flex items-center justify-between gap-1">
+                <div class="flex justify-between gap-1">
                     <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name}</h3>
-                    <div class="select-none">
+                    <div class="select-none shrink-0">
                         <button on:click={refresh} class="relative w-3.5 sm:w-4 select-none aspect-square group focus:outline-none">
                             <img src="/refresh.svg" alt="report">   
                             <span class="plot-option-tag">Refresh</span>
@@ -357,7 +356,6 @@
                         {/if}
                     </div>
                 </div>
-            </div>
             <div class="text-xs opacity-70">id: {id}</div>
             {#if (!minted || desc || link) && !$isMobileBrowser}
                 <div class="w-full h-px bg-zinc-800"></div>
@@ -367,7 +365,7 @@
                     <p>{desc}</p>
                 {/if}
                 {#if link}
-                    <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity w-max opacity-70 active:opacity-40">
+                    <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">
                         <img class="w-4 h-4" src="/link.svg" alt="link">
                         <p>{linkLabel}</p>
                     </a>

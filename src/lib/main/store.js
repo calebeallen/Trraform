@@ -31,7 +31,7 @@ const defaultSettings = {
     fov: 90,
     sensitivity: 8,
     tagCount: 10,
-    tagSize: 2,
+    tagSize: 4,
     renderLimitLinear: 15412,
     renderLimit: 1542,
     lowLODDist: 50

@@ -157,7 +157,7 @@
 
             } catch(e) {
 
-                pushNotification(NOTIFICATION, "Import Failed", `Could not import ${file.name}.`)
+                pushNotification(NOTIFICATION, "Import failed", `Could not import ${file.name}.`)
 
             }
 
@@ -408,30 +408,30 @@
     <ToggleMode on:toggle={beforeModeSwitch} disableIfModes={["edit"]} selectIfModes={["delete"]} mode="delete" tipHeader="Delete" tipImageSrc="/delete.gif">
         <img src="/delete.svg" alt="delete" slot="icon">
         <div class="my-1 space-y-1" slot="tipContent">
-            <div class="text-xs"><b>With color select:</b> Deletes blocks of the same color.</div>
-            <div class="text-xs"><b>With object select:</b> Deletes all connected blocks.</div>
+            <div class="text-xs"><b>With Color Select:</b> Deletes blocks of the same color.</div>
+            <div class="text-xs"><b>With Object Select:</b> Deletes all connected blocks.</div>
         </div>
     </ToggleMode>
     <ToggleMode on:toggle={beforeModeSwitch} disableIfModes={["edit"]} selectIfModes={["paint"]} mode="paint" tipHeader="Paint" tipImageSrc="/paint.gif">
         <img src="/paint.svg" alt="paint" slot="icon">
         <div class="my-1 space-y-1" slot="tipContent">
-            <div class="text-xs"><b>With color select:</b> Paints blocks of the same color.</div>
-            <div class="text-xs"><b>With object select:</b> Paints all connected blocks.</div>
+            <div class="text-xs"><b>With Color Select:</b> Paints blocks of the same color.</div>
+            <div class="text-xs"><b>With Object Select:</b> Paints all connected blocks.</div>
         </div>
     </ToggleMode>
     <ToggleMode on:toggle={beforeModeSwitch} disableIfModes={["edit"]} selectIfModes={["select"]} mode="select" tipHeader="Select" tipImageSrc="/select.gif">
         <img src="/select.svg" alt="select" slot="icon">
         <div class="my-1 space-y-1" slot="tipContent">
             <div class="text-xs">Select blocks to transform.</div>
-            <div class="text-xs"><b>With color select:</b> Selects blocks of the same color.</div>
-            <div class="text-xs"><b>With object select:</b> Selects all connected blocks.</div>
+            <div class="text-xs"><b>With Color Select:</b> Selects blocks of the same color.</div>
+            <div class="text-xs"><b>With Object Select:</b> Selects all connected blocks.</div>
         </div>
     </ToggleMode>
     <ToggleMode on:toggle={beforeModeSwitch} bind:overrideDisabled={$SELECTED} disableIfModes={['place', 'paint', 'delete',"select"]} selectIfModes={["transform-object", "transform-glb", "transform-glb-object", "transform-imported-object"]} mode="transform-object" tipHeader="Transform" tipImageSrc="/transform.gif">
         <img src="/transform.svg" alt="transform" slot="icon">
         <div class="my-1 space-y-1" slot="tipContent">
             <div class="text-xs">Transform selected blocks.</div>
-            <div class="text-xs"><b>With overlap:</b> Transformed blocks will override existing blocks.</div>
+            <div class="text-xs"><b>With Overlap:</b> Transformed blocks will override existing blocks.</div>
         </div>
     </ToggleMode>
     <div class="divider"></div>

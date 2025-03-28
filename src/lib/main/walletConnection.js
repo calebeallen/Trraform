@@ -1,8 +1,7 @@
 
 import { createConfig, getConnectors, getWalletClient, getPublicClient } from "@wagmi/core"
-import { polygon } from "@wagmi/core/chains"
 import { parseAbi } from 'abitype'
-import { http } from "viem"
+import { defineChain, http } from "viem"
 import { myPlots } from "$lib/main/store"
 import QuoterV2 from '@uniswap/v3-periphery/artifacts/contracts/lens/QuoterV2.sol/QuoterV2.json'
 import PlotId from "../common/plotId"
@@ -31,6 +30,26 @@ const USDC_ABI = parseAbi([
     "function nonces(address) view returns (uint256)",
 ]);
 
+
+const polygon = defineChain({
+  id: 137,
+  name: 'Polygon',
+  nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://polygon-bor-rpc.publicnode.com"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'PolygonScan',
+      url: 'https://polygonscan.com',
+      apiUrl: 'https://api.polygonscan.com/api',
+    },
+  }
+})
+
+
 const wagmiConfig = createConfig({
     chains: [polygon],
     transports: {
@@ -39,6 +58,7 @@ const wagmiConfig = createConfig({
 })
 
 const publicCli = getPublicClient(wagmiConfig)
+
 
 class WalletConnection {
 
@@ -273,6 +293,7 @@ class WalletConnection {
             abi: PROXY_CONTRACT_ABI,
             account: this.address,
             functionName: 'mintWithPOL',   
+            chain: polygon, 
             args: [plotId.bigInt(), useMintLock],
             value: quote,
         })
@@ -326,7 +347,8 @@ class WalletConnection {
             address: PROXY_CONTRACT_ADDRESS,
             abi: PROXY_CONTRACT_ABI,
             account: this.address,
-            functionName: 'mintWithUSDC',   
+            functionName: 'mintWithUSDC',  
+            chain: polygon, 
             args: [
                 plotId.bigInt(), 
                 useMintLock,

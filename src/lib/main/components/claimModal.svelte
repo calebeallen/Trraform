@@ -12,10 +12,9 @@
     import { pushNotification } from "$lib/common/utils";
     import { confetti } from "$lib/main/decoration"
     import MyPlot from "$lib/main/plot/myPlot"
-    import { setCookie, getCookie } from "$lib/common/cookie"
 
     const dispatcher = createEventDispatcher()
-    const MINT_PRICE = [10, 10, 6]
+    const MINT_PRICE = [12.5, 10, 8]
 
     export let plot
     let plotIdStr
@@ -206,9 +205,9 @@
                 </div>
                 <div class="flex items-baseline gap-1">
                     {#if isParentOwner}
-                        <div class="text-xs line-through text-zinc-400">${MINT_PRICE[depth]}</div>
+                        <div class="text-xs line-through text-zinc-400">{MINT_PRICE[depth]}</div>
                     {/if}
-                    <div class="text-sm font-bold sm:text-base">${price}</div>
+                    <div class="text-sm font-bold w-max sm:text-base">{price} USDC</div>
                 </div>
             </div>
             <div class="text-xs sm:text-sm text-zinc-300">{buildSize}x{buildSize}x{buildSize} maximum build volume</div>

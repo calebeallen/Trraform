@@ -215,7 +215,7 @@
                 <div class="text-xs sm:text-sm text-zinc-300">Claim subplots for <b class="text-white">40% off</b></div>
                 <button on:click={() => royaltiesExpanded = !royaltiesExpanded} class="w-full p-2 mt-1 transition-colors bg-yellow-700 rounded-lg outline-yellow-600 hover:bg-yellow-600 outline-1 outline">
                     <div class="flex items-center justify-between">
-                        <div class="text-xs font-extrabold sm:text-sm">Royalties (up to ${MINT_PRICE[depth + 1] * 144 / 10})</div>
+                        <div class="text-xs font-extrabold sm:text-sm">Royalties (up to {MINT_PRICE[depth + 1] * 144 / 10} USDC)</div>
                         <img class="w-4 h-4 {royaltiesExpanded ? "rotate-180" : ""} transition-transform" src="/dropdown.svg" alt="">
                     </div>
                     <div class="transition-all text-left text-xs sm:text-sm overflow-hidden w-full {royaltiesExpanded ? "sm:h-32" : "h-0"}">
@@ -295,7 +295,7 @@
             </div>
         </div>
         {#if paymentMethod === "POL"}
-            <a href="https://www.coinbase.com/price/polygon-pol" target="_blank" class="p-1 mt-1 text-sm font-semibold text-center transition-colors bg-[#6C00F6] rounded-lg outline outline-1 outline-[#7622e3] hover:bg-[#7622e3] sm:text-base flex items-center justify-center gap-1">
+            <a href="https://buy.moonpay.com/v2/buy?defaultCurrencyCode=pol_polygon" target="_blank" class="p-1 mt-1 text-sm font-semibold text-center transition-colors bg-[#6C00F6] rounded-lg outline outline-1 outline-[#7622e3] hover:bg-[#7622e3] sm:text-base flex items-center justify-center gap-1">
                 <span>Get POL</span>
                 <img class="w-3.5 sm:w-4 aspect-square" src="/polygonLogo.svg" alt="polygon logo">
             </a>

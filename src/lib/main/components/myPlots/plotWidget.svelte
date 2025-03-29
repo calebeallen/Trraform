@@ -77,7 +77,7 @@
             {#if !plotData.banned}
                 <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
             {/if} 
-            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://opensea.io/item/matic/${IMPLEMENTATION_CONTRACT_ADDRESS}/${plot?.id?.id}`)}/>
+            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://rarible.com/token/polygon/${IMPLEMENTATION_CONTRACT_ADDRESS}:${plot?.id?.id}`)}/>
         </div>
     {/if}
 </div>

@@ -5,9 +5,7 @@
 
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
-    import { showMyPlots } from "$lib/main/store"
     import PlotWidgetOption from "$lib/main/components/myPlots/plotWidgetOption.svelte";
-    import { IMPLEMENTATION_CONTRACT_ADDRESS } from "$lib/main/walletConnection"
 
     export let editingPlot
     export let plot
@@ -17,32 +15,6 @@
     onMount( async () => {
 
         loading = true
-
-        await plot.load()
-        
-        const id = plot.id.string()
-        const DAY = 24 * 60 * 60 * 1000
-        const now = Date.now()
-        const banned = now < plot.rEnd
-
-        let tag = null
-
-        if (plot.isNew) 
-
-            tag = { text: `New`, color : "#2563eb" }
-
-        if (banned)
-
-            tag = { text: `Banned for ${Math.floor((plot.rEnd - now) / DAY)} days.`, color : "#880000" }
-        
-        plotData = {
-            id,
-            name: plot.name || `Plot ${id}`,
-            imgUrl: await plot.getImgUrl(),
-            tag,
-            banned
-        }
-
         loading = false
 
     })
@@ -61,23 +33,19 @@
         <div class="head-container">
             <h3 class="text-xs">{plotData.id}</h3>
             <h2 class="font-bold truncate sm:text-lg">{plotData.name}</h2>
-            {#if plotData.tag}
-                <div class="flex items-center gap-1">
-                    <div class="w-2 h-2 rounded-full" style="background-color: {plotData.tag.color};"></div>
-                    <div class="text-xs text-zinc-400">{plotData.tag.text}</div>
-                </div>
-            {/if}   
+            <div class="flex items-center gap-1">
+                <div class="w-2 h-2 bg-blue-700 rounded-full"></div>
+                <div class="text-xs text-zinc-400">NEW</div>
+            </div>
         </div>
         <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
         <div class="absolute bottom-0 flex flex-col w-full gap-px p-1 transition-opacity opacity-0 group-hover:opacity-100">
             <PlotWidgetOption on:click={() => {
-                $showMyPlots = false
                 goto(`/world?plotId=${plotData.id}`)
             }} src="/navigate.svg" alt="navigate" text="Go to"/>
             {#if !plotData.banned}
                 <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
             {/if} 
-            <PlotWidgetOption src="/sell.svg" text="Sell" on:click={() => window.open(`https://rarible.com/token/polygon/${IMPLEMENTATION_CONTRACT_ADDRESS}:${plot?.id?.id}`)}/>
         </div>
     {/if}
 </div>

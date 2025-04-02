@@ -46,15 +46,11 @@
             <a class="w-4 aspect-square" href="https://www.instagram.com/trraform_" target="_blank">
                 <img src="/instagram.svg" alt="">
             </a>
-            <a class="w-4 aspect-square" href="https://x.com/trraform" target="_blank">
-                <img src="/x.svg" alt="">
-            </a>
             <a class="w-4 aspect-square" href="https://www.tiktok.com/@trraform" target="_blank">
                 <img src="/tiktok.svg" alt=""> 
             </a>
         </div>
         <h1 class="mt-1 text-4xl font-bold sm:text-5xl">Millions of Worlds</h1>
-        <h4 class="mt-1 text-sm font-semibold sm:text-base">Powered by <b>Polygon</b></h4>
         <nav class="w-full mt-3 space-y-3">
             <button on:click={() => {
                 $showHowItWorksModal = localStorage.getItem("showHowItWorks") === null

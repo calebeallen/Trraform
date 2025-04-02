@@ -9,16 +9,10 @@
         @apply overscroll-none;
     }
 
-    body {
+    body{
 
         @apply overflow-x-hidden font-sans text-left text-white bg-black touch-pan-y overscroll-none;        
         color-scheme: dark;
-
-    }
-
-    .menu-bg{
-
-        @apply absolute top-0 left-0 w-screen h-screen bg-black bg-opacity-50;
 
     }
 
@@ -34,9 +28,9 @@
 
     }
 
-    .button1{
+    .std-input{
 
-        @apply px-2 py-1 text-sm text-center transition-colors rounded-lg bg-zinc-700 disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-zinc-600 enabled:active:bg-zinc-700 focus:outline-none enabled:focus:bg-zinc-600;
+        @apply p-1 m-0 resize-none text-sm rounded-lg outline outline-1 outline-zinc-700 bg-zinc-900 transition-colors focus:bg-zinc-800;
 
     }
     
@@ -67,7 +61,6 @@
 
     }
 
-
     .plot-options-container{
 
         @apply absolute bottom-0 left-0 w-full p-1 space-y-0.5 transition-opacity bg-opacity-50 opacity-0 bg-zinc-950
@@ -78,6 +71,6 @@
 
         @apply block text-sm text-center w-full py-0.5 px-2 transition-colors rounded-lg bg-zinc-900 bg-opacity-0 hover:bg-opacity-80 focus:outline-none active:bg-opacity-80;
 
-    }
+    }  
 
 }

@@ -1,7 +1,7 @@
 
 <script>
 
-    import Modal from "../../common/components/modal.svelte";
+    import Modal from "../../../common/components/modal.svelte";
     import { createEventDispatcher } from "svelte";
 
     const dispatch = createEventDispatcher()
@@ -22,13 +22,6 @@
             <div>
                 <h1>Customize your plot</h1>
                 <p>Click the <img class="w-4 aspect-square" src="/plot1.svg" alt="" style=" display: inline; vertical-align: text-center;"> icon in the top right to view your plots. From here you can set your plot's build, name, description, and link.</p>
-            </div>
-        </section>
-        <section class="flex items-center gap-2">
-            <img class="icon" src="/sell.svg" alt="">
-            <div>
-                <h1>Sell and trade</h1>
-                <p>Since each plot is a on-chain asset, they can be sold and traded on popular Web3 marketplaces like <a class="font-bold" href="https://rarible.com/" target="_blank">Rarible</a> and <a class="font-bold" href="https://opensea.io/" target="_blank">Opensea</a>.</p>
             </div>
         </section>
         <section class="flex items-center gap-2">

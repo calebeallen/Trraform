@@ -13,22 +13,22 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showConnectWalletModal, showMyPlots, showSettingsModal, walletConnection, showHowItWorksModal, leaderboard, showNextStepsModal } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal } from "$lib/main/store"
     import { MAX_DEPTH } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
-    import RenderManager from "$lib/main/_renderManager"
+    import RenderManager from "$lib/main/renderManager"
     import { pushNotification } from "$lib/common/utils"
-    import MyPlots from "$lib/main/components/myPlots/MyPlots.svelte";
     import HeaderBar from "$lib/main/components/headerBar.svelte"
-    import ConnectWalletModal from "$lib/main/components/connectWallet/connectWalletModal.svelte";
-    import { WalletConnection } from "$lib/main/walletConnection"
-    import SettingsModal from "$lib/main/components/settings/settingsModal.svelte";
-    import HowItWorksModal from "../../lib/main/components/howItWorksModal.svelte"
-    import NextStepsModal from "../../lib/main/components/nextStepsModal.svelte";
+    import SettingsModal from "$lib/main/components/modals/settingsModal.svelte";
+    import HowItWorksModal from "$lib/main/components/modals/howItWorksModal.svelte"
+    import NextStepsModal from "$lib/main/components/modals/nextStepsModal.svelte";
+    import AuthModal from "$lib/main/components/modals/authModal.svelte";
+    import ResetPasswordModal from "../../lib/main/components/modals/resetPasswordModal.svelte";
+    import UserWidget from "../../lib/main/components/userWidget/userWidget.svelte";
 
     let rootPlot
-    let canvasContainer, glCanvas
+    let glCanvas
     let tagContainer
     let t1 = 0
     let tags = {}
@@ -78,17 +78,7 @@
         updateBg()
 
         $loadScreenOpacity = 0
-
-        refreshLeaderboard()
-
-        //reconnect wallet
-        const connection = new WalletConnection()
-        if(await connection.reconnect())
-
-            $walletConnection = connection
-
         
-
     })
 
     async function refreshLeaderboard(){
@@ -500,34 +490,28 @@
 
 <svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
 
-<div bind:this={canvasContainer} class="fixed top-0 left-0 w-screen h-screen {$showMyPlots ? "blur-2xl" : ""}">
-    <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-full h-full" style="will-change: background;"></canvas>
-    <div on:mousedown={mousedown} on:mousemove={mousemove} bind:this={tagContainer} class="fixed top-0 left-0 w-full h-full select-none"></div>
+<canvas bind:this={glCanvas} class="fixed top-0 left-0 w-screen h-screen" style="will-change: background;"></canvas>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div on:mousedown={mousedown} on:mousemove={mousemove} bind:this={tagContainer} class="fixed top-0 left-0 w-screen h-screen select-none"></div>
+
+<slot/>
+
+<div class="fixed top-0 right-0 flex items-center justify-between w-full p-2">
+    <a class="flex-shrink-0 w-6 m-2 opacity-50 pointer-events-auto select-none sm:w-7 aspect-square focus:outline-none" href="/">
+        <img src="/logo.svg" alt="">
+    </a>
+    <HeaderBar/>
 </div>
-<div class="w-full {$showMyPlots ? "blur-2xl" : ""}">
-    <div class="fixed top-0 left-0 flex items-center justify-between w-full p-2 pointer-events-none">
-        <a class="flex-shrink-0 m-2 opacity-50 pointer-events-auto select-none w-7 h-7 focus:outline-none"  href="/">
-            <img src="logo.svg" alt="">
-        </a>
-        <HeaderBar/>
-    </div>
-    <slot/>
+<div class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] top-14 sm:mt-1 right-2">
+    <UserWidget/>
 </div>
 
-{#if $showMyPlots}
-    <MyPlots on:close={() => $showMyPlots = false}/>
-{/if}
+
+
+<!-- Modals -->
 
 {#if $showSettingsModal}
     <SettingsModal on:close={() => $showSettingsModal = false}/>
-{/if}
-
-{#if $showConnectWalletModal}
-    <ConnectWalletModal on:close={() => $showConnectWalletModal = false}/>
-{/if}
-
-{#if $loadScreenOpacity !== 0}
-    <Loading bind:opacity={$loadScreenOpacity}/>
 {/if}
 
 {#if $showHowItWorksModal}
@@ -537,8 +521,21 @@
 {#if $showNextStepsModal}
     <NextStepsModal on:close={() => $showNextStepsModal = false}/>
 {/if}
+
+{#if $showAuthModal}
+    <AuthModal on:close={() => $showAuthModal = false}/>
+{/if}
+
+{#if $showResetPasswordModal}
+    <ResetPasswordModal on:close={() => $showResetPasswordModal = false}/>
+{/if}
+
+{#if $loadScreenOpacity !== 0}
+    <Loading bind:opacity={$loadScreenOpacity}/>
+{/if}
         
 <Notification store={notification}/>
+
 
 <style lang="postcss">
 

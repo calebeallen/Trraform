@@ -4,6 +4,7 @@
     import { createEventDispatcher } from "svelte";
     import { fade, fly } from "svelte/transition";
 
+    export let closeOnClickOutside = false
     export let header
     let addedClasses = ''
     export { addedClasses as class }
@@ -11,25 +12,22 @@
     const dispatch = createEventDispatcher();
 
     function clickOutside(node) {
+
+        if(!closeOnClickOutside)
+            return
   
         const handleClick = event => {
 
             if (node && !node.contains(event.target) && !event.defaultPrevented) 
-
-                node.dispatchEvent(new CustomEvent('click_outside', node))
-            
+                node.dispatchEvent(new CustomEvent('clickOutside', node))
         }
 
-        document.addEventListener('click', handleClick, true)
+        window.addEventListener('click', handleClick, true)
         
         return {
-
             destroy() {
-
-                document.removeEventListener('click', handleClick, true)
-
+                window.removeEventListener('click', handleClick, true)
             }
-
         }
 
     }
@@ -37,7 +35,7 @@
 </script>
 
 <div transition:fade={{duration: 150}} class="fixed top-0 left-0 grid w-full h-full px-2 overflow-auto bg-black bg-opacity-50 place-items-center">
-    <div on:click_outside={() => dispatch("close")} transition:fly={{duration: 150, y: 50}} class="w-full p-4 bg-zinc-800 outline outline-1 outline-zinc-700 rounded-2xl shadow-2xl shadow-black {addedClasses}">
+    <div use:clickOutside on:clickOutside={() => dispatch("close")} transition:fly={{duration: 150, y: 50}} class="w-full p-4 bg-zinc-800 outline outline-1 outline-zinc-700 rounded-2xl shadow-2xl shadow-black {addedClasses}">
         <div class="flex items-baseline justify-between w-full mb-2">
             <h1 class="text-base font-bold sm:text-lg">{header}</h1>
             <button on:click={() => dispatch("close")} class="w-5 h-5 transition-opacity active:opacity-60">

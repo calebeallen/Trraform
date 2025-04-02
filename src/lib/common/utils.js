@@ -1,6 +1,6 @@
 
 import { ColorLibrary } from "./colorLibrary"
-import { DESC_FIELD_MAXLEN, LINK_FIELD_MAXLEN, LINK_LABEL_FIELD_MAXLEN, MIN_BUILD_SIZE, NAME_FIELD_MAXLEN, PLOT_COUNT } from "./constants"
+import { MIN_BUILD_SIZE, PLOT_COUNT } from "./constants"
 
 function P2I( pos, size ){
 
@@ -349,58 +349,6 @@ function decodePlotData(bytes){
 
 }
 
-// not used 
-function encodePlotData({ name, desc, link, linkLabel, rEnd, buildData = null } = {}){
-
-    const json = {
-        name : substring(name ?? "", NAME_FIELD_MAXLEN),
-        desc : substring(desc ?? "", DESC_FIELD_MAXLEN),
-        link : (link ?? "").substring(0, LINK_FIELD_MAXLEN),
-        linkLabel : substring(linkLabel ?? "", LINK_LABEL_FIELD_MAXLEN),
-        rEnd : parseInt(rEnd ?? 0)
-    }   
-
-    const parts = []
-    const jsonPart = new TextEncoder().encode(JSON.stringify(json))
-    parts.push(writeUint32Len(jsonPart.length))
-    parts.push(jsonPart)
-
-    if(buildData){
-    
-        const buildU8 = new Uint8Array(buildData.buffer, buildData.byteOffset)
-        parts.push(writeUint32Len(buildU8.length))
-        parts.push(buildU8)
-
-    }
-
-    const totalLength = parts.reduce((sum, part) => sum + part.byteLength, 0)
-    const result = new Uint8Array(totalLength)
-    
-    let offset = 0;
-    for (const part of parts) {
-        result.set(new Uint8Array(part.buffer, part.byteOffset, part.byteLength), offset);
-        offset += part.byteLength;
-    }
-
-    return result
-
-}
-
-function substring(str, len){
-
-    const segmenter = new Intl.Segmenter(undefined, { granularity: 'grapheme' })
-    const graphemes = Array.from(segmenter.segment(str))
-    return graphemes.slice(0, len).map(s => s.segment).join('')
-
-}
-
-function writeUint32Len(value) {
-
-    const buffer = new ArrayBuffer(4)
-    new DataView(buffer).setUint32(0, value, true)
-    return new Uint8Array(buffer)
-
-}
 
 function pushNotification(notification, header, text, callback = () => {}){
 
@@ -426,4 +374,4 @@ function deleteNotification(notification, _id){
 
 }
 
-export { I2P, P2I, P2I_D, getFaceIndex, getVertexIndicies, vertexIndiciesToUintArr, topFace, bottomFace, frontFace, backFace, leftFace, rightFace, disposeMesh, condense, expand, validateBuildData, decodePlotData, encodePlotData, pushNotification, deleteNotification }
+export { I2P, P2I, P2I_D, getFaceIndex, getVertexIndicies, vertexIndiciesToUintArr, topFace, bottomFace, frontFace, backFace, leftFace, rightFace, disposeMesh, condense, expand, validateBuildData, decodePlotData, pushNotification, deleteNotification }

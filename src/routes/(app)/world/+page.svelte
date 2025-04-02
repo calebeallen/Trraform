@@ -7,18 +7,15 @@
 
     import { page } from "$app/stores"
     import { onMount } from "svelte";
-    import { insideOf, refs, isMobileBrowser, showMyPlots, plotSearchFocused, showSettingsModal, showHowItWorksModal } from "$lib/main/store"
-    import ReportModal from "$lib/main/components/reportModal.svelte";
-    import { setCookie, getCookie } from "$lib/common/cookie"
-
-    import ShareModal from "$lib/main/components/share/shareModal.svelte";
-    import ClaimModal from "$lib/main/components/claimModal.svelte";
-    import { fly } from "svelte/transition";
+    import { insideOf, refs, plotSearchFocused, showSettingsModal } from "$lib/main/store"
+    import { fly } from "svelte/transition"
+    import ReportModal from "$lib/main/components/reportModal.svelte"
+    import ShareModal from "$lib/main/components/share/shareModal.svelte"
 
     export let data 
     let lastTouches = []
     
-    let showConnectModal = false, showReportModal = false, showShareModal = false, showClaimModal = false
+    let showReportModal = false, showShareModal = false, showClaimModal = false
     let reportPlotId = null, sharePlotId = null
     let profile = {}
     let showProfile = false
@@ -28,6 +25,9 @@
     let canVote = false
     let minTillVote = ""
 
+    let modalsShowing = false
+    $: modalsShowing = showReportModal || showShareModal || showClaimModal || $plotSearchFocused || $showSettingsModal 
+
     onMount(() => {
 
         cancelKeyEvent()
@@ -36,7 +36,7 @@
 
     function keydown(e){
 
-        if( showConnectModal || showReportModal || showShareModal || showClaimModal || $plotSearchFocused || $showMyPlots || $showSettingsModal )
+        if(modalsShowing)
 
             return
 
@@ -125,7 +125,7 @@
 
     function mousewheel(e){
         
-        if( showConnectModal || showReportModal || showShareModal || showClaimModal || $showMyPlots || $plotSearchFocused || $showSettingsModal )
+        if( modalsShowing )
 
             return
 
@@ -139,7 +139,7 @@
 
     function touchevent(e){ 
 
-        if( showConnectModal || showReportModal || showShareModal || showClaimModal || $showMyPlots || $plotSearchFocused || $showSettingsModal || refs.camera.update === refs.camera.standard )
+        if( modalsShowing || refs.camera.update === refs.camera.standard )
 
             return
 
@@ -262,12 +262,6 @@
 
     }
 
-    function refresh(){
-
-        refs.renderManager.refresh($insideOf)
-
-    }
-
     async function castVote(id){
 
         plusOneAnimation = true
@@ -331,17 +325,13 @@
                 <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
             </div>
         {:then { id, minted, name, desc, link, linkLabel } }
-                <div class="flex justify-between gap-1">
+                <div class="flex justify-between gap-2">
                     <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name}</h3>
-                    <div class="select-none shrink-0">
-                        <button on:click={refresh} class="relative w-3.5 sm:w-4 select-none aspect-square group focus:outline-none">
-                            <img src="/refresh.svg" alt="report">   
-                            <span class="plot-option-tag">Refresh</span>
-                        </button>
+                    <div class="flex gap-2 select-none shrink-0">
                         <button on:click={() => {
                             sharePlotId = id
                             showShareModal = true
-                        }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
+                        }} class="relative w-4 select-none aspect-square group focus:outline-none">
                             <img src="/share.svg" alt="report">   
                             <span class="plot-option-tag">Share</span>
                         </button>
@@ -349,7 +339,7 @@
                             <button on:click={() => {
                                 reportPlotId = id
                                 showReportModal = true
-                            }} class="relative w-3.5 sm:w-4 aspect-square select-none group focus:outline-none">
+                            }} class="relative w-4 select-none aspect-square group focus:outline-none">
                                 <img src="/report.svg" alt="report">
                                 <span class="plot-option-tag">Report</span>
                             </button>
@@ -357,7 +347,7 @@
                     </div>
                 </div>
             <div class="text-xs opacity-70">id: {id}</div>
-            {#if (!minted || desc || link) && !$isMobileBrowser}
+            {#if desc || link}
                 <div class="w-full h-px bg-zinc-800"></div>
             {/if}
             {#if minted}
@@ -391,10 +381,6 @@
 
 {#if showReportModal}
     <ReportModal bind:plotIdStr={reportPlotId} on:close={() => showReportModal = false}/>
-{/if}
-
-{#if showClaimModal}
-    <ClaimModal bind:plot={$insideOf} on:close={() => showClaimModal = false}/>
 {/if}
 
 <style lang="postcss">

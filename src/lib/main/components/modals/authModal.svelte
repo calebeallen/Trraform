@@ -8,6 +8,11 @@
     import { showResetPasswordModal } from "$lib/main/store"
     import isEmail from "validator/lib/isEmail";
 
+    const USERNAME_MAX_LEN = 48
+    const EMAIL_MAX_LEN = 254
+    const PASSWORD_MIN_LEN = 8
+    const PASSWORD_MAX_LEN = 128
+
     let mode = "login"
     let emailValue = ""
     let passwordInput
@@ -38,7 +43,7 @@
             emailError = "Invalid email"
         }
 
-        if(passwordValue.length < 8 || passwordValue.length > 128){
+        if(passwordValue.length < PASSWORD_MIN_LEN || passwordValue.length > PASSWORD_MAX_LEN){
             err = true
             if(mode === "login")
                 passwordError = "Invalid password"
@@ -78,7 +83,7 @@
         <form class="flex flex-col gap-4 p-0 m-0" on:submit|preventDefault={submit}>
             <div>
                 <div class="input-container">
-                    <input bind:value={emailValue} class="" type="text" placeholder="Email">
+                    <input bind:value={emailValue} class="" type="text" placeholder="Email" maxlength={EMAIL_MAX_LEN}>
                 </div>
                 {#if emailError}
                     <div class="mt-1 text-xs text-red-500">{emailError}</div>
@@ -86,7 +91,7 @@
             </div>
             <div>
                 <div class="input-container">
-                    <input bind:this={passwordInput} type={showPassword ? "text" : "password"} placeholder="Password">
+                    <input bind:this={passwordInput} type={showPassword ? "text" : "password"} placeholder="Password" maxlength={PASSWORD_MAX_LEN + 1}>
                     <button type="button" on:click={() => showPassword = !showPassword}>
                         {#if showPassword}
                             <img class="w-4 rounded opacity-50 aspect-square" src="/eyeSlashed.svg" alt="">

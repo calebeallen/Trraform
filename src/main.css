@@ -30,7 +30,7 @@
 
     .std-input{
 
-        @apply p-1 m-0 resize-none text-sm rounded-lg outline outline-1 outline-zinc-700 bg-zinc-900 transition-colors focus:bg-zinc-800;
+        @apply p-1 placeholder:text-zinc-500 sm:text-sm text-xs m-0 resize-none rounded-lg outline outline-1 outline-zinc-700 bg-zinc-900 transition-colors focus:bg-zinc-800;
 
     }
     

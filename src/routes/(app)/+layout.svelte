@@ -77,6 +77,9 @@
         refs.renderer.render(refs.scene, refs.camera)
         updateBg()
 
+        if($page.url.searchParams.get("showLogin") == "true")
+            $showAuthModal = true
+
         $loadScreenOpacity = 0
         
     })
@@ -502,9 +505,9 @@
     </a>
     <HeaderBar/>
 </div>
-<div class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] top-14 sm:mt-1 right-2">
+<!-- <div class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] top-14 sm:mt-1 right-2">
     <UserWidget/>
-</div>
+</div> -->
 
 
 

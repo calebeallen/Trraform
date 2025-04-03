@@ -4,9 +4,10 @@
     
     import { fly } from "svelte/transition";
     import PlotList from "./plotList.svelte";
+    import EditPlot from "./editPlot.svelte";
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
     let showUserOptions, userOptionsContainer, userOptionsButton
-
+    let editingPlot = null
 
     function mousedown(e){
 
@@ -51,7 +52,7 @@
         <div class="relative flex items-center gap-0.5 ml-1">        
             <div class="font-semibold truncate shrink">CalebAllen318</div>
             <button bind:this={userOptionsButton} on:click={() => showUserOptions = !showUserOptions} class="h-full">
-                <img class="w-5 sm:w-6 aspect-square" src="/dots.svg" alt="">
+                <img class="w-4 sm:w-5 aspect-square" src="/dots.svg" alt="">
             </button>
             {#if showUserOptions}
                 <div bind:this={userOptionsContainer} transition:fly={{ y: -5, duration: 150 }} class="right-0 w-max expanded-options-container -bottom-2 bg-zinc-950">
@@ -90,8 +91,12 @@
         </div>
     </div>
     <!-- plots list -->
-    <div class="mt-4 overflow-y-auto scrollbar-clean shrink">
-        <PlotList/>
+    <div class="w-full mt-4 overflow-y-auto scrollbar-clean shrink">
+        {#if editingPlot === null}
+            <PlotList bind:editingPlot/>
+        {:else}
+            <EditPlot bind:editingPlot/>
+        {/if}
     </div>
 </div>
 

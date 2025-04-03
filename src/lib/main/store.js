@@ -6,7 +6,7 @@ const showSettingsModal = writable(false)
 const showHowItWorksModal = writable(false)
 const showNextStepsModal = writable(false)
 const showAuthModal = writable(false)
-const showResetPasswordModal = writable(true)
+const showResetPasswordModal = writable(false)
 
 const plotSearchFocused = writable(false)
 const isMobileBrowser = writable(false)

@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal } from "$lib/main/store"
     import { MAX_DEPTH } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -26,6 +26,7 @@
     import AuthModal from "$lib/main/components/modals/authModal.svelte";
     import ResetPasswordModal from "../../lib/main/components/modals/resetPasswordModal.svelte";
     import UserWidget from "../../lib/main/components/userWidget/userWidget.svelte";
+    import SendVerificationEmailModal from "../../lib/main/components/modals/sendVerificationEmailModal.svelte";
 
     let rootPlot
     let glCanvas
@@ -527,6 +528,10 @@
 
 {#if $showAuthModal}
     <AuthModal on:close={() => $showAuthModal = false}/>
+{/if}
+
+{#if $showSendVerificationEmailModal}
+    <SendVerificationEmailModal on:close={() => $showSendVerificationEmailModal = false}/>
 {/if}
 
 {#if $showResetPasswordModal}

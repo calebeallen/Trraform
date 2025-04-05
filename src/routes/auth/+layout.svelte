@@ -5,19 +5,24 @@
     import "../../main.css"
     import { onMount } from "svelte";
     import Loading from "$lib/common/components/loading.svelte";
-
-    let loading = true
-    let message = ""
-
-    let password0, password1
-    let showPassword0 = false, showPassword1 = false
-
+    import { goto } from "$app/navigation"
+    import { page } from "$app/stores"
+    import isUUID from "validator/lib/isUUID";
+    import isEmail from "validator/lib/isEmail";
+    import { loadScreenOpacity } from "./store"
 
     onMount(() => {
 
-        //testing
-        message = "Email Verified!"
-        setTimeout(() => loading = false, 1000)
+        const searchParams = $page.url.searchParams
+        const token = decodeURIComponent(searchParams.get("token") || "")
+        const email = decodeURIComponent(searchParams.get("email") || "")
+
+        if(!isEmail(email) || !isUUID(token)){
+            goto("/")
+            return
+        }
+        
+        $loadScreenOpacity = 0
 
     })
 
@@ -40,6 +45,7 @@
 
 <img class="fixed opacity-50 left-4 top-4 w-7 aspect-square" src="/logo.svg" alt="">
 
-{#if loading}
-    <Loading/>
+{#if $loadScreenOpacity !== 0}
+    <Loading bind:opacity={$loadScreenOpacity}/>
 {/if}
+        

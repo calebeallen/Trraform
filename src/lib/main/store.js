@@ -7,6 +7,7 @@ const showHowItWorksModal = writable(false)
 const showNextStepsModal = writable(false)
 const showAuthModal = writable(false)
 const showResetPasswordModal = writable(false)
+const showSendVerificationEmailModal = writable(false)
 
 const plotSearchFocused = writable(false)
 const isMobileBrowser = writable(false)
@@ -15,6 +16,7 @@ const notification = writable([])
 const newPlots = writable(false)
 const loadScreenOpacity = writable(100)
 const leaderboard = writable(null)
+const tempEmail = writable("")
 
 const refs = {
     renderer: null,
@@ -35,4 +37,4 @@ const defaultSettings = {
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
-export { defaultSettings, settings, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, showSettingsModal, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal }
+export { defaultSettings, settings, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, showSettingsModal, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, tempEmail, showSendVerificationEmailModal }

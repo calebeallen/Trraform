@@ -3,7 +3,6 @@
 
     import { onMount } from "svelte";
 
-    let loading = true
     let message = ""
 
     let password0, password1
@@ -14,7 +13,6 @@
 
         //testing
         message = "Email Verified!"
-        setTimeout(() => loading = false, 1000)
 
     })
 

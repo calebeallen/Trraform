@@ -7,34 +7,39 @@
 
     let cooldown = 0
     let cooldownInterval = null
-    let sendError = null
+    let sendError = ""
 
     async function sendLink(){
 
+        sendError = ""
         $loadScreenOpacity = 50
 
-        const res = await fetch(`${API_ORIGIN}/auth/send-verification-email`, {
-            method: "POST",
-            body: JSON.stringify({ email: $tempEmail })
-        })
-        const { data, error } = await res.json() 
+        try { 
+
+            const res = await fetch(`${API_ORIGIN}/auth/send-verification-email`, {
+                method: "POST",
+                body: JSON.stringify({ email: $tempEmail })
+            })
+            const { data, error, message } = await res.json() 
+
+            if(error)
+                throw new Error(message)
+
+            cooldown = data?.cooldown ?? 0
+            cooldownInterval = setInterval(() => {
+
+                cooldown--
+                
+                if(cooldown <= 0)
+                    clearInterval(cooldownInterval)
+
+            }, 1000)
+
+        } catch {
+            sendError = "An error occured, email may already be verified."
+        }
 
         $loadScreenOpacity = 0
-        sendError = error
-
-        if(error)
-            return
-
-        cooldown = data?.cooldown ?? 0
-        cooldownInterval = setInterval(() => {
-
-            cooldown--
-            
-            if(cooldown <= 0)
-                clearInterval(cooldownInterval)
-
-        }, 1000)
-
 
     }   
 
@@ -52,7 +57,7 @@
             <div>
                 <button class="w-full button0" on:click={sendLink}>Send link</button>
                 {#if sendError}
-                    <div class="mt-1 text-xs text-red-500">An error occured or email is already verified.</div>
+                    <div class="mt-1 text-xs text-red-500">{sendError}</div>
                 {/if}
             </div>
         {/if}

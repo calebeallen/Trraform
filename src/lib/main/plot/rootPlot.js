@@ -1,13 +1,13 @@
 
 import { Sphere, Vector3 } from "three";
 import PlotId from "$lib/common/plotId";
-import { expand, I2P } from "$lib/common/utils";
+import { expand, I2P, } from "$lib/common/utils";
 import Queue from "$lib/main/structures/queue";
 import Plot from "$lib/main/plot/plot";
 import Octree from "$lib/main/structures/octree";
 import Task from "$lib/main/task/task";
-
-const CHUNK_SIZE = 4
+import { CHUNK_SIZE } from "$lib/common/constants";
+import Chunk from "./chunk";
 
 export default class RootPlot {
 
@@ -30,7 +30,9 @@ export default class RootPlot {
             this._loading = ( async () => {
 
                 //get build
-                const condensed = new Uint16Array(await this.id.fetch())
+                const res = await fetch("/0x00")
+                const buf = await res.arrayBuffer()
+                const condensed = new Uint16Array(buf)
                 const bs = condensed[1]
                 const expanded = expand(condensed)
                 
@@ -193,17 +195,13 @@ export default class RootPlot {
                 const chunkCount = maxChunkId + 1
                 const chunks = new Array(chunkCount)
 
-                for(let i = 0; i < chunkCount; i++)
+                for(let i = 0; i < chunkCount; i++){
 
-                    chunks[i] = { 
-                        parent: null,
-                        children: new Set(),
-                        plots: [],
-                        lod: null,
-                        boundingSphere: new Sphere(),
-                        buildCount: 0
-                    }
+                    const chunkId = `0_${i}`
+                    chunks[i] = new Chunk(chunkId, null) 
         
+                }
+
                 // create child plots
                 for(let i = 0; i < plotIndicies.length; i++){
 
@@ -220,8 +218,11 @@ export default class RootPlot {
 
                 }
 
+                for(const chunk of chunks)
+                    chunk.computeBoundingSphere()
+
                 //get geomdata
-                const task = new Task("reduce-poly", { expanded, buildSize : bs })
+                const task = new Task("reduce_poly", { expanded, buildSize : bs })
                 const geomData = this.geometryData.stdRes = await task.run()
 
                 this.octree = new Octree(this.children, bs)

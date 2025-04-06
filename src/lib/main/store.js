@@ -1,14 +1,17 @@
 
 import { writable } from "svelte/store"
 
-const showConnectWalletModal = writable(false)
 const showSettingsModal = writable(false)
 const showHowItWorksModal = writable(false)
 const showNextStepsModal = writable(false)
 const showAuthModal = writable(false)
 const showResetPasswordModal = writable(false)
 const showSendVerificationEmailModal = writable(false)
+const showClaimModal = writable(true)
 
+const showUserWidget = writable(false)
+
+const user = writable(null)
 const plotSearchFocused = writable(false)
 const isMobileBrowser = writable(false)
 const insideOf = writable(null)
@@ -17,6 +20,7 @@ const newPlots = writable(false)
 const loadScreenOpacity = writable(100)
 const leaderboard = writable(null)
 const tempEmail = writable("")
+const myPlots = writable([])
 
 const refs = {
     renderer: null,
@@ -37,4 +41,4 @@ const defaultSettings = {
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
-export { defaultSettings, settings, refs, insideOf, isMobileBrowser, showConnectWalletModal, showHowItWorksModal, showSettingsModal, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, tempEmail, showSendVerificationEmailModal }
+export { defaultSettings, settings, refs, insideOf, isMobileBrowser, showHowItWorksModal, showSettingsModal, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, tempEmail, showSendVerificationEmailModal, user, showUserWidget, myPlots, showClaimModal }

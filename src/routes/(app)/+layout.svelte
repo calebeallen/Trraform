@@ -13,8 +13,8 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal } from "$lib/main/store"
-    import { MAX_DEPTH } from "$lib/common/constants"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, showClaimModal } from "$lib/main/store"
+    import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
@@ -27,7 +27,9 @@
     import ResetPasswordModal from "../../lib/main/components/modals/resetPasswordModal.svelte";
     import UserWidget from "../../lib/main/components/userWidget/userWidget.svelte";
     import SendVerificationEmailModal from "../../lib/main/components/modals/sendVerificationEmailModal.svelte";
-
+    import { getCookie } from "$lib/common/cookie"
+    import { fly } from "svelte/transition";
+    
     let rootPlot
     let glCanvas
     let tagContainer
@@ -72,6 +74,23 @@
 
         // listen for page route change events
         page.subscribe(handleNavigate)
+
+        // get user data
+        const authToken = localStorage.getItem("auth_token")
+
+        if(authToken){
+
+            const res = await fetch(`${API_ORIGIN}/user/data`, {
+                headers: { Authorization: authToken }
+            })
+            const { data, error } = await res.json()
+            
+            if(!error){
+                $user = data
+                localStorage.setItem("auth_token", data.token)
+            }
+
+        }
 
         /* begin rendering */
         refs.renderer.setAnimationLoop(renderLoop)
@@ -215,16 +234,16 @@
         if(plots.length == 0)
             return
 
-        //render plots
-        const plotIdSet = new Set(plots.map(a => a.plot.id.id))
-        for(let i = plots.length - 1; i >= 0; i--){
+        // //render plots
+        // const plotIdSet = new Set(plots.map(a => a.plot.id.id))
+        // for(let i = plots.length - 1; i >= 0; i--){
 
-            if(!refs.renderManager.hasAvailability())
-                break
+        //     if(!refs.renderManager.hasAvailability())
+        //         break
 
-            refs.renderManager.managedRender(plots[i].plot, refs.camera, plotIdSet)
+        //     refs.renderManager.managedRender(plots[i].plot, refs.camera, plotIdSet)
 
-        }
+        // }
     
     }
 
@@ -384,7 +403,7 @@
 
         const ids = plotId.split()
         let plot = rootPlot
-
+        
         for(const id of ids){
 
             if(!plot.children.length)
@@ -506,14 +525,13 @@
     </a>
     <HeaderBar/>
 </div>
-<!-- <div class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] top-14 sm:mt-1 right-2">
-    <UserWidget/>
-</div> -->
-
-
+{#if $showUserWidget}
+    <div transition:fly={{ x: 600, opacity: 1 }} class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] top-14 sm:mt-1 right-2">
+        <UserWidget/>
+    </div>
+{/if}
 
 <!-- Modals -->
-
 {#if $showSettingsModal}
     <SettingsModal on:close={() => $showSettingsModal = false}/>
 {/if}

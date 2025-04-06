@@ -5,6 +5,8 @@
     import { fly } from "svelte/transition";
     import PlotList from "./plotList.svelte";
     import EditPlot from "./editPlot.svelte";
+    import { user, showUserWidget } from "$lib/main/store"
+
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
     let showUserOptions, userOptionsContainer, userOptionsButton
     let editingPlot = null
@@ -37,7 +39,9 @@
     function logout(){
 
         showUserOptions = false
-
+        localStorage.setItem("auth_token", null)
+        $showUserWidget = false
+        $user = null
 
     }
 
@@ -91,13 +95,11 @@
         </div>
     </div>
     <!-- plots list -->
-    <div class="w-full mt-4 overflow-y-auto scrollbar-clean shrink">
-        {#if editingPlot === null}
-            <PlotList bind:editingPlot/>
-        {:else}
-            <EditPlot bind:editingPlot/>
-        {/if}
-    </div>
+    {#if editingPlot === null}
+        <PlotList bind:editingPlot/>
+    {:else}
+        <EditPlot bind:editingPlot/>
+    {/if}
 </div>
 
 <style lang="postcss">

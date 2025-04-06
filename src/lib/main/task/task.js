@@ -111,22 +111,22 @@ export default class Task{
 
         switch(this.method){
 
-            case "decode":
-
-                transferable = [this.params.encoded.buffer]
-                break
-
-            case "reduce-poly":
+            case "reduce_poly":
 
                 transferable = [this.params.expanded.buffer]
                 break
 
-            case "get-plot-data":
+            case "get_chunk":
 
                 transferable = []
                 break
 
-            case "merge-geometries":
+            case "process_plot_data":
+
+                transferable = [this.params.plotDataU8.buffer]
+                break
+
+            case "merge_geometries":
 
                 const d = this.params.geometryData
                 transferable = []

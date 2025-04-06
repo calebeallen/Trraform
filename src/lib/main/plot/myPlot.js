@@ -5,7 +5,6 @@ import { expand } from "$lib/common/utils"
 import PlotData from "$lib/main/plot/plotData"
 import PlotId from "$lib/common/plotId"
 import Task from "$lib/main/task/task"
-import { newPlots } from "$lib/main/store"
 
 export default class MyPlot extends PlotData{
 
@@ -13,7 +12,7 @@ export default class MyPlot extends PlotData{
 
         const bs = buildData[1]
         const expanded = expand(buildData)
-        const task = new Task("reduce-poly", { expanded, buildSize : bs })
+        const task = new Task("reduce_poly", { expanded, buildSize : bs })
 
         const geomData = await task.run()
         if(geomData.err)
@@ -91,42 +90,24 @@ export default class MyPlot extends PlotData{
 
     }
 
-    load(){
+    load(getPlots){
 
         if(this._loading === null)
 
-            this._loading = ( async () => {
+            this._loading = new Promise(async () => {
 
-                try {
+                // promise may contain multiple plot data
+                const plots = await getPlots
+                const data = plots[this.id.string()]
 
-                    const encodedBuffer = await this.id.fetch()
-                    if(encodedBuffer === null) 
-                        
-                        throw null
+                this.name = data.name
+                this.desc = data.description
+                this.link = data.link
+                this.linkTitle = data.linkTitle
+                this.buildData = data.buildData
+                this.updateImgUrl()
 
-                    const encoded = new Uint8Array(encodedBuffer)
-                    const task = new Task("decode", { encoded, depth: this.id.depth() })
-                    const data = await task.run()
-                    
-                    if(data.err) 
-                        
-                        throw null
-
-                    this.rEnd = data.rEnd
-                    this.name = data.name
-                    this.desc = data.desc
-                    this.link = data.link
-                    this.linkLabel = data.linkLabel
-                    this.buildData = data.buildData
-                    this.imgUrl = await MyPlot.getImageUrl(this.buildData)
-
-                } catch(e) {}
-
-                return this
-
-            })()
-
-        return this._loading
+            })
 
     }
 

@@ -3,17 +3,15 @@
 
     import { fly } from "svelte/transition"
     import { goto } from "$app/navigation"
-    import { plotSearchFocused, showSettingsModal, newPlots, showAuthModal } from "$lib/main/store"
+    import { plotSearchFocused, showSettingsModal, newPlots, showAuthModal, user, showUserWidget } from "$lib/main/store"
     import PlotId from "$lib/common/plotId"
     import { pushNotification } from "$lib/common/utils"
     
     let plotSearchValue = "", showSearchResults = false, searchResult, searchContainer, searchResultsContainer
-    let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
     let disconnectAnimationInterval = null, disconnectAnimationt = 0
 
     $:{
 
-        plotSearchValue
         setShowResults()
        
     }
@@ -61,9 +59,6 @@
         if(searchResultsContainer && !searchResultsContainer.contains(e.target) && !searchContainer.contains(e.target))
             showSearchResults = false
 
-        if(depthDropdownContainer && !depthDropdownContainer.contains(e.target) && !dropdownButtonContainer.contains(e.target))
-            showDepthDropdown = false
-
     }
 
     function mouseup(){
@@ -93,8 +88,13 @@
         {/if}
     </div>
     <div class="w-px h-6 bg-zinc-700"></div>
-    {#if true}
+    {#if !$user}
         <button class="px-6 button0" on:click={() => $showAuthModal = true}>Login</button>
+    {:else}
+        <button on:click={() => $showUserWidget = !$showUserWidget} class="{ $showUserWidget ? "bg-zinc-800" : "" } flex gap-1 items-center text-zinc-400 text-xs sm:text-sm py-1 pl-2 pr-3 hover:bg-zinc-800 transition-colors rounded-lg">
+            <img class="w-3.5 opacity-60 aspect-square" src="/user.svg" alt="">
+            <div>{$user?.username}</div>
+        </button>
     {/if}
     <button on:click={() => $showSettingsModal = true} class="transition-opacity opacity-50 shrink-0 w-7 h-7 hover:opacity-80 focus:outline-none">
         <img class="pointer-events-none select-none" src="/settings.svg" alt="">

@@ -20,7 +20,6 @@
 
     }
 
-
     async function resetPassword(){
 
         password0Error = password1Error = resetError = ""
@@ -84,7 +83,7 @@
 {:else}
     <div class="w-full max-w-sm p-4 bg-zinc-800 outline-zinc-700 outline-1 outline rounded-2xl">
         <h1 class="text-xl font-bold">Reset password</h1>
-        <form on:submit={resetPassword} class="mt-4 space-y-4">
+        <form on:submit|preventDefault={resetPassword} class="mt-4 space-y-4">
             <div>
                 <div class="input-container">
                     <input bind:this={password0} type={showPassword ? "text" : "password"} placeholder="New password">

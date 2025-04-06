@@ -148,84 +148,91 @@ export default class RenderManager {
 
         this.renderedBuildsCount += buildCount
         chunk.buildCount = buildCount
-        // merge geometries
-        const merged = {}
 
-        for(const res of ["stdRes", "lowRes"]){
+        if(buildCount > 0){
 
-            const packaged = { position : [], color : [], index: [], min : [], max : [], scale : [] }
+            // merge geometries
+            const merged = {}
 
-            // package data to be merged
-            for(let i = 0; i < chunk.plots.length; i++){
+            for(const res of ["stdRes", "lowRes"]){
 
-                if(chunk.plots[i].geometryData == null)
+                const packaged = { position : [], color : [], index: [], min : [], max : [], scale : [] }
 
-                    continue
+                // package data to be merged
+                for(let i = 0; i < chunk.plots.length; i++){
 
-                const geomData = chunk.plots[i].geometryData[res]
+                    if(chunk.plots[i].geometryData == null)
 
-                packaged.position.push(geomData.position)
-                packaged.color.push(geomData.color)
-                packaged.index.push(geomData.index)
+                        continue
 
-                //compute bounds relative to world
-                const scale = chunk.plots[i].blockSize
-                const center = new Vector3(...geomData.center)
-                const centerDiff = new Vector3(...geomData.dp)
-                const min = center.clone().sub(centerDiff)
-                const max = center.clone().add(centerDiff)
+                    const geomData = chunk.plots[i].geometryData[res]
 
-                min.multiplyScalar(scale).add(chunk.plots[i].pos)
-                max.multiplyScalar(scale).add(chunk.plots[i].pos)
+                    packaged.position.push(geomData.position)
+                    packaged.color.push(geomData.color)
+                    packaged.index.push(geomData.index)
 
-                packaged.min.push(min.toArray())
-                packaged.max.push(max.toArray())
-                packaged.scale.push(scale)
+                    //compute bounds relative to world
+                    const scale = chunk.plots[i].blockSize
+                    const center = new Vector3(...geomData.center)
+                    const centerDiff = new Vector3(...geomData.dp)
+                    const min = center.clone().sub(centerDiff)
+                    const max = center.clone().add(centerDiff)
 
+                    min.multiplyScalar(scale).add(chunk.plots[i].pos)
+                    max.multiplyScalar(scale).add(chunk.plots[i].pos)
+
+                    packaged.min.push(min.toArray())
+                    packaged.max.push(max.toArray())
+                    packaged.scale.push(scale)
+
+                }
+
+                //merge
+                const mergeTask = new Task( "merge-geometries", { geometryData : packaged } )
+                merged[res] = await mergeTask.run()
+                
             }
 
-            //merge
-            const mergeTask = new Task( "merge-geometries", { geometryData : packaged } )
-            merged[res] = await mergeTask.run()
+            const stdMD = merged.stdRes
+            const stdRes = this._createMesh(
+                stdMD.position,
+                stdMD.color,
+                stdMD.index,
+                new Vector3(...stdMD.center),
+                Math.hypot(...stdMD.dp),
+                stdMD.scale
+            )
+            const lowMD = merged.lowRes
+            const lowRes = this._createMesh(
+                lowMD.position,
+                lowMD.color,
+                lowMD.index,
+                new Vector3(...lowMD.center),
+                Math.hypot(...lowMD.dp),
+                lowMD.scale
+            )
+
+            const lod = new LOD()
+            lod.autoUpdate = lod.matrixAutoUpdate = lod.matrixWorldAutoUpdate = false
+            lod.addLevel(stdRes, 0)
+            lod.addLevel(lowRes, settings.lowLODDist * parent.blockSize, 0.01)
+            lod.position.copy(stdRes.position)
+            lod.updateMatrix()
+            lod.matrixWorld.copy(lod.matrix)
+            lod.update(refs.camera)
+            refs.scene.add(lod)
+            
+            chunk.boundingSphere.center.copy(stdRes.position)
+            chunk.boundingSphere.radius = Math.hypot(...stdMD.dp)
+            chunk.lod = lod      
             
         }
 
-        const stdMD = merged.stdRes
-        const stdRes = this._createMesh(
-            stdMD.position,
-            stdMD.color,
-            stdMD.index,
-            new Vector3(...stdMD.center),
-            Math.hypot(...stdMD.dp),
-            stdMD.scale
-        )
-        const lowMD = merged.lowRes
-        const lowRes = this._createMesh(
-            lowMD.position,
-            lowMD.color,
-            lowMD.index,
-            new Vector3(...lowMD.center),
-            Math.hypot(...lowMD.dp),
-            lowMD.scale
-        )
-
-        const lod = new LOD()
-        lod.autoUpdate = lod.matrixAutoUpdate = lod.matrixWorldAutoUpdate = false
-        lod.addLevel(stdRes, 0)
-        lod.addLevel(lowRes, settings.lowLODDist * parent.blockSize, 0.01)
-        lod.position.copy(stdRes.position)
-        lod.updateMatrix()
-        lod.matrixWorld.copy(lod.matrix)
-        lod.update(refs.camera)
-        refs.scene.add(lod)
-        
-        chunk.boundingSphere.center.copy(stdRes.position)
-        chunk.boundingSphere.radius = Math.hypot(...stdMD.dp)
-        chunk.lod = lod        
-
-        // add chunk to parent list
+        // add chunk to parent's children list
         if(chunk.parent !== null)
             chunk.parent.children.add(chunk)
+
+        chunk.plotData = chunk._loading = null
 
     }
 
@@ -284,10 +291,14 @@ export default class RenderManager {
         this.renderedChunks.delete(chunk)
 
         // remove from scene
-        refs.scene.remove(chunk.lod)
+        if(chunk.lod !== null)
+            refs.scene.remove(chunk.lod)
 
         // deduct from rendered builds count
         this.renderedBuildsCount -= chunk.buildCount
+
+        //reset chunk to be rendered again
+        chunk.reset()
 
     }
 

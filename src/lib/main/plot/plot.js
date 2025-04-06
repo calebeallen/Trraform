@@ -2,41 +2,12 @@
 import { Frustum, Sphere, Vector3, Vector4 } from "three";
 import PlotData from "./plotData";
 import Task from "../task/task";
-import { refs } from "../store";
-import { MAX_DEPTH, PLOT_COUNT } from "../../common/constants";
-import { I2P, P2I } from "../../common/utils";
+import { CHUNK_SIZE, MAX_DEPTH } from "../../common/constants";
+import { I2P } from "../../common/utils";
 import MaxHeap from "../structures/maxHeap";
+import Chunk from "./chunk";
 
 export default class Plot extends PlotData {
-
-    static defaultChildPlots(buildSize){
-
-        //place unplaced plots
-        const pos = new Vector3()
-        const plotIndicies = new Array(PLOT_COUNT)
-        const chunkArr = new Array(PLOT_COUNT)
-        const X0 = 1/12, Z0 = 3/12, S = 1/6
-
-        //start with default positions
-        for(let z = 0; z < 4; z++)
-        for(let x = 0; x < 6; x++){
-
-            const chunk = Math.floor( z / 2 ) * 2 + Math.floor(x / 3) //chunk size 6
-
-            pos.set(X0 + x * S, 0, Z0 + z * S)
-            pos.multiplyScalar(buildSize).floor()
-
-            const plotId = z * 6 + x
-            const ind = P2I(pos, buildSize)
-
-            plotIndicies[plotId] = ind
-            chunkArr[plotId] = chunk
-
-        }
-
-        return [plotIndicies, chunkArr]
-
-    }
 
     constructor(plotId, pos, parent, chunk){
 
@@ -45,10 +16,11 @@ export default class Plot extends PlotData {
         this.pos = pos
         this.parent = parent
         this.children = []
-        this.chunk = chunk //object shared between all plots that belong to this chunk
-        this.minted = false
+        this.chunk = chunk // reference shared between all plots that belong to this chunk
+        this.verified = false
+        this.owner = null
 
-        const c = pos.clone().addScalar( parent.blockSize / 2)
+        const c = pos.clone().addScalar(parent.blockSize / 2)
         this.sphere = new Sphere(c, Math.sqrt((parent.blockSize / 2 ) ** 2 * 3)) //does not change, is the absolute bounds of the plot
         this.boundingSphere = this.sphere.clone() //bounds of mesh + plots (not set until plot is loaded)
         
@@ -95,26 +67,28 @@ export default class Plot extends PlotData {
 
             this._loading = new Promise(async resolve => {
 
-                const task = new Task("get-plot-data", {
-                    id: this.id.id,
-                    depth: this.id.depth()
+                const localId = this.id.getLocal()
+                const plotDataU8 = await this.chunk.getPlotData(localId)
+
+                if(plotDataU8 === null){
+                    resolve(this)
+                    return
+                }
+
+                const task = new Task("process_plot_data", { 
+                    plotDataU8,
+                    placeSubplots: this.id.depth() < MAX_DEPTH
                 })
                 const data = await task.run()
 
-                if(data === null){
-
-                    resolve(this)
-                    return
-
-                }
-
+                this.owner = data.owner
                 this.name = data.name
                 this.desc = data.desc
                 this.link = data.link
-                this.linkLabel = data.linkLabel
+                this.linkTitle = data.linkTitle
+                this.verified = this.verified
                 this.buildSize = data.buildSize
                 this.blockSize = this.parent.blockSize / data.buildSize
-                this.minted = true
 
                 if (data.geometryData !== null) {
                     
@@ -135,69 +109,46 @@ export default class Plot extends PlotData {
                 
                 }
                 
-                //child plots
-                if (this.id.depth() < MAX_DEPTH)
+                // child plots
+                if (this.id.depth() < MAX_DEPTH) {
 
-                    this.createChildPlots( data.plotIndicies, data.chunkArr )
+                    const chunkCount = Math.floor(plotIndicies.length / CHUNK_SIZE)
+                    const chunks = new Array(chunkCount)
+            
+                    // create chunks, give chunks a reference to parent chunk
+                    for(let i = 0; i < chunkCount; i++){
+            
+                        const chunkId = `${this.id.string(false)}_${i}` //id is <parent plot id>_<local chunk number> allows for easy chunk restructuring if needed.
+                        chunks[i] = new Chunk(chunkId, this.chunk) 
+            
+                    }
+            
+                    //create child plots
+                    for(let i = 0; i < plotIndicies.length; i++){
+            
+                        const childPlotId = this.id.mergeChild(i + 1)
+                        const childPos = new Vector3(...I2P(plotIndicies[i], this.buildSize))
+                        childPos.multiplyScalar(this.blockSize).add(this.pos)
+            
+                        // pass shared reference of a chunk to its plots
+                        const chunk = chunks[Math.floor(i / CHUNK_SIZE)]
+                        const plot = new Plot(childPlotId, childPos, this, chunk)
+            
+                        chunk.plots.push(plot)
+                        this.children.push(plot)
+            
+                    }
+
+                    for(const chunk of chunks)
+                        chunk.computeBoundingSphere()
+
+                }
 
                 resolve(this)
                 
             })
 
         return this._loading
-
-    }
-
-    createChildPlots(plotIndicies, chunkArr){
-
-        //create shared chunk reference, give parent chunk a reference to child
-        let maxChunkId = chunkArr[0]
-        for(let i = 1; i < chunkArr.length; i++)
-
-            if(chunkArr[i] > maxChunkId)
-                maxChunkId = chunkArr[i]
-
-        const chunkCount = maxChunkId + 1
-        const chunks = new Array(chunkCount)
-
-        // create chunks, give parent a reference to child chunks
-        for(let i = 0; i < chunkCount; i++)
-
-            chunks[i] = { 
-                parent: this.chunk,
-                children: new Set(),
-                plots: [],
-                lod: null,
-                boundingSphere: new Sphere(),
-                buildCount: 0
-            }
-
-        //create child plots
-        for(let i = 0; i < plotIndicies.length; i++){
-
-            const childPlotId = this.id.mergeChild(i + 1)
-            const childPos = new Vector3(...I2P(plotIndicies[i], this.buildSize))
-            childPos.multiplyScalar(this.blockSize).add(this.pos)
-
-            const chunk = chunks[chunkArr[i]]
-            const plot = new Plot(childPlotId, childPos, this, chunk)
-
-            chunk.plots.push(plot)
-            this.children.push(plot)
-
-        }
-
-    }
-
-    _inView(vector){
-    
-        const v = new Vector4(vector.x, vector.y, vector.z, 1)
-        v.applyMatrix4(refs.camera.viewMatrix)
-        v.x /= v.w
-        v.y /= v.w
-        v.z /= v.w
-        
-        return !(v.z >= 1 || v.x < -1 || v.x > 1 || v.y < -1 || v.y > 1)
 
     }
 

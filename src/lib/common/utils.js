@@ -323,7 +323,7 @@ function decodePlotData(bytes){
         throw new Error("cannot decode plot data: invalid parts length")
 
     const jsonData = JSON.parse(new TextDecoder().decode(parts[0]))
-    const { ver, name, desc, link, linkLabel, rEnd } = jsonData
+    const { ver, owner, name, desc, link, linkTitle, verified } = jsonData
     let buildData = null
 
     // if it has a build part, give blank build
@@ -345,7 +345,7 @@ function decodePlotData(bytes){
 
     }
 
-    return { ver, name, desc, link, linkLabel, rEnd, buildData }   
+    return { ver, owner, name, desc, link, linkTitle, verified, buildData }   
 
 }
 

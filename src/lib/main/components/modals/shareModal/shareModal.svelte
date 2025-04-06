@@ -6,8 +6,8 @@
     import MyPlots from "$lib/main/plot/myPlot"
     import { fade, fly } from "svelte/transition";
     import PlotId from "$lib/common/plotId";
-    import ShareOptionLink from "$lib/main/components/share/shareOptionLink.svelte";
-    import ShareOptionButton from "$lib/main/components/share/shareOptionButton.svelte";
+    import ShareOptionLink from "./shareOptionLink.svelte";
+    import ShareOptionButton from "./shareOptionButton.svelte";
     import { notification } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
 

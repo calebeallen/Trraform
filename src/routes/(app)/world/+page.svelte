@@ -7,10 +7,11 @@
 
     import { page } from "$app/stores"
     import { onMount } from "svelte";
-    import { insideOf, refs, plotSearchFocused, showSettingsModal } from "$lib/main/store"
+    import { insideOf, refs, plotSearchFocused, showSettingsModal, user, showAuthModal} from "$lib/main/store"
     import { fly } from "svelte/transition"
-    import ReportModal from "$lib/main/components/reportModal.svelte"
-    import ShareModal from "$lib/main/components/share/shareModal.svelte"
+    import ReportModal from "$lib/main/components/modals/reportModal.svelte"
+    import ShareModal from "$lib/main/components/modals/shareModal/shareModal.svelte"
+    import ClaimModal from "../../../lib/main/components/modals/claimModal.svelte";
 
     export let data 
     let lastTouches = []
@@ -321,8 +322,8 @@
     <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-1">
         {#await profile}
             <div class="w-full h-20 animate-pulse">
-                <div class="w-1/4 h-3 mt-0.5 rounded-full bg-zinc-700"></div>
-                <div class="w-1/2 h-4 mt-1 rounded-full bg-zinc-700"></div>
+                <div class="w-1/2 h-5 mt-1 rounded-full bg-zinc-800"></div>
+                <div class="w-1/4 h-3 mt-1 rounded-full bg-zinc-800"></div>
             </div>
         {:then { id, minted, name, desc, link, linkLabel } }
                 <div class="flex justify-between gap-2">
@@ -366,7 +367,12 @@
                     <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
                 {/if}
             {:else}
-                <button class="mt-1 button0" on:click={() => showClaimModal = true}>Claim</button>
+                <button class="mt-1 button0" on:click={() => {
+                    if(!$user)
+                        $showAuthModal = true
+                    else
+                        showClaimModal = true
+                }}>Claim</button>
             {/if}
         {/await}
     </div>
@@ -374,6 +380,10 @@
         <div out:fly={{ y: -150, opacity: 0, duration: 2000 }} class="absolute top-0 left-0 w-full text-3xl font-bold text-center pointer-events-none rotate-12 -z-10">+1</div>
     {/if}
 </div> 
+
+{#if showClaimModal}
+    <ClaimModal on:close={() => showClaimModal = false}/>
+{/if}
 
 {#if showShareModal}
     <ShareModal bind:plotIdStr={sharePlotId} on:close={() => showShareModal = false}/>

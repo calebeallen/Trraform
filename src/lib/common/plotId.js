@@ -1,65 +1,74 @@
-
-import { D0_PLOT_COUNT, PLOT_COUNT, PLOT_DATA_BUCKET_URL, IMAGES_BUCKET_URL} from "$lib/common/constants"
-
-const D0_BIT_MASK = 0xFFFF
-const DN_BIT_MASK = 0xFF
+import {
+    D0_PLOT_COUNT,     
+    PLOT_COUNT,
+    IMAGES_BUCKET_URL
+} from "$lib/common/constants";
+  
+// Convert these masks to BigInt
+const D0_BIT_MASK = 0xFFFFFFn  // 24 bits
+const DN_BIT_MASK = 0xFFFn    // 12 bits
 
 export default class PlotId {
 
-    static fromHexString(hexStr){
+    static fromHexString(hexStr) {
 
-        const id = parseInt(hexStr, 16)
+        // Safely parse the hex string as a BigInt
+        let id
+        try {
 
-        if(isNaN(id) || id === 0 || id >= 2**32)
+            // Remove leading "0x" if present
+            const sanitized = hexStr.trim().toLowerCase().replace(/^0x/, "")
+            id = BigInt(`0x${sanitized}`)
 
-            throw new Error("Invalid plot id")
-
+        } catch {
+            throw new Error("Invalid plot id (not parseable as BigInt)")
+        }
+    
+        // Check range: must be > 0 and < 2**32
+        if (id === 0n || id >= (1n << 32n))
+            throw new Error("Invalid plot id (out of range)")
+    
         return new PlotId(id)
 
     }
+  
+    static depth(id) {
 
-    static depth(id){
-
-        id >>>= 16
-
+        // Shift off the lower 24 bits first
+        id = id >> 24n
+    
         let depth = 0
-
-        while(id > 0){
+        while (id > 0n) {
 
             depth++
-
-            id >>>= 8
+            id = id >> 12n
 
         }
 
         return depth
 
     }
-
-    static verify(id){
+  
+    static verify(id) {
 
         try {
 
-            const depth = this.depth(id)
-
-            //verify depth 0 plot id
-            let idCopy = id & 0xffff
-
-            if(idCopy <= 0 || idCopy > D0_PLOT_COUNT)
-
+            const depth = this.depth(id);
+    
+            // 1) Verify the D0 (depth 0) portion
+            let idCopy = id & 0xFFFFFFn
+            if (idCopy <= 0n || idCopy > BigInt(D0_PLOT_COUNT))
                 return false
+            
+            // 2) Verify deeper segments
+            idCopy = id >> 24n
+            for (let i = 0; i < depth; i++) {
 
-            idCopy = id >> 16
-
-            for(let i = 0; i < depth; i++){
-
-                const dnid = idCopy & 0xff
+                const dnid = idCopy & 0xFFFn
+                if (dnid <= 0n || dnid > BigInt(PLOT_COUNT))
+                    return false;
                 
-                if(dnid <= 0 || dnid > PLOT_COUNT)
-
-                    return false
-
-                idCopy >>= 8
+                idCopy = idCopy >> 12n
 
             }
 
@@ -67,151 +76,118 @@ export default class PlotId {
 
         } catch {
 
-            return false
-
+            return false;
+            
         }
 
     }
+  
+    constructor(id) {
 
-    constructor(id){
-
-        this.id = id || 0
+        // If id not provided, use 0n
+        this.id = id ? BigInt(id) : 0n;
 
     }
-
-    getImgUrl(){
+  
+    getImgUrl() {
 
         return `${IMAGES_BUCKET_URL}/${this.string()}.png`
 
     }
 
-    getUrl(){
+    equals(plotId) {
 
-        return `${PLOT_DATA_BUCKET_URL}/${this.string()}`
-
-    }
-
-    getUrls(){
-
-        return [
-            this.getUrl(),
-            this.getImgUrl()
-        ]
-
-    }
-
-    async fetch(){
-
-        try {
-
-            const res = await fetch(this.getUrl())
-
-            // const res = await fetch(`${PLOT_DATA_BUCKET_URL}/${this.id === 0 ? "0x00" : "0x01"}`) 
-            
-            if(!res.ok)
-
-                return null
-
-            return await ( await res.blob() ).arrayBuffer()
-
-        } catch(e) {
-
-            console.log(e)
-            return null
-
-        }   
-
-    }
-
-    equals(plotId){
-
+        // Compare BigInts directly
         return plotId?.id === this.id
 
     }
-
-    clone(){
+  
+    clone() {
 
         return new PlotId(this.id)
 
     }
+  
+    string(hexPrefix = true) {
 
-    string(hexPrefix = true){
-
+        // Convert BigInt to lowercase hex
         let str = this.id.toString(16).toLowerCase()
 
+        // Ensure even-length hex (so something like 0x0F doesn't lose the leading '0')
         if (str.length % 2 !== 0)
-
-            str = `0${str}`
-
+            str = `0${str}`;
+        
         return hexPrefix ? `0x${str}` : str
+    }
+  
+    bigInt() {
+
+        return this.id
 
     }
-
-    bigInt(){
-
-        return BigInt(this.id)
-
-    }
-
-    verify(){
+  
+    verify() {
 
         return PlotId.verify(this.id)
 
     }
-
-    depth(){
+  
+    depth() {
 
         return PlotId.depth(this.id)
 
     }
-
-    getParent(){
-
-        const depth = this.depth()
-
-        if(depth == 0)
-
-            return new PlotId(0)
-
-        return new PlotId( this.id & ( ( 1 << ( 16 + 8 * (depth - 1) )) - 1 ) )
-
-    }
-
-    split(){
-
-        let id = this.id
-
-        const split = [id & D0_BIT_MASK]
-
-        id >>= 16
-
-        while(id > 0){
-
-            split.push(id & DN_BIT_MASK)
-
-            id >>= 8
-
-        }   
-
-        return split
-
-    }
-
-    mergeChild(localId){
-
-        return new PlotId(this.id === 0 ? localId : this.id | ( localId << (16 + 8 * this.depth()) ))
-
-    }
-
-    getLocal(){
+  
+    getParent() {
 
         const depth = this.depth()
+        if (depth === 0) 
+            return new PlotId(0n)
+        
+        // Mask out the last 12 bits that define the current child's ID
+        const mask = (1n << BigInt(24 + 12 * (depth - 1))) - 1n
+        return new PlotId(this.id & mask)
 
-        if(depth === 0)
+    }
+  
+    split() {
 
+        let tmp = this.id
+        const segments = [tmp & D0_BIT_MASK] // depth 0 portion
+        tmp = tmp >> 24n
+    
+        while (tmp > 0n) {
+            segments.push(tmp & DN_BIT_MASK)
+            tmp = tmp >> 12n
+        }
+
+
+        return segments.map(a => Number(a))
+
+    }
+  
+    mergeChild(localId) {
+
+      const localBig = BigInt(localId)
+
+      if (this.id === 0n)
+        return new PlotId(localBig)
+      
+      // Place new child ID in higher bits
+      const shiftAmount = BigInt(24 + 12 * this.depth())
+      return new PlotId(this.id | (localBig << shiftAmount))
+
+    }
+  
+    getLocal() {
+
+        const depth = this.depth();
+        if (depth === 0) 
             return new PlotId(this.id)
-
-        return new PlotId(this.id >> (16 + 8 * (depth - 1)))
+        
+        // Shift off all but the last child ID
+        const shiftAmount = BigInt(24 + 12 * (depth - 1))
+        return new PlotId(this.id >> shiftAmount)
 
     }
 

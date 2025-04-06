@@ -5,7 +5,7 @@
     import Modal from "$lib/common/components/modal.svelte";
     import { createEventDispatcher, onMount } from "svelte";
     import { API_ORIGIN } from "$lib/common/constants"
-    import { showResetPasswordModal, loadScreenOpacity, tempEmail, showSendVerificationEmailModal } from "$lib/main/store"
+    import { showResetPasswordModal, loadScreenOpacity, tempEmail, showSendVerificationEmailModal, user } from "$lib/main/store"
     import isEmail from "validator/lib/isEmail";
 
     const USERNAME_MAX_LEN = 48
@@ -169,10 +169,12 @@
 
         }
         
-        //otherwise, get user data
+        //otherwise, save jwt, get user data
+        await getUserData(data.token)
 
         $tempEmail = ""
         dispatch("close")
+
         
     }
 
@@ -187,10 +189,12 @@
                 method: "POST",
                 body: JSON.stringify({ token: response.credential })
             })
-            const { error, message } = await res.json()
+            const { data, error, message } = await res.json()
 
             if(error)
                 throw new Error(message)
+
+            await getUserData(data.token)
 
         } catch {
             googleError = "Error logging in with google."
@@ -198,6 +202,28 @@
 
         $loadScreenOpacity = 0
         dispatch("close")
+
+    }
+
+    async function getUserData(token){
+
+        localStorage.setItem("auth_token", token)
+
+        try {
+
+            const res = await fetch(`${API_ORIGIN}/user/data`, {
+                headers: {
+                    Authorization: token
+                }
+            })
+            const { data, error, message } = await res.json()
+
+            if(error)
+                throw new Error(message)
+
+            $user = data
+
+        } catch {}
 
     }
 

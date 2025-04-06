@@ -3,7 +3,7 @@
 
 import { Vector3 } from "three"
 import { ColorLibrary } from "../../common/colorLibrary"
-import { PLOT_COUNT, LOW_RES, CHUNK_SIZE, MAX_DEPTH } from "../../common/constants"
+import { PLOT_COUNT, LOW_RES, CHUNK_SIZE, MAX_DEPTH, CHUNK_BUCKET_URL } from "../../common/constants"
 import { I2P, P2I, backFace, bottomFace, expand, frontFace, getVertexIndicies, leftFace, rightFace, topFace, decodePlotData } from "../../common/utils"
 import PlotId from "../../common/plotId"
 
@@ -20,23 +20,22 @@ onmessage = async e => {
 
         switch(method){
 
-            case "decode":
-
-                response = decodePlotData(data.encoded, data.depth, true)
-                transferable = response.buildData ? [response.buildData.buffer] : []
-                break
-
-            case "reduce-poly":
+            case "reduce_poly":
 
                 [response, transferable] = reducePoly(data.expanded, data.buildSize)
                 break
 
-            case "get-plot-data":
+            case "get_chunk":
 
-                [response, transferable] = await getPlotData(data.id)
+                [response, transferable] = await getChunk(data.chunkId)
                 break
 
-            case "merge-geometries":
+            case "process_plot_data":
+
+                [response, transferable] = processPlotData(data.plotDataU8, data.placeSubplots)
+                break
+
+            case "merge_geometries":
 
                 [response, transferable] = mergeGeometries(data.geometryData)
                 break
@@ -65,32 +64,37 @@ onmessage = async e => {
 
 }
 
+// fetches chunk, decodes it into it's parts
+// TODO
+async function getChunk(chunkId){
+
+    const res = await fetch(`${CHUNK_BUCKET_URL}/${chunkId}`)
+
+    // if(!res.ok)
+    //     return {}, []
+
+    return [{}, []]
+
+}
+
 /* one function that does everything, should reduce overhead */
 // places unplaced subplots
 // generates low detail geometry
 // generates full detail geometry with poly reduction
-async function getPlotData(id){
+function processPlotData(plotDataU8, placeSubplots = true){
 
-    const plotId = new PlotId(id)
-    const depth = plotId.depth()
-    const encodedBuffer = await plotId.fetch()
-
-    // plot doesn't exist
-    if(encodedBuffer === null)
-        return [null, null]
-
-    const encoded = new Uint8Array(encodedBuffer)
-    const { name, desc, link, linkLabel, buildData } = decodePlotData(encoded, depth, true)
+    const { owner, name, desc, link, linkTitle, verified, buildData } = decodePlotData(plotDataU8)
 
     const buildSize = buildData[1]
     const plotData = {
+        owner,
         name,
         desc,
         link,
-        linkLabel,
+        linkTitle,
+        verified,
         buildSize,
-        plotIndicies :null,
-        chunkArr: null,
+        plotIndicies: null,
         geometryData: null
     }
 
@@ -102,7 +106,7 @@ async function getPlotData(id){
     const v2 = new Vector3()
 
     // handle subplot placement if not max depth
-    if (depth < MAX_DEPTH) {
+    if (subplots) {
 
         const plotIndicies = new Array(PLOT_COUNT).fill(-1)
         let plotsUnplaced = PLOT_COUNT
@@ -209,7 +213,6 @@ async function getPlotData(id){
         }
 
         plotData.plotIndicies = plotIndicies
-        plotData.chunkArr = createChunkArr(plotIndicies, buildSize, CHUNK_SIZE)
 
         // account for subplot positions in min/max
         for(let i = 0; i < plotIndicies.length; i++){
@@ -223,17 +226,18 @@ async function getPlotData(id){
     
     }
     
+    //if build is empty, no geometry processing
     if(expanded === null)
 
         return [plotData, null]
    
     const stdRes = reducePoly(expanded, buildSize)[0]
     const lowRes = makeLowRes(expanded, buildSize, LOW_RES)
-    v2.set(...stdRes.dp)
-    v1.set(...stdRes.center)
+    v2.fromArray(stdRes.dp)
+    v1.fromArray(stdRes.center) 
     v1.sub(v2)
     min.min(v1)
-    v1.set(...stdRes.center)
+    v1.fromArray(stdRes.center)
     v1.add(v2)
     max.max(v1)    
 
@@ -263,95 +267,6 @@ function seededRNG(seed){
         state = (state * 16807) % 2147483647
         return state / 2147483647;
     }
-
-}
-
-function createChunkArr(plotIndices, buildSize, chunkSize){
-
-    const N = plotIndices.length
-    const graph = new Array(N)
-    const chunkArr = new Array(N)
-
-    //create nodes
-    for(let i = 0; i < N; i++){
-
-        const node = {
-            ind: i,
-            connections: new Array(N),
-            pos: I2P(plotIndices[i], buildSize),
-            chunk: null
-        }
-
-        graph[i] = node
-
-    }
-
-    //connect all nodes to each other
-    for(const n1 of graph){
-
-        for(let i = 0; i < N; i++){
-
-            const n2 = graph[i]
-
-            if(n1 === n2)
-
-                continue
-
-            n1.connections[i] = { 
-                dist: (n2.pos[0] - n1.pos[0]) ** 2 + (n2.pos[1] - n1.pos[1]) ** 2 + (n2.pos[2] - n2.pos[2]) ** 2,
-                node: n2
-            }
-
-        }
-
-        n1.connections.sort( ( a, b ) => a.dist - b.dist )
-
-    }
-
-    //create chunks
-    let chunkId = 0
-
-    for(const n of graph){
-
-        //if already assigned to chunk, skip it
-        if(n.chunk !== null)
-
-            continue
-
-        //find chunkSize amount of nodes closest to n that don't already have a chunk. Assign them a chunk
-        let found = 0
-
-        for(let i = 0; i < N - 1; i++){
-
-            if(found === chunkSize - 1)
-
-                break
-
-            if(n.connections[i].node.chunk === null){
-
-                n.connections[i].node.chunk = chunkId
-                chunkArr[n.connections[i].node.ind] = chunkId
-                found++
-
-            }
-
-        }
-
-        //if nodes were able to be assigned a chunk, give node n that chunk aswell
-        if(found){
-
-            n.chunk = chunkId 
-            chunkId++
-
-        } else //if 0 nodes were found, assign n to the chunk of its nearest neighbor
-
-            n.chunk = n.connections[0].node.chunk
-
-        chunkArr[n.ind] = n.chunk
-
-    }
-
-    return chunkArr
 
 }
 

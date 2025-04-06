@@ -6,22 +6,20 @@ export default class PlotData {
     constructor(id = new PlotId()){
 
         this.id = id //token id
-        this.rEnd = 0
         this.name = ""
         this.desc = ""
         this.link = ""
-        this.linkLabel = ""
+        this.linkTitle = ""
         this._loading = null
 
     }
 
     clear(){
 
-        this.rEnd = 0
         this.name = ""
         this.desc = ""
         this.link = ""
-        this.linkLabel = ""
+        this.linkTitle = ""
         this._loading = null
 
     }
@@ -29,11 +27,10 @@ export default class PlotData {
     copy(plotData){
 
         this.id = plotData.id
-        this.rEnd = plotData.rEnd
         this.name = plotData.name
         this.desc = plotData.desc
         this.link = plotData.link
-        this.linkLabel = plotData.linkLabel
+        this.linkTitle = plotData.linkTitle
         this._loading = plotData._loading
 
     }

@@ -78,19 +78,19 @@
         // get user data
         const authToken = localStorage.getItem("auth_token")
 
-        if(authToken){
+        // if(authToken){
 
-            const res = await fetch(`${API_ORIGIN}/user/data`, {
-                headers: { Authorization: authToken }
-            })
-            const { data, error } = await res.json()
+        //     const res = await fetch(`${API_ORIGIN}/user/data`, {
+        //         headers: { Authorization: authToken }
+        //     })
+        //     const { data, error } = await res.json()
             
-            if(!error){
-                $user = data
-                localStorage.setItem("auth_token", data.token)
-            }
+        //     if(!error){
+        //         $user = data
+        //         localStorage.setItem("auth_token", data.token)
+        //     }
 
-        }
+        // }
 
         /* begin rendering */
         refs.renderer.setAnimationLoop(renderLoop)

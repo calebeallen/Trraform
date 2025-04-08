@@ -29,188 +29,47 @@ export default class RootPlot {
 
             this._loading = ( async () => {
 
-                //get build
-                const res = await fetch("/0x00")
-                const buf = await res.arrayBuffer()
-                const condensed = new Uint16Array(buf)
-                const bs = condensed[1]
-                const expanded = expand(condensed)
-                
-                //get root plot indicies
-                let plotIndicies = []
-                
-                for(let i = 0; i < expanded.length; i++){
+                //get build data
+                const buildDatRes = await fetch("/0x00.dat")
+                const buildDataBuf = await buildDatRes.arrayBuffer()
+                const buildData = new Uint16Array(buildDataBuf)
+                const bs = buildData[1]
+                const expanded = expand(buildData)
 
-                    const up1 = i + bs ** 2
+                //get chunk data
+                const chunkMapRes = await fetch("/chunk_map.dat")
+                const chunkMapBuf = await chunkMapRes.arrayBuffer()
+                const chunkMap = new Uint32Array(chunkMapBuf)
+                const chunkCount = chunkMap[chunkMap.length - 2] + 1
+                const plotIdxs = []
+                const idxToChunk = []
 
-                    if(expanded[i] !== 0 && (up1 >= expanded.length || expanded[up1] === 0))
+                for(let i = 0; i < chunkMap.length; i+=2){
 
-                        plotIndicies.push(i)
+                    const chunkId = chunkMap[i]
+                    const plotIdx = chunkMap[i + 1]
 
-                }
-
-                //create chunkArr
-                const grid = Array.from({ length: bs }, () => Array.from({ length: bs }, () => []));
-                const graph = new Array(plotIndicies.length)
-                const chunkArr = new Array(plotIndicies.length)
-
-                //create all nodes
-                for(let i = 0; i < plotIndicies.length; i++){
-
-                    const pos = I2P(plotIndicies[i], bs)
-                    const node = {
-                        ind: i,
-                        connections: [],
-                        pos: pos,
-                        chunk: null,
-                        len: pos.x ** 2 + pos.y ** 2 + pos.z ** 2
-                    }
-                    
-                    grid[pos[2]][pos[0]].push(node)
-                    graph[i] = node
+                    idxToChunk.push(chunkId)
+                    plotIdxs.push(plotIdx)
 
                 }
-
-                graph.sort((a,b) => a.len - b.len)
-
-                const dx = [1,0,-1,0]
-                const dz = [0,1,0,-1]
-
-                //connect nodes
-                for(const node of graph){
-
-                    const [x,y,z] = node.pos
-
-                    for(let i = 0; i < 4; i++){
-
-                        const x1 = x + dx[i]
-                        const z1 = z + dz[i]
-
-                        if(x1 < 0 || x1 >= bs || z1 < 0 || z1 >= bs)
-
-                            continue
-
-                        let minDist = Infinity
-                        let closest = null
-                        const adjacent = grid[z1][x1]
-
-                        for(const adjNode of adjacent){
-
-                            const y1 = adjNode.pos[1]
-                            const dist = (x1 - x) ** 2 + (y1 - y) ** 2 + (z1 - z) ** 2
-
-                            if(dist < minDist){
-
-                                minDist = dist
-                                closest = adjNode
-
-                            }
-
-                        }
-
-                        if(closest !== null)
-
-                            node.connections.push({ dist: minDist, node: closest })
-                
-                    }
-
-                }
-
-                //create chunks
-                let chunk = 0
-
-                for(const node of graph){
-
-                    if(node.chunk !== null)
-
-                        continue
-
-                    const queue = new Queue()
-                    queue.enqueue(node)
-
-                    let found = 0;
-
-                    outer: while(queue.size()){
-
-                        const dqed = queue.dequeue()
-
-                        for(const adj of dqed.connections){
-
-                            if(found >= CHUNK_SIZE)
-
-                                break outer
-
-                            if(adj.node.chunk === null){
-
-                                adj.node.chunk = chunk
-                                chunkArr[adj.node.ind] = chunk
-                                queue.enqueue(adj.node)
-                            
-                                found++
-
-                            }
-
-                        }
-
-                    }
-                    
-                    if(node.chunk === null){ //if 0 nodes were found, assign n to the chunk of its nearest neighbor
-
-                        if(found === 0)
-
-                            node.chunk = node.connections[0].node.chunk
-
-                        else
-
-                            node.chunk = chunk
-
-                        chunkArr[node.ind] = node.chunk
-
-                    }
-
-                    //if nodes were able to be assigned a chunk, give node n that chunk aswell
-                    if(found)
-
-                        chunk++
-
-                }
-
-                //get chunk sizes
-                const chunkSizes = {}
-
-                for(let i = 0; i < chunkArr.length; i++){
-
-                    if(!chunkSizes[chunkArr[i]]) chunkSizes[chunkArr[i]] = 1
-                    else chunkSizes[chunkArr[i]]++
-
-                }
-
-                //c reate chunk objects to pass to children (they are shared for memory efficiency)
-                let maxChunkId = chunkArr[0]
-                for(let i = 1; i < chunkArr.length; i++)
-
-                    if(chunkArr[i] > maxChunkId)
-                        maxChunkId = chunkArr[i]
-
-                const chunkCount = maxChunkId + 1
                 const chunks = new Array(chunkCount)
-
                 for(let i = 0; i < chunkCount; i++){
 
                     const chunkId = `0_${i}`
-                    chunks[i] = new Chunk(chunkId, null) 
+                    chunks[i] = new Chunk(chunkId, null)
         
                 }
 
                 // create child plots
-                for(let i = 0; i < plotIndicies.length; i++){
+                for(let i = 0; i < plotIdxs.length; i++){
 
                     const childPlotId = this.id.mergeChild(i + 1)
-                    const childPos = new Vector3(...I2P(plotIndicies[i], bs))
+                    const childPos = new Vector3(...I2P(plotIdxs[i], bs))
                     childPos.y++
                     childPos.multiplyScalar(this.blockSize).add(this.pos)
                     
-                    const chunk = chunks[chunkArr[i]]
+                    const chunk = chunks[idxToChunk[i]]
                     const plot = new Plot(childPlotId, childPos, this, chunk)
 
                     chunk.plots.push(plot)
@@ -281,3 +140,8 @@ export default class RootPlot {
     }
 
 }
+
+
+
+
+

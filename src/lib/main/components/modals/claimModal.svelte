@@ -4,6 +4,12 @@
     import Modal from "$lib/common/components/modal.svelte"
     import Promo from "../promo.svelte";
 
+    async function claim(){
+
+        const
+
+    }
+
 </script>
 
 

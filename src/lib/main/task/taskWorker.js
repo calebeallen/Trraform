@@ -68,14 +68,84 @@ onmessage = async e => {
 // TODO
 async function getChunk(chunkId){
 
-    const res = await fetch(`${CHUNK_BUCKET_URL}/${chunkId}`)
+    const res = await fetch(`${CHUNK_BUCKET_URL}/${chunkId}.dat`)
 
-    // if(!res.ok)
-    //     return {}, []
+    if(!res.ok)
+        return [{}, []]
 
-    return [{}, []]
+    const buf = await res.arrayBuffer()
+    const data = new Uint8Array(buf)
+
+    const chunk = {} // The resulting map; keys as string, values as Uint8Array
+    const transferable = []
+    let cursor = 0
+    const dataLength = data.length
+
+    // Create a DataView to read bytes in little-endian format.
+    const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  
+    while (cursor < dataLength) {
+  
+        // Read body length (4 bytes, little-endian)
+        const bodyLen = dataView.getUint32(cursor, true) // true for little-endian
+        cursor += 4
+    
+        // Read key (8 bytes, little-endian) as BigInt
+        const plotIdBigInt = dataView.getBigUint64(cursor, true)
+        const plotId = new PlotId(plotIdBigInt)
+        cursor += 8
+
+        // Extract the body as a new Uint8Array. Using slice creates a new view.
+        const body = data.slice(cursor, cursor + bodyLen);
+        cursor += bodyLen
+    
+        // Insert into the result object; keys are strings.
+        chunk[plotId.string()] = body
+        transferable.push(body.buffer)
+
+    }
+
+    return [chunk, transferable]
 
 }
+
+
+
+
+
+function decodeChunk(data) {
+  
+    const result = {} // The resulting map; keys as string, values as Uint8Array
+    let cursor = 0
+    const dataLength = data.length
+
+    // Create a DataView to read bytes in little-endian format.
+    const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  
+    while (cursor < dataLength) {
+  
+        // Read body length (4 bytes, little-endian)
+        const bodyLen = dataView.getUint32(cursor, true) // true for little-endian
+        cursor += 4
+    
+        // Read key (8 bytes, little-endian) as BigInt
+        const plotIdBigInt = dataView.getBigUint64(cursor, true)
+        const plotId = new PlotId(plotIdBigInt)
+        cursor += 8
+
+        // Extract the body as a new Uint8Array. Using slice creates a new view.
+        const body = data.slice(cursor, cursor + bodyLen);
+        cursor += bodyLen
+    
+        // Insert into the result object; keys are strings.
+        result[plotId.string()] = body
+
+    }
+  
+    return result
+
+}
+  
 
 /* one function that does everything, should reduce overhead */
 // places unplaced subplots
@@ -106,7 +176,7 @@ function processPlotData(plotDataU8, placeSubplots = true){
     const v2 = new Vector3()
 
     // handle subplot placement if not max depth
-    if (subplots) {
+    if (placeSubplots) {
 
         const plotIndicies = new Array(PLOT_COUNT).fill(-1)
         let plotsUnplaced = PLOT_COUNT

@@ -33,6 +33,8 @@ export default class Chunk{
 
                 const task = new Task("get_chunk", { chunkId: this.chunkId })
                 this.plotData = await task.run()
+
+                console.log(this.plotData)
                 res(this)
 
             })
@@ -41,11 +43,11 @@ export default class Chunk{
 
     }
 
-    async getPlotData(localId){
+    async getPlotData(plotId){
 
         await this.load()
-        const locIdInt = Number(localId.id)
-        return this.plotData[locIdInt] ?? null
+        const idStr = plotId.string()
+        return this.plotData[idStr] ?? null
 
     }
     
@@ -69,4 +71,3 @@ export default class Chunk{
     }
 
 }
-

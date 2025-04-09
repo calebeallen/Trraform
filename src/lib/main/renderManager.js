@@ -188,7 +188,7 @@ export default class RenderManager {
                 }
 
                 //merge
-                const mergeTask = new Task( "merge-geometries", { geometryData : packaged } )
+                const mergeTask = new Task( "merge_geometries", { geometryData : packaged } )
                 merged[res] = await mergeTask.run()
                 
             }

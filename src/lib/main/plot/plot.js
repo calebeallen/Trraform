@@ -67,8 +67,7 @@ export default class Plot extends PlotData {
 
             this._loading = new Promise(async resolve => {
 
-                const localId = this.id.getLocal()
-                const plotDataU8 = await this.chunk.getPlotData(localId)
+                const plotDataU8 = await this.chunk.getPlotData(this.id)
 
                 if(plotDataU8 === null){
                     resolve(this)
@@ -112,6 +111,7 @@ export default class Plot extends PlotData {
                 // child plots
                 if (this.id.depth() < MAX_DEPTH) {
 
+                    const plotIndicies = data.plotIndicies
                     const chunkCount = Math.floor(plotIndicies.length / CHUNK_SIZE)
                     const chunks = new Array(chunkCount)
             

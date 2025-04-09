@@ -3,9 +3,9 @@
 <script>
     
     import Modal from "$lib/common/components/modal.svelte";
-    import { createEventDispatcher, onMount } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { API_ORIGIN } from "$lib/common/constants"
-    import { showResetPasswordModal, loadScreenOpacity, tempEmail, showSendVerificationEmailModal, user } from "$lib/main/store"
+    import { showResetPasswordModal, loadScreenOpacity, tempEmail, showSendVerificationEmailModal, user, modalsShowing } from "$lib/main/store"
     import isEmail from "validator/lib/isEmail";
 
     const USERNAME_MAX_LEN = 48
@@ -34,6 +34,8 @@
 
     onMount(() => {
 
+        $modalsShowing++
+
         google.accounts.id.initialize({
             client_id: "505214281747-g26m4g2lv692ff819neq6pbus4q6f36f.apps.googleusercontent.com",
             callback: googleLogIn
@@ -47,6 +49,8 @@
         google.accounts.id.prompt()
 
     })
+
+    onDestroy(() => $modalsShowing--)
 
     function isUsername(username){
 

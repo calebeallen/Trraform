@@ -3,11 +3,15 @@
 
     import Modal from "$lib/common/components/modal.svelte"
     import { API_ORIGIN } from "$lib/common/constants"
-    import { tempEmail, loadScreenOpacity } from "$lib/main/store"
+    import { tempEmail, loadScreenOpacity, modalsShowing } from "$lib/main/store"
+    import { onDestroy, onMount } from "svelte";
 
     let cooldown = 0
     let cooldownInterval = null
     let sendError = ""
+
+    onMount(() => $modalsShowing++)
+    onDestroy(() => $modalsShowing--)
 
     async function sendLink(){
 

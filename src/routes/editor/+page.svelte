@@ -51,7 +51,7 @@
         REFS.camera.position.setFromSphericalCoords(1, Math.PI * 2/5, Math.PI / 4)
         
         //load last build data
-        let save = localStorage.getItem("editorSave")
+        let save = localStorage.getItem("editor_save")
 
         REFS.newBuild(save ? save.split(",").map(x => parseInt(x)) : [0,REFS.buildSize])
 

@@ -1,7 +1,8 @@
 
 import { BufferAttribute, BufferGeometry, Mesh, MeshBasicMaterial } from "three"
 import { buildImageUrl } from "$lib/common/buildImage"
-import { expand } from "$lib/common/utils"
+import { expand, decodePlotData } from "$lib/common/utils"
+import { PLOT_DATA_BUCKET_URL } from "$lib/common/constants"
 import PlotData from "$lib/main/plot/plotData"
 import PlotId from "$lib/common/plotId"
 import Task from "$lib/main/task/task"
@@ -31,7 +32,7 @@ export default class MyPlot extends PlotData{
 
     }
 
-    static async imgUrl(buildData, w = 240, h = 320){
+    static async imgUrl(buildData, w = 400, h = 400){
 
         const mesh = await MyPlot.getMesh(buildData)
         const url = buildImageUrl(w, h, mesh)
@@ -70,6 +71,9 @@ export default class MyPlot extends PlotData{
 
     async getImgUrl(){
 
+        if(this.buildData?.length == 2)
+            return "/default.png"
+
         if(this.imgUrl === null)
 
             await this.updateImgUrl()
@@ -90,24 +94,29 @@ export default class MyPlot extends PlotData{
 
     }
 
-    load(getPlots){
+    load(){
 
         if(this._loading === null)
 
-            this._loading = new Promise(async () => {
+            this._loading = new Promise(async resolve => {
 
-                // promise may contain multiple plot data
-                const plots = await getPlots
-                const data = plots[this.id.string()]
+                const res = await fetch(`${PLOT_DATA_BUCKET_URL}/${this.id.string()}.dat`)
+                const resBuf = await res.arrayBuffer()
+                const resBytes = new Uint8Array(resBuf)
+                const data = decodePlotData(resBytes)
 
                 this.name = data.name
-                this.desc = data.description
+                this.desc = data.desc
                 this.link = data.link
                 this.linkTitle = data.linkTitle
                 this.buildData = data.buildData
                 this.updateImgUrl()
 
+                resolve(this)
+
             })
+
+        return this._loading
 
     }
 

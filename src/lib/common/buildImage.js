@@ -397,6 +397,7 @@ function preprocessPNG(mesh, resolution = 1000){
 
     }
 
+
     return new Float32Array(preprocessed)
 
 }

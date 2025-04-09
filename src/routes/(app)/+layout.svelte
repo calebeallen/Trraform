@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, showClaimModal } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -29,6 +29,9 @@
     import SendVerificationEmailModal from "../../lib/main/components/modals/sendVerificationEmailModal.svelte";
     import { getCookie } from "$lib/common/cookie"
     import { fly } from "svelte/transition";
+    import ClaimModal from "../../lib/main/components/modals/claimModal.svelte";
+    import ShareModal from "../../lib/main/components/modals/shareModal/shareModal.svelte";
+    import ReportModal from "../../lib/main/components/modals/reportModal.svelte";
     
     let rootPlot
     let glCanvas
@@ -37,6 +40,7 @@
     let tags = {}
     let ismousedown = false
     let leaderboardPlots = []
+    let lastTouches = []
     
     onMount(async () => {
         
@@ -78,19 +82,19 @@
         // get user data
         const authToken = localStorage.getItem("auth_token")
 
-        // if(authToken){
+        if(authToken){
 
-        //     const res = await fetch(`${API_ORIGIN}/user/data`, {
-        //         headers: { Authorization: authToken }
-        //     })
-        //     const { data, error } = await res.json()
+            const res = await fetch(`${API_ORIGIN}/user/data`, {
+                headers: { Authorization: authToken }
+            })
+            const { data, error } = await res.json()
             
-        //     if(!error){
-        //         $user = data
-        //         localStorage.setItem("auth_token", data.token)
-        //     }
+            if(!error){
+                $user = data
+                localStorage.setItem("auth_token", data.token)
+            }
 
-        // }
+        }
 
         /* begin rendering */
         refs.renderer.setAnimationLoop(renderLoop)
@@ -481,12 +485,13 @@
 
     }
 
-    function mousedown(e){
+    /* user interaction */
+
+    function mousedown(){
 
         ismousedown = true
 
         if( $page?.route?.id === "/(app)/world" && refs.camera.update === refs.camera.autoRotate )
-
             refs.camera.update = refs.camera.orbit
 
     }
@@ -509,29 +514,249 @@
 
     }
 
+    function keydown(e){
+
+        if($inputFocused || $modalsShowing > 0)
+            return
+
+        const key = e.key.toLowerCase()
+
+        if($page?.route?.id !== "/(app)/world")
+            goto("/world")
+
+        if(key === "w" || key === "a" || key === "s" || key === "d")
+            refs.camera.update = refs.camera.standard
+
+        switch(key){
+
+            case "w":
+
+                refs.camera.forward = true
+                break
+
+            case "s":
+
+                refs.camera.backward = true
+                break
+
+            case "d":
+
+                refs.camera.right = true
+                break
+
+            case "a":
+
+                refs.camera.left = true
+                break
+            
+            case "shift":   
+                
+                refs.camera.accelerationMultiplier = 4
+                break
+
+        }
+
+    }
+
+    function keyup(e){
+
+        const key = e.key.toLowerCase()
+
+        switch(key){
+
+            case "w":
+
+                refs.camera.forward = false
+                break
+
+            case "s":
+
+                refs.camera.backward = false
+                break
+
+            case "d":
+
+                refs.camera.right = false
+                break
+
+            case "a":
+
+                refs.camera.left = false
+                break
+
+            case "shift":
+
+                refs.camera.accelerationMultiplier = 1
+                break
+
+        }
+
+    }
+
+    function cancelKeyEvent(){
+
+        if(refs.camera){
+
+            refs.camera.forward = refs.camera.backward = refs.camera.right = refs.camera.left = false
+            refs.camera.accelerationMultiplier = 1
+
+        }
+
+    }
+
+    function mousewheel(e){
+
+        if( $inputFocused || $modalsShowing > 0  )
+
+            return
+
+        if(refs.camera.update === refs.camera.autoRotate)
+
+            refs.camera.update = refs.camera.orbit
+
+        refs.camera.scrollVelocity -= e.deltaY / 100
+
+    }
+
+    function touchevent(e){ 
+
+        if( $inputFocused || $modalsShowing > 0 || refs.camera.update === refs.camera.standard )
+
+            return
+
+        refs.camera.update = refs.camera.orbit
+
+        const { touches } = e
+
+        if(lastTouches.length === 1){
+
+            const lastTouch = lastTouches[0]
+
+            //there may be multiple new touches, but they will be new touch events if last touches has length is 1
+            for(const touch of touches){
+
+                if(touch.identifier === lastTouch.identifier){
+
+                    const touchPos = { x: touch.clientX, y: touch.clientY }
+                    const lastTouchPos = { x: lastTouch.clientX, y: lastTouch.clientY }
+
+                    const dx = touchPos.x - lastTouchPos.x
+                    const dy = touchPos.y - lastTouchPos.y
+
+                    const { route } = $page
+
+                    if( route?.id === "/(app)/[id]" && refs.camera.update === refs.camera.autoRotate)
+
+                        refs.camera.update = refs.camera.orbit
+
+                    refs.camera.angularVelocityDamping = 1e-6
+                    refs.camera.angularVelocity.theta += - dx / window.innerWidth * Math.PI * 20
+                    refs.camera.angularVelocity.phi += dy / window.innerHeight * Math.PI * 20
+
+                }
+
+            }
+
+        } else if (lastTouches.length === 2) {
+
+            let sameTouches = 0
+
+            for(const lastTouch of lastTouches)
+            for(const touch of touches)
+
+                if(touch.identifier == lastTouch.identifier)
+
+                    sameTouches++
+
+            if(sameTouches === 2){
+
+                const len1 = Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY)
+                const len2 = Math.hypot(lastTouches[1].clientX - lastTouches[0].clientX, lastTouches[1].clientY - lastTouches[0].clientY)
+
+                refs.camera.scrollVelocity -= (len2 - len1) / 10
+
+            }
+
+        }
+
+        lastTouches = touches
+
+    }
+
+    function focusin(e){
+
+        if (e.target.matches('input[type="text"], textarea'))
+            $inputFocused = true
+
+    }
+
+    function focusout(e){
+
+        if (e.target.matches('input[type="text"], textarea'))
+            $inputFocused = false
+
+    }
+
 </script>
 
-<svelte:window on:resize={resize} on:mouseup={mousecancel} on:mouseleave={mousecancel} on:blur={mousecancel}/>
+<svelte:document
+    on:keydown={keydown}
+    on:keyup={keyup}
+/>
+
+<svelte:window 
+    on:resize={resize} 
+    on:mouseup={mousecancel} 
+    on:mouseleave={mousecancel}
+    on:blur={() => { mousecancel(); cancelKeyEvent() }}
+    on:contextmenu={() => { mousecancel(); cancelKeyEvent() }}
+    on:visibilitychange={() => { mousecancel(); cancelKeyEvent() }}
+    on:focusin={focusin}
+    on:focusout={focusout}
+/>
 
 <canvas bind:this={glCanvas} class="fixed top-0 left-0 w-screen h-screen" style="will-change: background;"></canvas>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div on:mousedown={mousedown} on:mousemove={mousemove} bind:this={tagContainer} class="fixed top-0 left-0 w-screen h-screen select-none"></div>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div 
+    bind:this={tagContainer} 
+    on:mousedown={mousedown} 
+    on:mousemove={mousemove}
+    on:touchstart|passive={touchevent} 
+    on:touchmove|passive={touchevent} 
+    on:touchend|passive={touchevent} 
+    on:mousewheel|passive={mousewheel} 
+    on:click={() => $showUserWidget = false}
+    class="fixed top-0 left-0 w-screen h-screen select-none">
+</div>
 
 <slot/>
 
-<div class="fixed top-0 right-0 flex items-center justify-between w-full p-2">
+<div class="pointer-events-none fixed top-0 right-0 flex items-center justify-between w-full p-2">
     <a class="flex-shrink-0 w-6 m-2 opacity-50 pointer-events-auto select-none sm:w-7 aspect-square focus:outline-none" href="/">
         <img src="/logo.svg" alt="">
     </a>
     <HeaderBar/>
 </div>
 {#if $showUserWidget}
-    <div transition:fly={{ x: 600, opacity: 1 }} class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] top-14 sm:mt-1 right-2">
+    <div transition:fly={{ x: 600, opacity: 1 }} class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] pointer-events-none top-14 sm:mt-1 right-0 px-2">
         <UserWidget/>
     </div>
 {/if}
 
 <!-- Modals -->
+{#if $showClaimModal}
+    <ClaimModal on:close={() => $showClaimModal = false}/>
+{/if}
+
+{#if $showShareModal}
+    <ShareModal on:close={() => $showShareModal = false}/>
+{/if}
+
+{#if $showReportModal}
+    <ReportModal on:close={() => $showReportModal = false}/>
+{/if}
+
 {#if $showSettingsModal}
     <SettingsModal on:close={() => $showSettingsModal = false}/>
 {/if}

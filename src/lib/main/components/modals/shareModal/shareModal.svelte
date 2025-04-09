@@ -1,37 +1,33 @@
 
 <script>
 
-    import { onMount, createEventDispatcher } from "svelte";
+    import { onMount, createEventDispatcher, onDestroy } from "svelte";
+    import { IMAGES_BUCKET_URL } from "$lib/common/constants"
     import { decodePlotData } from "$lib/common/utils"
     import MyPlots from "$lib/main/plot/myPlot"
     import { fade, fly } from "svelte/transition";
     import PlotId from "$lib/common/plotId";
     import ShareOptionLink from "./shareOptionLink.svelte";
     import ShareOptionButton from "./shareOptionButton.svelte";
-    import { notification } from "$lib/main/store"
+    import { notification, modalsShowing, insideOf } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
 
     const dispatch = createEventDispatcher();
 
-    export let plotIdStr
+    let plotIdStr
     let plotImgSrc
     let xPostIntent, threadsPostIntent  
     let load = true
     
     onMount(async () => {
 
-        const plotId = PlotId.fromHexString(plotIdStr)
-        const plotDataBuffer = await plotId.fetch()
+        $modalsShowing++
 
-        if(plotDataBuffer) {
+        const plotIdStr = $insideOf.id.string()
 
-            const { buildData } = decodePlotData( new Uint8Array(plotDataBuffer), plotId.depth() )
-            const wpx = 384
-
-            plotImgSrc = await MyPlots.imgUrl(buildData, wpx, wpx * 4/3)
-
-        } else 
-
+        if($insideOf.owner !== null)
+            plotImgSrc = `${IMAGES_BUCKET_URL}/${plotIdStr}`
+        else    
             plotImgSrc = "/default.png"
 
         const encoded = encodeURI(`https://trraform.com/world?plotId=${plotIdStr}`)
@@ -44,6 +40,8 @@
         load = false
 
     })
+
+    onDestroy(() => $modalsShowing--)
 
     function copyToClipboard(){
 

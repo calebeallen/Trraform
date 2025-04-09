@@ -318,34 +318,24 @@ function decodePlotData(bytes){
     }
 
     // json part is mandatory, build is optional
-    if(parts.length == 0 || parts.length > 2)
+    if(parts.length !== 2)
 
         throw new Error("cannot decode plot data: invalid parts length")
 
     const jsonData = JSON.parse(new TextDecoder().decode(parts[0]))
-    const { ver, owner, name, desc, link, linkTitle, verified } = jsonData
-    let buildData = null
+    const { owner, name, desc, link, linkTitle, verified } = jsonData
 
-    // if it has a build part, give blank build
-    // *this is already done on server, but just for precaution
-    if (parts.length == 1) {
-        
-        buildData = new Uint16Array([0, MIN_BUILD_SIZE])
 
-    } else {
+    const buildDataU8 = Uint8Array.from(parts[1])
+    const dv = new DataView(buildDataU8.buffer)
+    const len = buildDataU8.length / 2
 
-        const buildDataU8 = Uint8Array.from(parts[1])
-        const dv = new DataView(buildDataU8.buffer)
-        const len = buildDataU8.length / 2
+    const buildData = new Uint16Array(len)
+    
+    for (let i = 0; i < len; i++) 
+        buildData[i] = dv.getUint16(i * 2, true)
 
-        buildData = new Uint16Array(len)
-        
-        for (let i = 0; i < len; i++) 
-            buildData[i] = dv.getUint16(i * 2, true)
-
-    }
-
-    return { ver, owner, name, desc, link, linkTitle, verified, buildData }   
+    return { owner, name, desc, link, linkTitle, verified, buildData }   
 
 }
 

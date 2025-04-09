@@ -2,11 +2,11 @@
 
 <script>
 
-    import { refs, settings, defaultSettings } from "$lib/main/store"
+    import { refs, settings, defaultSettings, modalsShowing } from "$lib/main/store"
     import Modal from "$lib/common/components/modal.svelte";
     import Slider from "$lib/common/components/slider.svelte";
     import Tip from "$lib/common/components/tip.svelte";
-    import { onMount } from "svelte";
+    import { onDestroy, onMount } from "svelte";
 
     const FOV_MIN = 30, FOV_MAX = 160
     const SENSITIVITY_MIN = 1, SENSITIVITY_MAX = 20
@@ -20,6 +20,8 @@
 
     onMount(() => {
 
+        $modalsShowing++
+
         fovValue = settings.fov
         sensitivityValue = settings.sensitivity
         tagCountValue = settings.tagCount
@@ -28,6 +30,8 @@
         lowLODDistValue = settings.lowLODDist
 
     })
+
+    onDestroy(() => $modalsShowing--)
 
     function nonLinear(value, exp, min, max) {
 

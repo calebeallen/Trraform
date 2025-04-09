@@ -50,7 +50,7 @@
 <svelte:window on:mousedown={mousedown}/>
 
 
-<div class="flex flex-col h-full p-4 max-h-max bg-zinc-900 rounded-2xl outline-zinc-800 outline outline-1">
+<div class="flex flex-col h-full p-4 max-h-max bg-zinc-900 rounded-2xl outline-zinc-800 outline outline-1 pointer-events-auto">
     <!-- header -->
     <div class="flex items-center justify-between gap-3 p-2 text-xs bg-zinc-800 outline-zinc-700 outline outline-1 rounded-xl sm:text-sm">
         <div class="relative flex items-center gap-0.5 ml-1">        

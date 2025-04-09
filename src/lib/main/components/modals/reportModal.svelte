@@ -2,18 +2,27 @@
 <script>
 
     import Modal from "$lib/common/components/modal.svelte"
-    import { createEventDispatcher } from "svelte"
-    import { loadScreenOpacity, notification } from "$lib/main/store"
+    import { createEventDispatcher, onDestroy, onMount } from "svelte"
+    import { loadScreenOpacity, notification, modalsShowing, insideOf } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
     import { setCookie, getCookie } from "$lib/common/cookie"
 
     const dispatch = createEventDispatcher()
 
-    export let plotIdStr
+    let plotIdStr
     let message = ""
     let charCount
 
     $: charCount = message.trim().length - 250
+
+    onMount(() => {
+
+        $modalsShowing++
+
+        plotIdStr = $insideOf.id.string()
+
+    })
+    onDestroy(() => $modalsShowing--)
 
     async function submit(){
 

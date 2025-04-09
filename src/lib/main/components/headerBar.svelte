@@ -3,7 +3,7 @@
 
     import { fly } from "svelte/transition"
     import { goto } from "$app/navigation"
-    import { plotSearchFocused, showSettingsModal, newPlots, showAuthModal, user, showUserWidget } from "$lib/main/store"
+    import { showSettingsModal, newPlots, showAuthModal, user, showUserWidget } from "$lib/main/store"
     import PlotId from "$lib/common/plotId"
     import { pushNotification } from "$lib/common/utils"
     
@@ -49,11 +49,6 @@
 
     }
 
-    async function findOpenPlot(){
-
-
-    }
-
     function mousedown(e){
 
         if(searchResultsContainer && !searchResultsContainer.contains(e.target) && !searchContainer.contains(e.target))
@@ -78,7 +73,7 @@
     <div bind:this={searchContainer} class="relative flex items-center gap-1 p-1 bg-transparent">
         <img class="w-4 h-4 pointer-events-none select-none opacity-70" src="/search.svg" alt="search">
         <form class="inline-flex p-0 m-0" on:submit|preventDefault={search}>
-            <input on:focus={() => $plotSearchFocused = true} on:blur={() => $plotSearchFocused = false} bind:value={plotSearchValue} class="w-full bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
+            <input bind:value={plotSearchValue} class="w-full bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
             <button tabindex="-1" class="hidden" type="submit"></button>
         </form>
         {#if showSearchResults}
@@ -96,7 +91,7 @@
             <div>{$user?.username}</div>
         </button>
     {/if}
-    <button on:click={() => $showSettingsModal = true} class="transition-opacity opacity-50 shrink-0 w-7 h-7 hover:opacity-80 focus:outline-none">
+    <button on:click={() => $showSettingsModal = true} class="transition-opacity opacity-50 w-7 shrink-0 aspect-square hover:opacity-80 focus:outline-none">
         <img class="pointer-events-none select-none" src="/settings.svg" alt="">
     </button>
 </div>

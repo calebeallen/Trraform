@@ -4,19 +4,11 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-
-    import { page } from "$app/stores"
-    import { onMount } from "svelte";
-    import { insideOf, refs, plotSearchFocused, showSettingsModal, user, showAuthModal} from "$lib/main/store"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal } from "$lib/main/store"
     import { fly } from "svelte/transition"
-    import ReportModal from "$lib/main/components/modals/reportModal.svelte"
-    import ShareModal from "$lib/main/components/modals/shareModal/shareModal.svelte"
-    import ClaimModal from "../../../lib/main/components/modals/claimModal.svelte";
 
-    export let data 
-    let lastTouches = []
+    export let data
     
-    let showReportModal = false, showShareModal = false, showClaimModal = false
     let reportPlotId = null, sharePlotId = null
     let profile = {}
     let showProfile = false
@@ -25,183 +17,6 @@
 
     let canVote = false
     let minTillVote = ""
-
-    let modalsShowing = false
-    $: modalsShowing = showReportModal || showShareModal || showClaimModal || $plotSearchFocused || $showSettingsModal 
-
-    onMount(() => {
-
-        cancelKeyEvent()
-
-    })
-
-    function keydown(e){
-
-        if(modalsShowing)
-
-            return
-
-        const key = e.key.toLowerCase()
-
-        if(key === "w" || key === "a" || key === "s" || key === "d")
-
-            refs.camera.update = refs.camera.standard
-
-        switch(key){
-
-            case "w":
-
-                refs.camera.forward = true
-                break
-
-            case "s":
-
-                refs.camera.backward = true
-                break
-
-            case "d":
-
-                refs.camera.right = true
-                break
-
-            case "a":
-
-                refs.camera.left = true
-                break
-            
-            case "shift":   
-                
-                refs.camera.accelerationMultiplier = 4
-                break
-
-        }
-
-    }
-
-    function keyup(e){
-
-        const key = e.key.toLowerCase()
-
-        switch(key){
-
-            case "w":
-
-                refs.camera.forward = false
-                break
-
-            case "s":
-
-                refs.camera.backward = false
-                break
-
-            case "d":
-
-                refs.camera.right = false
-                break
-
-            case "a":
-
-                refs.camera.left = false
-                break
-
-            case "shift":
-
-                refs.camera.accelerationMultiplier = 1
-                break
-
-        }
-
-    }
-
-    function cancelKeyEvent(){
-
-        if(refs.camera){
-
-            refs.camera.forward = refs.camera.backward = refs.camera.right = refs.camera.left = false
-            refs.camera.accelerationMultiplier = 1
-
-        }
-
-    }
-
-    function mousewheel(e){
-        
-        if( modalsShowing )
-
-            return
-
-        if(refs.camera.update === refs.camera.autoRotate)
-
-            refs.camera.update = refs.camera.orbit
-
-        refs.camera.scrollVelocity -= e.deltaY / 100
-
-    }
-
-    function touchevent(e){ 
-
-        if( modalsShowing || refs.camera.update === refs.camera.standard )
-
-            return
-
-        refs.camera.update = refs.camera.orbit
-
-        const { touches } = e
-
-        if(lastTouches.length === 1){
-        
-            const lastTouch = lastTouches[0]
-
-            //there may be multiple new touches, but they will be new touch events if last touches has length is 1
-            for(const touch of touches){
-
-                if(touch.identifier === lastTouch.identifier){
-
-                    const touchPos = { x: touch.clientX, y: touch.clientY }
-                    const lastTouchPos = { x: lastTouch.clientX, y: lastTouch.clientY }
-
-                    const dx = touchPos.x - lastTouchPos.x
-                    const dy = touchPos.y - lastTouchPos.y
-
-                    const { route } = $page
-
-                    if( route?.id === "/(app)/[id]" && refs.camera.update === refs.camera.autoRotate)
-
-                        refs.camera.update = refs.camera.orbit
-
-                    refs.camera.angularVelocityDamping = 1e-6
-                    refs.camera.angularVelocity.theta += - dx / window.innerWidth * Math.PI * 20
-                    refs.camera.angularVelocity.phi += dy / window.innerHeight * Math.PI * 20
-
-                }
-
-            }
-
-        } else if (lastTouches.length === 2) {
-
-            let sameTouches = 0
-
-            for(const lastTouch of lastTouches)
-            for(const touch of touches)
-
-                if(touch.identifier == lastTouch.identifier)
-
-                    sameTouches++
-
-            if(sameTouches === 2){
-
-                const len1 = Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY)
-                const len2 = Math.hypot(lastTouches[1].clientX - lastTouches[0].clientX, lastTouches[1].clientY - lastTouches[0].clientY)
-
-                refs.camera.scrollVelocity -= (len2 - len1) / 10
-
-            }
-
-        }
-
-        lastTouches = touches
-
-    }
 
     $: if ($insideOf !== null) {
 
@@ -268,12 +83,10 @@
         plusOneAnimation = true
         setTimeout(() => plusOneAnimation = false, 1)
 
-
         canVote = false
         localStorage.setItem("tsLastVote", Date.now())
         minTillVote = 5
         await fetch(`https://api.trraform.com/cast-vote?plotId=${id}`, { method: "POST" })
-
 
     }
 
@@ -289,7 +102,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta property="og:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds powered by Polygon."}>
+    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds."}>
     <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/banner.png"}>
 
     <!-- Twitter Meta Tags -->
@@ -297,26 +110,10 @@
     <meta property="twitter:domain" content="trraform.com">
     <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta name="twitter:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds powered by Polygon."}>
+    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds."}>
     <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/banner.png"}>
 
 </svelte:head>
-
-<svelte:window
-    on:blur={cancelKeyEvent}
-    on:contextmenu={cancelKeyEvent}
-    on:visibilitychange={cancelKeyEvent}
-    on:touchstart|passive={touchevent} 
-    on:touchmove|passive={touchevent} 
-    on:touchend|passive={touchevent} 
-    on:mousewheel|passive={mousewheel} 
-/>
-
-<svelte:document
-    on:keydown={keydown}
-    on:keyup={keyup}
-/>
-
 
 <div class="fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
     <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-1">
@@ -331,7 +128,7 @@
                     <div class="flex gap-2 select-none shrink-0">
                         <button on:click={() => {
                             sharePlotId = id
-                            showShareModal = true
+                            $showShareModal = true
                         }} class="relative w-4 select-none aspect-square group focus:outline-none">
                             <img src="/share.svg" alt="report">   
                             <span class="plot-option-tag">Share</span>
@@ -339,7 +136,7 @@
                         {#if minted}
                             <button on:click={() => {
                                 reportPlotId = id
-                                showReportModal = true
+                                $showReportModal = true
                             }} class="relative w-4 select-none aspect-square group focus:outline-none">
                                 <img src="/report.svg" alt="report">
                                 <span class="plot-option-tag">Report</span>
@@ -371,7 +168,7 @@
                     if(!$user)
                         $showAuthModal = true
                     else
-                        showClaimModal = true
+                        $showClaimModal = true
                 }}>Claim</button>
             {/if}
         {/await}
@@ -381,17 +178,7 @@
     {/if}
 </div> 
 
-{#if showClaimModal}
-    <ClaimModal on:close={() => showClaimModal = false}/>
-{/if}
 
-{#if showShareModal}
-    <ShareModal bind:plotIdStr={sharePlotId} on:close={() => showShareModal = false}/>
-{/if}
-
-{#if showReportModal}
-    <ReportModal bind:plotIdStr={reportPlotId} on:close={() => showReportModal = false}/>
-{/if}
 
 <style lang="postcss">
 
@@ -410,12 +197,6 @@
     .plot-option-tag {
 
         @apply absolute text-xs font-semibold transition-opacity opacity-0 pointer-events-none select-none w-max bottom-0 -translate-x-1/2 -translate-y-full mb-0.5 left-1/2 group-hover:opacity-100;
-
-    }
-    
-    .button{
-
-        @apply mt-1 w-full px-2 py-1 text-xs sm:text-sm text-center transition-colors bg-blue-700 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed hover:bg-blue-600 focus:outline-none outline outline-1 outline-blue-600 focus:bg-blue-600 font-semibold;
 
     }
 

@@ -3,10 +3,33 @@
 
     import Modal from "$lib/common/components/modal.svelte"
     import Promo from "../promo.svelte";
+    import { API_ORIGIN } from "$lib/common/constants"
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { insideOf } from "$lib/main/store"
+    import { modalsShowing } from "$lib/main/store"
+
+    const dispatch = createEventDispatcher()
+
+    onMount(() => $modalsShowing++)
+    onDestroy(() => $modalsShowing--)
 
     async function claim(){
 
-        const
+        const plotId = $insideOf.id.string()
+
+        const res = await fetch(`${API_ORIGIN}/plot/claim-with-credit`, {
+            method: "POST",
+            headers: {
+                Authorization: localStorage.getItem("auth_token")
+            },
+            body: JSON.stringify({
+                plotId: plotId
+            })
+        })
+        if(!res.ok)
+            return
+
+        dispatch("close")
 
     }
 
@@ -21,6 +44,6 @@
             <div class="text-sm text-zinc-400 mt-0.5">Depth 0</div>
         </div>
         <div class="text-sm">You have <b>2</b> plot credits available!</div>
-        <button class="w-full button0">Claim</button>
+        <button on:click={claim} class="w-full button0">Claim</button>
     </div>
 </Modal>

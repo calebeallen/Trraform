@@ -1,6 +1,6 @@
 
 import { writable } from 'svelte/store';
-import { MAX_BUILD_SIZES } from '$lib/common/constants';
+import { BUILD_SIZE_STD } from '$lib/common/constants';
 
 const LOADING = writable(true)
 const EDITOR_VERSION = 0
@@ -43,7 +43,7 @@ const REFS = {
     camera: null,
     transform: null,
     switchModes: null,
-    buildSize: MAX_BUILD_SIZES[0],
+    buildSize: BUILD_SIZE_STD,
     eventIndex: -1,
     eventQueue: [],
     diameter: 1,

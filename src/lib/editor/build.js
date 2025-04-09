@@ -407,7 +407,7 @@ export default class Build {
 
         clearTimeout(this.saveTimeout)
 
-        this.saveTimeout = setTimeout( () => localStorage.setItem("editorSave", condense(this.blocks.map(block => block[0]), REFS.buildSize)), 1500)
+        this.saveTimeout = setTimeout( () => localStorage.setItem("editor_save", condense(this.blocks.map(block => block[0]), REFS.buildSize)), 1500)
 
     }
 

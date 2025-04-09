@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import { GRID_SIZING, REFS, MODE, OBJECT_SELECT, COLOR_SELECT, OVERLAP, SHOW_BLOCK_PANEL } from "$lib/editor/store";
     import { Scene, MeshBasicMaterial, LineSegments, Spherical, Color } from "three"
-    import { MAX_BUILD_SIZES } from "$lib/common/constants"
+    import { BUILD_SIZE_STD, BUILD_SIZE_LARGE } from "$lib/common/constants"
 	import { GridGeometry } from "$lib/editor/geometries/gridGeometry";
 	import { disposeMesh } from "$lib/common/utils";
 	import { fly } from "svelte/transition";
@@ -12,7 +12,7 @@
     const gridMat = new MeshBasicMaterial( { transparent: true, opacity: 0.2 } )
     const spherical = new Spherical()
 
-    let grid, size = MAX_BUILD_SIZES[0], isSliderActive = false 
+    let grid, size = BUILD_SIZE_STD, isSliderActive = false 
 
     let t2 = null
 
@@ -117,19 +117,15 @@
 <div transition:fly={{y: -200, duration: 200}} class="absolute -translate-x-1/2 left-1/2 top-16">
     <div class="flex flex-col items-center">
         <h1 class="text-4xl font-bold text-center lg:text-5xl">New Build {size}x{size}x{size}</h1>
-        {#if size > MAX_BUILD_SIZES[1]}
-            <h2 class="w-full mt-2 text-lg font-semibold text-center text-zinc-300">This size is available to plots with depth &gt 1.</h2>
-        {:else if size > MAX_BUILD_SIZES[0]}
-            <h2 class="w-full mt-2 text-lg font-semibold text-center text-zinc-300">This size is available to plots with depth &gt 0.</h2>
-        {:else}
-            <h2 class="w-full mt-2 text-lg font-semibold text-center text-zinc-300">This size is available to all plots.</h2>
+        {#if size > BUILD_SIZE_STD}
+            <h2 class="w-full mt-2 text-lg font-semibold text-center text-zinc-300">This size is available to subscription users only.</h2>
         {/if}
     </div>
 </div>
 <div transition:fly={{y: 200, duration: 200}} class="absolute space-y-5 -translate-x-1/2 w-72 bottom-5 left-1/2 panel-container">
     <div class="text-sm font-semibold">Grid Size</div>
     <div class="flex justify-center">
-        <input class="slider" bind:value={size} on:input={gridInput} on:mousedown={() => isSliderActive = true} type="range" min="6" max={MAX_BUILD_SIZES[2]}> 
+        <input class="slider" bind:value={size} on:input={gridInput} on:mousedown={() => isSliderActive = true} type="range" min="6" max={BUILD_SIZE_LARGE}> 
     </div>
     <div class="flex gap-2">
         <button class="editor-btn" on:click={confirm}>Confirm</button>

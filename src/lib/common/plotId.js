@@ -108,7 +108,7 @@ export default class PlotId {
 
     }
   
-    string(hexPrefix = true) {
+    string(hexPrefix = false) {
 
         // Convert BigInt to lowercase hex
         let str = this.id.toString(16).toLowerCase()

@@ -2,9 +2,13 @@
 <script>
 
     import Modal from "../../../common/components/modal.svelte";
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { modalsShowing } from "$lib/main/store"
 
     const dispatch = createEventDispatcher()
+
+    onMount(() => $modalsShowing++)
+    onDestroy(() => $modalsShowing--)
 
 </script>
 

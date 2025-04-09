@@ -5,16 +5,24 @@
 
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
-    import PlotWidgetOption from "$lib/main/components/myPlots/plotWidgetOption.svelte";
 
     export let editingPlot
     export let plot
     let plotData = {}
-    let loading = false
+    let loading = true
 
     onMount( async () => {
 
-        loading = true
+        await plot.load()
+        const plotIdStr = plot.id.string()
+
+        plotData = {
+            isNew: plot.isNew,
+            id: plotIdStr,
+            name: plot.name || `Plot 0x${plotIdStr}`,
+            imgUrl: await plot.getImgUrl()
+        }
+
         loading = false
 
     })
@@ -31,21 +39,25 @@
         </div>
     {:else}
         <div class="head-container">
-            <h3 class="text-xs">{plotData.id}</h3>
-            <h2 class="font-bold truncate sm:text-lg">{plotData.name}</h2>
-            <div class="flex items-center gap-1">
-                <div class="w-2 h-2 bg-blue-700 rounded-full"></div>
-                <div class="text-xs text-zinc-400">NEW</div>
-            </div>
+            <h2 class="text-sm font-bold truncate sm:text-base">{plotData.name}</h2>
+            <h3 class="text-xs">id: 0x{plotData.id}</h3>
+            {#if plotData.isNew}
+                <div class="flex items-center gap-1">
+                    <div class="w-2 h-2 bg-blue-700 rounded-full"></div>
+                    <div class="text-xs text-zinc-400">NEW</div>
+                </div>
+            {/if}
         </div>
         <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
         <div class="absolute bottom-0 flex flex-col w-full gap-px p-1 transition-opacity opacity-0 group-hover:opacity-100">
-            <PlotWidgetOption on:click={() => {
-                goto(`/world?plotId=${plotData.id}`)
-            }} src="/navigate.svg" alt="navigate" text="Go to"/>
-            {#if !plotData.banned}
-                <PlotWidgetOption on:click={() => editingPlot = plot} src="/pencil.svg" alt="pencil" text="Edit"/>
-            {/if} 
+            <button on:click={() => goto(`/world?plotId=${plotData.id}`)} class="flex items-center w-full gap-1 px-1 py-0.5 bg-zinc-950 bg-opacity-0 rounded-xl hover:bg-opacity-50">
+                <img class="w-3.5 sm:w-4 aspect-square" src="/navigate.svg" alt="">
+                <div class="text-xs sm:text-sm">Go to</div>
+            </button>
+            <button on:click={() => editingPlot = plot} class="flex items-center w-full gap-1 px-1 py-0.5  bg-zinc-950 bg-opacity-0 rounded-xl hover:bg-opacity-50">
+                <img class="w-3.5 sm:w-4 aspect-square" src="/pencil.svg" alt="">
+                <div class="text-xs sm:text-sm">Edit</div>
+            </button>
         </div>
     {/if}
 </div>

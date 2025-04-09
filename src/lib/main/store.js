@@ -7,12 +7,15 @@ const showNextStepsModal = writable(false)
 const showAuthModal = writable(false)
 const showResetPasswordModal = writable(false)
 const showSendVerificationEmailModal = writable(false)
-const showClaimModal = writable(true)
+const showClaimModal = writable(false)
+const showShareModal = writable(false)
+const showReportModal = writable(false)
+const modalsShowing = writable(0)
 
 const showUserWidget = writable(false)
 
 const user = writable(null)
-const plotSearchFocused = writable(false)
+const inputFocused = writable(false)
 const isMobileBrowser = writable(false)
 const insideOf = writable(null)
 const notification = writable([])
@@ -41,4 +44,29 @@ const defaultSettings = {
 
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
-export { defaultSettings, settings, refs, insideOf, isMobileBrowser, showHowItWorksModal, showSettingsModal, plotSearchFocused, notification, newPlots, loadScreenOpacity, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, tempEmail, showSendVerificationEmailModal, user, showUserWidget, myPlots, showClaimModal }
+export { 
+    defaultSettings, 
+    settings, 
+    refs, 
+    insideOf, 
+    isMobileBrowser, 
+    showHowItWorksModal, 
+    showSettingsModal,
+    notification, 
+    newPlots, 
+    loadScreenOpacity, 
+    leaderboard, 
+    showNextStepsModal, 
+    showAuthModal, 
+    showResetPasswordModal, 
+    tempEmail, 
+    showSendVerificationEmailModal, 
+    user, 
+    showUserWidget, 
+    myPlots, 
+    showClaimModal, 
+    showShareModal,
+    showReportModal,
+    modalsShowing,
+    inputFocused
+}

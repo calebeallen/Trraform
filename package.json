@@ -20,6 +20,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@stripe/stripe-js": "^7.0.0",
 		"@supabase/supabase-js": "^2.49.1",
 		"@uniswap/sdk-core": "^7.7.0",
 		"@uniswap/v4-sdk": "^1.21.0",

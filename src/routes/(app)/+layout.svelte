@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -32,6 +32,7 @@
     import ShareModal from "../../lib/main/components/modals/shareModal/shareModal.svelte";
     import ReportModal from "../../lib/main/components/modals/reportModal.svelte";
     import ChangeUsernameModal from "../../lib/main/components/modals/changeUsernameModal.svelte";
+    import { loadStripe } from "@stripe/stripe-js";
     
     let rootPlot
     let glCanvas
@@ -95,6 +96,9 @@
             }
 
         }
+
+
+        $stripe = await loadStripe('pk_test_51RCYJGGgpUJInHeUFiJ7rMaDW6ScPPU8Git55wQkr13bAzHOqs0w5yUMRwqXxdTFSgzrelQNXVIV5rXlpAm8mV8500dr0ExiFj')
 
         /* begin rendering */
         refs.renderer.setAnimationLoop(renderLoop)

@@ -15,6 +15,7 @@ const modalsShowing = writable(0)
 
 const showUserWidget = writable(false)
 
+const stripe = writable(null)
 const user = writable(null)
 const inputFocused = writable(false)
 const isMobileBrowser = writable(false)
@@ -46,6 +47,7 @@ const defaultSettings = {
 const settings = Object.assign({}, structuredClone(defaultSettings))
 
 export { 
+    stripe,
     defaultSettings, 
     settings, 
     refs, 

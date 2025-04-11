@@ -110,43 +110,6 @@ async function getChunk(chunkId){
 }
 
 
-
-
-
-function decodeChunk(data) {
-  
-    const result = {} // The resulting map; keys as string, values as Uint8Array
-    let cursor = 0
-    const dataLength = data.length
-
-    // Create a DataView to read bytes in little-endian format.
-    const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  
-    while (cursor < dataLength) {
-  
-        // Read body length (4 bytes, little-endian)
-        const bodyLen = dataView.getUint32(cursor, true) // true for little-endian
-        cursor += 4
-    
-        // Read key (8 bytes, little-endian) as BigInt
-        const plotIdBigInt = dataView.getBigUint64(cursor, true)
-        const plotId = new PlotId(plotIdBigInt)
-        cursor += 8
-
-        // Extract the body as a new Uint8Array. Using slice creates a new view.
-        const body = data.slice(cursor, cursor + bodyLen);
-        cursor += bodyLen
-    
-        // Insert into the result object; keys are strings.
-        result[plotId.string()] = body
-
-    }
-  
-    return result
-
-}
-  
-
 /* one function that does everything, should reduce overhead */
 // places unplaced subplots
 // generates low detail geometry

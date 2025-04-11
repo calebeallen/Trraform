@@ -10,6 +10,7 @@ const showSendVerificationEmailModal = writable(false)
 const showClaimModal = writable(false)
 const showShareModal = writable(false)
 const showReportModal = writable(false)
+const showChangeUsernameModal = writable(false)
 const modalsShowing = writable(0)
 
 const showUserWidget = writable(false)
@@ -21,7 +22,7 @@ const insideOf = writable(null)
 const notification = writable([])
 const newPlots = writable(false)
 const loadScreenOpacity = writable(100)
-const leaderboard = writable(null)
+const leaderboard = writable([])
 const tempEmail = writable("")
 const myPlots = writable([])
 
@@ -68,5 +69,6 @@ export {
     showShareModal,
     showReportModal,
     modalsShowing,
-    inputFocused
+    inputFocused,
+    showChangeUsernameModal
 }

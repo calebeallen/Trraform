@@ -85,7 +85,7 @@ export default class Plot extends PlotData {
                 this.desc = data.desc
                 this.link = data.link
                 this.linkTitle = data.linkTitle
-                this.verified = this.verified
+                this.verified = data.verified
                 this.buildSize = data.buildSize
                 this.blockSize = this.parent.blockSize / data.buildSize
 

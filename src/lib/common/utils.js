@@ -325,7 +325,6 @@ function decodePlotData(bytes){
     const jsonData = JSON.parse(new TextDecoder().decode(parts[0]))
     const { owner, name, desc, link, linkTitle, verified } = jsonData
 
-
     const buildDataU8 = Uint8Array.from(parts[1])
     const dv = new DataView(buildDataU8.buffer)
     const len = buildDataU8.length / 2

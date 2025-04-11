@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -27,11 +27,11 @@
     import ResetPasswordModal from "../../lib/main/components/modals/resetPasswordModal.svelte";
     import UserWidget from "../../lib/main/components/userWidget/userWidget.svelte";
     import SendVerificationEmailModal from "../../lib/main/components/modals/sendVerificationEmailModal.svelte";
-    import { getCookie } from "$lib/common/cookie"
     import { fly } from "svelte/transition";
     import ClaimModal from "../../lib/main/components/modals/claimModal.svelte";
     import ShareModal from "../../lib/main/components/modals/shareModal/shareModal.svelte";
     import ReportModal from "../../lib/main/components/modals/reportModal.svelte";
+    import ChangeUsernameModal from "../../lib/main/components/modals/changeUsernameModal.svelte";
     
     let rootPlot
     let glCanvas
@@ -84,7 +84,7 @@
 
         if(authToken){
 
-            const res = await fetch(`${API_ORIGIN}/user/data`, {
+            const res = await fetch(`${API_ORIGIN}/user`, {
                 headers: { Authorization: authToken }
             })
             const { data, error } = await res.json()
@@ -105,45 +105,39 @@
             $showAuthModal = true
 
         $loadScreenOpacity = 0
+
+        refreshLeaderboard()
         
     })
 
     async function refreshLeaderboard(){
 
-        $leaderboard = null
-        
-        const res = await fetch("https://api.trraform.com/leaderboard")
+        const res = await fetch(`${API_ORIGIN}/leaderboard`)
         const { data } = await res.json()
-        const n =  Math.min(data.length, 5)
-        const votesArr = new Array(n)
-        const loadPlots = new Array(n)
 
-        for(let i = 0; i < n; i++){
+        const loadPlots = data.map( ({ id }) => {
+            const plotId = PlotId.fromHexString(id)
+            return loadPlot(plotId)
+        })
+        
+        leaderboardPlots = await Promise.all(loadPlots)
+        const lb = []
 
-            const { id, votes } = data[i]
-            const plotId = new PlotId(id)
-            votesArr[i] = votes
-            loadPlots[i] = loadPlot(plotId)
+        for(let i = 0; i < data.length; i++){
 
-        }
-        const plots = await Promise.all(loadPlots)
-
-        $leaderboard = new Array(n)
-        leaderboardPlots = new Array(n)
-
-        for(let i = 0; i < n; i++){
-
-            const plot = plots[i]
-            const idStr = plot.id.string()
-            const name = plot.name || `Plot ${idStr}`
-            $leaderboard[i] = { 
-                name, 
-                votes: votesArr[i],
-                plotId: idStr
-            }
-            leaderboardPlots[i] = plot
+            const plot = leaderboardPlots[i]
+            const { id, votes, dir } = data[i]
+            lb.push({ 
+                plotId: id,
+                name:  plot.name || `Plot 0x${id}`, 
+                verified: plot.verified,
+                votes,
+                dir
+            })
 
         }
+
+        $leaderboard = lb
 
     }
 
@@ -521,11 +515,14 @@
 
         const key = e.key.toLowerCase()
 
-        if($page?.route?.id !== "/(app)/world")
-            goto("/world")
+        if(key === "w" || key === "a" || key === "s" || key === "d"){
 
-        if(key === "w" || key === "a" || key === "s" || key === "d")
+            if($page?.route?.id !== "/(app)/world")
+                goto("/world")
+
             refs.camera.update = refs.camera.standard
+
+        }
 
         switch(key){
 
@@ -726,13 +723,12 @@
     on:touchmove|passive={touchevent} 
     on:touchend|passive={touchevent} 
     on:mousewheel|passive={mousewheel} 
-    on:click={() => $showUserWidget = false}
     class="fixed top-0 left-0 w-screen h-screen select-none">
 </div>
 
 <slot/>
 
-<div class="pointer-events-none fixed top-0 right-0 flex items-center justify-between w-full p-2">
+<div class="fixed top-0 right-0 flex items-center justify-between w-full p-2 pointer-events-none">
     <a class="flex-shrink-0 w-6 m-2 opacity-50 pointer-events-auto select-none sm:w-7 aspect-square focus:outline-none" href="/">
         <img src="/logo.svg" alt="">
     </a>
@@ -779,6 +775,10 @@
 
 {#if $showResetPasswordModal}
     <ResetPasswordModal on:close={() => $showResetPasswordModal = false}/>
+{/if}
+
+{#if $showChangeUsernameModal}
+    <ChangeUsernameModal on:close={() => $showChangeUsernameModal = false}/>
 {/if}
 
 {#if $loadScreenOpacity !== 0}

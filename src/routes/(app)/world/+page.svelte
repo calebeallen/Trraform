@@ -5,6 +5,7 @@
     //disable when modal
     //flag blue dot menu options
     import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal } from "$lib/main/store"
+    import { API_ORIGIN } from "$lib/common/constants"
     import { fly } from "svelte/transition"
 
     export let data
@@ -24,35 +25,29 @@
 
             const plot = $insideOf
             await plot.load()
-
             const idStr = plot.id.string()
-
             let link = null
 
             //normalize url
             if(plot.link){
-
                 link = plot.link
-
                 if(!link.startsWith("https://") && !link.startsWith("http://"))
-
                     link = `https://${link}`
-
             }
 
             res({ 
-                minted : plot.minted, 
+                owner : plot.owner, 
                 id : idStr,
+                verified: plot.verified,
                 name : plot.name || `Plot ${idStr}`, 
                 desc : plot.desc,
                 link,
-                linkLabel : plot.linkLabel || "link"
+                linkTitle : plot.linkTitle || "link"
             })
 
         })
 
-        const lastVote = localStorage.getItem("tsLastVote")
-
+        const lastVote = localStorage.getItem("time_last_vote")
 
         if(lastVote === null){
             canVote = true
@@ -72,11 +67,9 @@
         showProfile = true
        
 
-    } else {
-        
+    } else 
         showProfile = false
 
-    }
 
     async function castVote(id){
 
@@ -84,9 +77,15 @@
         setTimeout(() => plusOneAnimation = false, 1)
 
         canVote = false
-        localStorage.setItem("tsLastVote", Date.now())
+        localStorage.setItem("time_last_vote", Date.now())
         minTillVote = 5
-        await fetch(`https://api.trraform.com/cast-vote?plotId=${id}`, { method: "POST" })
+        await fetch(`${API_ORIGIN}/leaderboard/vote`, { 
+            method: "POST",
+            headers: {
+                "Content-type": "application/json"
+            },
+            body: JSON.stringify({ plotId: id })
+        })
 
     }
 
@@ -116,15 +115,16 @@
 </svelte:head>
 
 <div class="fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-1">
+    <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-2">
         {#await profile}
             <div class="w-full h-20 animate-pulse">
                 <div class="w-1/2 h-5 mt-1 rounded-full bg-zinc-800"></div>
                 <div class="w-1/4 h-3 mt-1 rounded-full bg-zinc-800"></div>
             </div>
-        {:then { id, minted, name, desc, link, linkLabel } }
-                <div class="flex justify-between gap-2">
-                    <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name}</h3>
+        {:then { id, owner, verified, name, desc, link, linkTitle } }
+            <div>
+                <div class="flex items-baseline justify-between gap-2">
+                    <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name} {#if verified}<img class="w-3.5 aspect-square" src="/verified.svg" alt="" style=" display: inline; vertical-align: middle;">{/if}</h3>
                     <div class="flex gap-2 select-none shrink-0">
                         <button on:click={() => {
                             sharePlotId = id
@@ -133,7 +133,7 @@
                             <img src="/share.svg" alt="report">   
                             <span class="plot-option-tag">Share</span>
                         </button>
-                        {#if minted}
+                        {#if owner}
                             <button on:click={() => {
                                 reportPlotId = id
                                 $showReportModal = true
@@ -144,22 +144,28 @@
                         {/if}
                     </div>
                 </div>
-            <div class="text-xs opacity-70">id: {id}</div>
+                <div class="space-y-px">
+                    {#if owner}
+                        <div class="text-xs opacity-70"><img class="w-3 aspect-square" src="/user.svg" alt="" style=" display: inline; vertical-align: middle;"> {owner}</div>
+                    {/if}
+                    <div class="text-xs opacity-70">id: 0x{id}</div>
+                </div>
+            </div>
             {#if desc || link}
                 <div class="w-full h-px bg-zinc-800"></div>
             {/if}
-            {#if minted}
-                {#if desc}
-                    <p>{desc}</p>
-                {/if}
-                {#if link}
-                    <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">
-                        <img class="w-4 h-4" src="/link.svg" alt="link">
-                        <p>{linkLabel}</p>
-                    </a>
-                {/if}
+            {#if desc}
+                <p>{desc}</p>
+            {/if}
+            {#if link}
+                <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">
+                    <img class="w-4 h-4" src="/link.svg" alt="link">
+                    <p>{linkTitle}</p>
+                </a>
+            {/if}
+            {#if owner}
                 {#if canVote}
-                    <button class="mt-1 button0" on:click={() => castVote(id)}>Cast Vote</button>
+                    <button class="mt-1 button0" on:click={() => castVote(id)}>Vote</button>
                 {:else}
                     <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
                 {/if}

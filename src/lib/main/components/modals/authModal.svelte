@@ -215,7 +215,7 @@
 
         try {
 
-            const res = await fetch(`${API_ORIGIN}/user/data`, {
+            const res = await fetch(`${API_ORIGIN}/user`, {
                 headers: {
                     Authorization: token
                 }

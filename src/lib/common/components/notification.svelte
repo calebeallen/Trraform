@@ -9,9 +9,9 @@
 
 
 {#each $store as { id, header, text, callback } (id) }
-    <button transition:fly={{ x: 600, opacity: 1, duration: 200, delay: 500 }} on:click={callback} class="fixed p-2 pb-4 w-[calc(100%-16px)] sm:w-[calc(100%-24px)] max-w-sm bottom-2 right-2 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden text-left">
+    <button transition:fly={{ x: 600, opacity: 1, duration: 200, delay: 500 }} on:click={callback} class="fixed p-2 pb-3 w-[calc(100%-16px)] sm:w-[calc(100%-24px)] max-w-sm bottom-2 right-2 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden text-left">
         <h1 class="block text-sm font-semibold sm:text-base">{header}</h1>
-        <p class="block mt-2 text-xs sm:text-sm">{text}</p>
+        <p class="block mt-1 text-xs sm:text-sm text-zinc-300">{text}</p>
         <div class="time-bar"></div>
     </button>
 {/each}

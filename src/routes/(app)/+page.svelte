@@ -8,7 +8,7 @@
 
         import { fly } from "svelte/transition"
         import { goto } from "$app/navigation"
-        import { isMobileBrowser, showHowItWorksModal } from "$lib/main/store"
+        import { isMobileBrowser, showHowItWorksModal, leaderboard } from "$lib/main/store"
         import Leaderboard from "$lib/main/components/leaderboard.svelte";
         import { setCookie, getCookie } from "$lib/common/cookie"
 
@@ -72,7 +72,7 @@
         </div>
     </div>
     
-    <div class="fixed hidden bottom-2 right-2 md:block">
+    <div transition:fly={{ x: 400 }}  class="fixed bottom-0 right-0 hidden w-full p-2 pointer-events-none md:block">
         <Leaderboard/>
     </div>
 

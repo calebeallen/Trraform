@@ -4,9 +4,10 @@
     import { onMount } from "svelte";
     import { BUILD_SIZE_STD, BUILD_SIZE_LARGE, API_ORIGIN } from "$lib/common/constants"
     import isURL from "validator/lib/isURL";
-    import { user } from "$lib/main/store"
+    import { user, loadScreenOpacity, notification } from "$lib/main/store"
     import { fade } from "svelte/transition";
     import MyPlot from "$lib/main/plot/myPlot"
+    import { pushNotification } from "$lib/common/utils"
     import { preprocessPNG } from "$lib/common/buildImage"
 
     const NAME_MAX_LENGTH = 48
@@ -152,10 +153,12 @@
 
         linkError = saveError = ""
 
-        if($user.subscribed && !isURL(link)){
+        if($user.subscribed && link != "" && !isURL(link)){
             linkError = "Invalid URL"
             return
         }
+
+        $loadScreenOpacity = 50
 
         // encode build data
         let imageData = ""
@@ -174,14 +177,38 @@
             imageData
         }
 
-        const res = await fetch(`${API_ORIGIN}/plot/update`, {
-            method: "POST",
-            headers: {
-                "Authorization": localStorage.getItem("auth_token"),
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(plotData)
-        })
+        try{
+
+            const res = await fetch(`${API_ORIGIN}/plot/update`, {
+                method: "POST",
+                headers: {
+                    "Authorization": localStorage.getItem("auth_token"),
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(plotData)
+            })
+
+            if(!res.ok)
+                throw new Error()
+
+            pushNotification(notification, "Plot updated", "It will take a few minutes for these updates to show.")
+
+            editingPlot.name = name
+            editingPlot.desc = desc
+            editingPlot.link = link
+            editingPlot.linkTitle = linkTitle
+            editingPlot.buildData = buildData
+            await editingPlot.updateImgUrl()
+            
+            editingPlot = null
+
+        } catch {
+
+            pushNotification(notification, "Something went wrong", "Could not update plot, try again later.")
+
+        }
+
+        $loadScreenOpacity = 0
 
     }   
 
@@ -225,7 +252,7 @@
         {#if buildError}
             <div out:fade class="mt-1 text-xs text-red-500">{buildError}</div>
         {/if}
-        <form on:submit={save} class="mt-4 space-y-4">
+        <form on:submit|preventDefault={save} class="mt-4 space-y-4">
             <input bind:value={name} class="w-full std-input" type="text" placeholder="Name" maxlength={NAME_MAX_LENGTH}>
             <textarea bind:value={desc} class="block w-full m-0 leading-none border-none appearance-none resize-none std-input" type="text" placeholder="Description" rows="3" maxlength={DESC_MAX_LENGTH}/>
             {#if $user?.subscribed}

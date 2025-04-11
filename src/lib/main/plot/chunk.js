@@ -34,7 +34,6 @@ export default class Chunk{
                 const task = new Task("get_chunk", { chunkId: this.chunkId })
                 this.plotData = await task.run()
 
-                console.log(this.plotData)
                 res(this)
 
             })

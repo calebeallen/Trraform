@@ -11,7 +11,8 @@
     let disconnectAnimationInterval = null, disconnectAnimationt = 0
 
     $:{
-
+        
+        plotSearchValue //don't delete! not a mistake!
         setShowResults()
        
     }
@@ -31,7 +32,7 @@
         if(!plotId.verify())
             return
 
-        searchResult = `Plot ${plotId.string()}`
+        searchResult = `Plot 0x${plotId.string()}`
         showSearchResults = true
 
     }
@@ -73,7 +74,7 @@
     <div bind:this={searchContainer} class="relative flex items-center gap-1 p-1 bg-transparent">
         <img class="w-4 h-4 pointer-events-none select-none opacity-70" src="/search.svg" alt="search">
         <form class="inline-flex p-0 m-0" on:submit|preventDefault={search}>
-            <input bind:value={plotSearchValue} class="w-full bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
+            <input  bind:value={plotSearchValue} class="w-full bg-transparent appearance-none focus:outline-none placeholder-zinc-400 placeholder:select-none" type="text" placeholder="Search plot id">
             <button tabindex="-1" class="hidden" type="submit"></button>
         </form>
         {#if showSearchResults}

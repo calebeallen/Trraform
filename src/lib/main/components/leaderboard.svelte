@@ -1,53 +1,37 @@
 
+
 <script>
 
-    import { fly } from "svelte/transition";
-    import { leaderboard } from "../store";
+    import { leaderboard } from "$lib/main/store"
     import { goto } from "$app/navigation"
 
 </script>
 
-{#if $leaderboard instanceof Array && $leaderboard.length != 0}
-<div transition:fly={ { x: 500, opacity: 1, delay: 50 } } class="p-2.5 bg-zinc-900 space-y-1 outline-1 outline outline-zinc-800 rounded-2xl w-72">
-    <div class="font-semibold">🔥Leaderboard🔥</div>
-    <div class="flex items-center gap-2 py-1 justify-evenly">
-        <div class="flex-1 h-px bg-zinc-600"></div>
-        <div class="text-xs text-zinc-400">Ranked by votes</div>
-        <div class="flex-1 h-px bg-zinc-600"></div>
+
+<div class="w-full p-3 ml-auto space-y-2 pointer-events-auto max-w-80 rounded-2xl bg-zinc-900 outline-1 outline outline-zinc-800">
+    <div class="font-bold">Top plots</div>
+    <div class="flex items-center w-full gap-2">
+        <div class="w-full h-px bg-zinc-800"></div>
+        <div class="flex-shrink-0 text-xs text-zinc-600 w-max">Ranked by votes</div>
+        <div class="w-full h-px bg-zinc-800"></div>
     </div>
-    <div>
-        {#if $leaderboard === null}
-            {#each new Array(5) as _, i }
-                <div class="flex gap-1 p-0.5 text-sm w-full">
-                    <div class="w-5 font-semibold text-center shrink-0">
-                        {#if i == 0}🥇
-                        {:else if i == 1}🥈
-                        {:else if i == 2}🥉
-                        {:else}{i + 1}.
-                        {/if}
-                    </div>
-                    <div class="w-full rounded-lg bg-zinc-800 animate-pulse"></div>
-                    <div class="w-full"></div>
-                    <div class="w-full rounded-lg bg-zinc-800 animate-pulse"></div>
-                </div>
-            {/each}
-        {:else}
-            {#each $leaderboard as { name, plotId, votes }, i }
-                <button on:click={() => {
-                    goto(`/world?plotId=${plotId}`)
-                }} class="flex items-center gap-1 p-0.5 text-sm w-full hover:bg-zinc-800 transition-colors rounded-lg focus:outline-none ">
-                    <div class="w-5 font-semibold text-center">
-                        {#if i == 0}🥇
-                        {:else if i == 1}🥈
-                        {:else if i == 2}🥉
-                        {:else}{i + 1}.
-                        {/if}
-                    </div>
-                    <div class="flex-1 text-left">{name}</div>
-                    <div class="px-1 text-right">{votes}</div>
-                </button>
-            {/each}
-        {/if}
-    </div>
+    {#each $leaderboard as { plotId, name, verified, votes, dir }, i }
+        <button on:click={() => goto(`/world?plotId=${plotId}`)} class="flex items-center justify-between w-full p-px text-sm">
+            <div class="flex items-center w-full gap-0.5">
+                {#if dir == 1}
+                    <img class="w-4 aspect-square" src="/up-green.svg" alt="">
+                {:else if dir == -1}
+                    <img class="w-4 aspect-square" src="/down-red.svg" alt="">
+                {:else if dir == 0}
+                    <img class="w-4 aspect-square" src="/grey-neutral.svg" alt="">
+                {/if}
+                <div class="font-semibold truncate w-max max-w-40">{i+1}. {name}</div>
+                {#if verified}
+                    <img class="w-3.5 aspect-square" src="/verified.svg" alt="">
+                {/if}
+            </div>
+            <div>{votes}</div>
+        </button>
+    {/each}
 </div>
-{/if}
+

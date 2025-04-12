@@ -5,15 +5,18 @@
     import { fly } from "svelte/transition";
     import PlotList from "./plotList.svelte";
     import EditPlot from "./editPlot.svelte";
-    import { user, showUserWidget, myPlots, showChangeUsernameModal, notification } from "$lib/main/store"
+    import { user, showUserWidget, myPlots, showChangeUsernameModal, notification, newPlots } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
     import { goto } from "$app/navigation"
     import { API_ORIGIN } from "$lib/common/constants"
+    import { onMount } from "svelte";
 
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
     let showUserOptions, userOptionsContainer, userOptionsButton
     let editingPlot = null
     let disableFindOpenPlot = false
+
+    onMount(() => $newPlots = 0)
 
     function mousedown(e){
 
@@ -37,8 +40,6 @@
                 "Content-type": "application/json"
             }
         })
-
-        console.log("test")
 
         disableFindOpenPlot = false
 
@@ -77,10 +78,12 @@
 
 <div class="flex flex-col h-full p-4 pointer-events-auto max-h-max bg-zinc-900 rounded-2xl outline-zinc-800 outline outline-1">
     <!-- header -->
-    <div class="flex items-center justify-between gap-3 p-2 text-xs bg-zinc-800 outline-zinc-700 outline outline-1 rounded-xl sm:text-sm">
+    <div class="flex items-center justify-between gap-3 pb-4 text-xs border-b sm:text-sm border-zinc-800">
         <div class="relative flex items-center gap-0.5 ml-1">        
-            <div class="font-semibold truncate shrink">{$user?.username}</div>
-            <img class="w-3.5 aspect-square" src="/verified.svg" alt="">
+            <div class="text-sm font-semibold truncate shrink sm:text-base">{$user?.username}</div>
+            {#if $user?.subscribed}
+                <img class="w-3.5 aspect-square" src="/verified.svg" alt="">
+            {/if}
             <button bind:this={userOptionsButton} on:click={() => showUserOptions = !showUserOptions} class="h-full">
                 <img class="w-4 sm:w-5 aspect-square" src="/dots.svg" alt="">
             </button>

@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -33,6 +33,8 @@
     import ReportModal from "../../lib/main/components/modals/reportModal.svelte";
     import ChangeUsernameModal from "../../lib/main/components/modals/changeUsernameModal.svelte";
     import { loadStripe } from "@stripe/stripe-js";
+    import CartWidget from "../../lib/main/components/cartWidget/cartWidget.svelte";
+    import PaymentModal from "../../lib/main/components/modals/paymentModal.svelte";
     
     let rootPlot
     let glCanvas
@@ -91,8 +93,13 @@
             const { data, error } = await res.json()
             
             if(!error){
+                data.plotIds = data.plotIds.map(plotId => ({ plotId, isNew: false }))
                 $user = data
                 localStorage.setItem("auth_token", data.token)
+                const cartSave = localStorage.getItem("cart")
+                if(cartSave)
+                    $cart = JSON.parse(cartSave)
+
             }
 
         }
@@ -739,8 +746,14 @@
     <HeaderBar/>
 </div>
 {#if $showUserWidget}
-    <div transition:fly={{ x: 600, opacity: 1 }} class="fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] pointer-events-none top-14 sm:mt-1 right-0 px-2">
+    <div transition:fly={{ x: 600, opacity: 1 }} class="widget-container">
         <UserWidget/>
+    </div>
+{/if}
+
+{#if $showCartWidget}
+    <div transition:fly={{ x: 600, opacity: 1 }} class="widget-container">
+        <CartWidget/>
     </div>
 {/if}
 
@@ -785,6 +798,10 @@
     <ChangeUsernameModal on:close={() => $showChangeUsernameModal = false}/>
 {/if}
 
+{#if $paymentSession}
+    <PaymentModal/>
+{/if}   
+
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>
 {/if}
@@ -796,6 +813,12 @@
 
     :global(.plot-tag) {
         @apply absolute px-1 py-0.5 bg-zinc-900 rounded-lg text-sm;
+    }
+    
+    .widget-container{
+
+        @apply fixed sm:h-[calc(100%-68px)] h-[calc(100%-66px)] pointer-events-none top-14 sm:mt-1 right-0 px-2
+    
     }
 
 </style>

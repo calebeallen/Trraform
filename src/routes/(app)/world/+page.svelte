@@ -4,9 +4,11 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal } from "$lib/main/store"
-    import { API_ORIGIN } from "$lib/common/constants"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification } from "$lib/main/store"
+    import { API_ORIGIN, PRICE } from "$lib/common/constants"
     import { fly } from "svelte/transition"
+    import PlotId from "$lib/common/plotId"
+    import { pushNotification } from "$lib/common/utils"
 
     export let data
     
@@ -38,6 +40,7 @@
             res({ 
                 owner : plot.owner, 
                 id : idStr,
+                depth: plot.id.depth(),
                 verified: plot.verified,
                 name : plot.name || `Plot ${idStr}`, 
                 desc : plot.desc,
@@ -89,6 +92,32 @@
 
     }
 
+    function addToCart(id){
+
+        const plotId = PlotId.fromHexString(id)
+
+        if(Object.keys($cart).length >= 30){
+            pushNotification(notification, "Cart full", "Cart contains maximum items. Please split your order.")
+            return
+        }
+
+        $cart[id] = {
+            isClaimed: false,
+            depth: plotId.depth()
+        }
+        $cart = $cart
+        localStorage.setItem("cart", JSON.stringify($cart))
+
+    }
+
+    function removeFromCart(id){
+
+        delete $cart[id]
+        $cart = $cart
+        localStorage.setItem("cart", JSON.stringify($cart))
+
+    }
+
 </script>
 
 <svelte:head>
@@ -115,13 +144,13 @@
 </svelte:head>
 
 <div class="fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    <div class="relative p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max flex flex-col gap-2">
+    <div class="relative flex flex-col gap-3 p-3 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max">
         {#await profile}
             <div class="w-full h-20 animate-pulse">
                 <div class="w-1/2 h-5 mt-1 rounded-full bg-zinc-800"></div>
                 <div class="w-1/4 h-3 mt-1 rounded-full bg-zinc-800"></div>
             </div>
-        {:then { id, owner, verified, name, desc, link, linkTitle } }
+        {:then { id, owner, depth, verified, name, desc, link, linkTitle } }
             <div>
                 <div class="flex items-baseline justify-between gap-2">
                     <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name} {#if verified}<img class="w-3.5 aspect-square" src="/verified.svg" alt="" style=" display: inline; vertical-align: middle;">{/if}</h3>
@@ -151,31 +180,45 @@
                     <div class="text-xs opacity-70">id: 0x{id}</div>
                 </div>
             </div>
-            {#if desc || link}
-                <div class="w-full h-px bg-zinc-800"></div>
-            {/if}
-            {#if desc}
-                <p>{desc}</p>
-            {/if}
-            {#if link}
-                <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">
-                    <img class="w-4 h-4" src="/link.svg" alt="link">
-                    <p>{linkTitle}</p>
-                </a>
-            {/if}
             {#if owner}
+                {#if desc || link}
+                    <div class="w-full h-px bg-zinc-800"></div>
+                {/if}
+                {#if desc}
+                    <p class="text-zinc-300">{desc}</p>
+                {/if}
+                {#if link}
+                    <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">
+                        <img class="w-4 h-4" src="/link.svg" alt="link">
+                        <p>{linkTitle}</p>
+                    </a>
+                {/if}
                 {#if canVote}
                     <button class="mt-1 button0" on:click={() => castVote(id)}>Vote</button>
                 {:else}
                     <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
                 {/if}
             {:else}
-                <button class="mt-1 button0" on:click={() => {
-                    if(!$user)
-                        $showAuthModal = true
-                    else
-                        $showClaimModal = true
-                }}>Claim</button>
+                {#if $user}
+                    <div class="w-full h-px bg-zinc-800"></div>
+                    {#if $user.plotCredits}
+                        <div class="text-sm">You have <strong>{$user.plotCredits}</strong> unclaimed plots!</div>
+                        <button class="mt-1 button0" on:click={() => $showClaimModal = true}>Claim</button>
+                    {:else}
+                        <div class="flex items-center gap-2 text-sm text-zinc-300">
+                            <div>Depth {depth}</div>
+                            <div class="w-px h-4 bg-zinc-700"></div>
+                            <div class="text-sm">${PRICE[depth] / 100}</div>
+                        </div>
+                        {#if $cart[id]}
+                            <button on:click={() => removeFromCart(id)} class="button0">Remove from cart</button>
+                        {:else}
+                            <button on:click={() => addToCart(id)} class="button0">Add to cart</button>
+                        {/if}
+                    {/if}
+                {:else}
+                    <button class="mt-1 button0" on:click={() => $showAuthModal = true}>Claim</button>
+                {/if}
             {/if}
         {/await}
     </div>

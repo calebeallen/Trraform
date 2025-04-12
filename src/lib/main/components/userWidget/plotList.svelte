@@ -2,7 +2,7 @@
 <script>
 
     import PlotWidget from "./plotWidget.svelte";
-    import { myPlots, user } from "$lib/main/store"
+    import { myPlots, user, newPlots} from "$lib/main/store"
     import PlotId from "$lib/common/plotId"
     import MyPlot from "$lib/main/plot/myPlot"
     import { onMount } from "svelte";
@@ -12,9 +12,24 @@
     let scrollContainer
     let listContainer
 
-    onMount(() => loadPlots(6))
+    onMount(() => {
+        
+        const initialAmt = 6 - $myPlots.length
+        loadPlots(initialAmt)
+
+    })
+
+    $:{
+        $user
+        $newPlots = 0
+        const initialAmt = 6 - $myPlots.length
+        loadPlots(initialAmt)
+    }
     
     function onmousewheel(){
+
+        if(!scrollContainer || !listContainer)
+            return
 
         const scrollRect = scrollContainer.getBoundingClientRect()
         const listRect = listContainer.getBoundingClientRect()
@@ -36,8 +51,9 @@
 
         for(let i = $myPlots.length; i < limit; i++){
 
-            const plotId = PlotId.fromHexString($user.plotIds[i])
-            const plot = new MyPlot(plotId)
+    
+            const plotId = PlotId.fromHexString($user.plotIds[i].plotId)
+            const plot = new MyPlot(plotId, $user.plotIds[i].isNew)
             $myPlots.push(new MyPlot(plotId))
             loadPromises.push(plot.load())
 
@@ -52,7 +68,7 @@
 </script>
 
 <div bind:this={scrollContainer} on:mousewheel={onmousewheel} class="w-full mt-4 overflow-y-auto scrollbar-clean shrink">
-    {#if $myPlots?.length}
+    {#if $user.plotIds?.length}
         <div bind:this={listContainer} class="grid grid-cols-1 gap-2 p-px mx-auto sm:grid-cols-2 sm:w-[458px] w-[224px]">
             {#each $myPlots as plot (plot?.id?.id)}
                 <PlotWidget bind:editingPlot plot={plot}></PlotWidget>

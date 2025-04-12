@@ -14,18 +14,21 @@ const showChangeUsernameModal = writable(false)
 const modalsShowing = writable(0)
 
 const showUserWidget = writable(false)
+const showCartWidget = writable(false)
 
 const stripe = writable(null)
+const paymentSession = writable(null)
 const user = writable(null)
 const inputFocused = writable(false)
 const isMobileBrowser = writable(false)
 const insideOf = writable(null)
 const notification = writable([])
-const newPlots = writable(false)
+const newPlots = writable(0)
 const loadScreenOpacity = writable(100)
 const leaderboard = writable([])
 const tempEmail = writable("")
 const myPlots = writable([])
+const cart = writable({})
 
 const refs = {
     renderer: null,
@@ -48,6 +51,7 @@ const settings = Object.assign({}, structuredClone(defaultSettings))
 
 export { 
     stripe,
+    paymentSession,
     defaultSettings, 
     settings, 
     refs, 
@@ -72,5 +76,7 @@ export {
     showReportModal,
     modalsShowing,
     inputFocused,
-    showChangeUsernameModal
+    showChangeUsernameModal,
+    showCartWidget,
+    cart
 }

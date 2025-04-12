@@ -69,6 +69,7 @@
 
         /* root plot */
         rootPlot = new RootPlot()
+        refs.rootPlot = rootPlot
         await rootPlot.load()
         await refs.renderManager.renderStatic(rootPlot)
 
@@ -97,8 +98,10 @@
                 $user = data
                 localStorage.setItem("auth_token", data.token)
                 const cartSave = localStorage.getItem("cart")
-                if(cartSave)
+                if(cartSave !== "null")
                     $cart = JSON.parse(cartSave)
+                else
+                    $cart = {}
 
             }
 

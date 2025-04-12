@@ -13,7 +13,6 @@
     let cartItemCount = 0
 
     $: {
-        console.log($cart)
         cartItemCount = Object.keys($cart).length
     }
 

@@ -34,6 +34,7 @@
     onMount(async () => {
 
         await editingPlot.load()
+        editingPlot.isNew = false
 
         name = editingPlot.name
         desc = editingPlot.desc
@@ -226,7 +227,7 @@
 </script>
 
 <input bind:this={buildInput} on:change={changeBuild} class="hidden" type="file">
-<div class="w-full mt-4 overflow-y-auto scrollbar-clean shrink">
+<div class="w-full mt-3 overflow-y-auto scrollbar-clean shrink">
     <div class="p-px max-w-96">
         <div class="relative aspect-square rounded-2xl outline-1 outline outline-zinc-700 bg-zinc-900">
             <img class="object-cover" src={imgUrl} alt="">

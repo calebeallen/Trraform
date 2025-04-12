@@ -15,7 +15,6 @@
 
         await plot.load()
         const plotIdStr = plot.id.string()
-
         plotData = {
             isNew: plot.isNew,
             id: plotIdStr,
@@ -41,12 +40,6 @@
         <div class="head-container">
             <h2 class="text-sm font-bold truncate sm:text-base">{plotData.name}</h2>
             <h3 class="text-xs">id: 0x{plotData.id}</h3>
-            {#if plotData.isNew}
-                <div class="flex items-center gap-1">
-                    <div class="w-2 h-2 bg-blue-700 rounded-full"></div>
-                    <div class="text-xs text-zinc-400">NEW</div>
-                </div>
-            {/if}
         </div>
         <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
         <div class="absolute bottom-0 flex flex-col w-full gap-px p-1 transition-opacity opacity-0 group-hover:opacity-100">
@@ -59,6 +52,9 @@
                 <div class="text-xs sm:text-sm">Edit</div>
             </button>
         </div>
+    {/if}
+    {#if plotData.isNew}
+        <div class="absolute w-24 py-px text-xs font-semibold text-center origin-center rotate-45 translate-x-1/2 bg-blue-700 top-2 right-4">NEW</div>
     {/if}
 </div>
 

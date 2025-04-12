@@ -76,9 +76,9 @@
 <svelte:window on:mousedown={mousedown}/>
 
 
-<div class="flex flex-col h-full p-4 pointer-events-auto max-h-max bg-zinc-900 rounded-2xl outline-zinc-800 outline outline-1">
+<div class="flex flex-col h-full p-3 pointer-events-auto max-h-max bg-zinc-900 rounded-2xl outline-zinc-800 outline outline-1">
     <!-- header -->
-    <div class="flex items-center justify-between gap-3 pb-4 text-xs border-b sm:text-sm border-zinc-800">
+    <div class="flex items-center justify-between gap-3 pb-3 text-xs border-b sm:text-sm border-zinc-800">
         <div class="relative flex items-center gap-0.5 ml-1">        
             <div class="text-sm font-semibold truncate shrink sm:text-base">{$user?.username}</div>
             {#if $user?.subscribed}

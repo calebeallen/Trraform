@@ -54,7 +54,7 @@
     
             const plotId = PlotId.fromHexString($user.plotIds[i].plotId)
             const plot = new MyPlot(plotId, $user.plotIds[i].isNew)
-            $myPlots.push(new MyPlot(plotId))
+            $myPlots.push(plot)
             loadPromises.push(plot.load())
 
         }
@@ -67,7 +67,7 @@
 
 </script>
 
-<div bind:this={scrollContainer} on:mousewheel={onmousewheel} class="w-full mt-4 overflow-y-auto scrollbar-clean shrink">
+<div bind:this={scrollContainer} on:mousewheel={onmousewheel} class="w-full mt-3 overflow-y-auto scrollbar-clean shrink">
     {#if $user.plotIds?.length}
         <div bind:this={listContainer} class="grid grid-cols-1 gap-2 p-px mx-auto sm:grid-cols-2 sm:w-[458px] w-[224px]">
             {#each $myPlots as plot (plot?.id?.id)}

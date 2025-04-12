@@ -4,7 +4,7 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification } from "$lib/main/store"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, justClaimed } from "$lib/main/store"
     import { API_ORIGIN, PRICE } from "$lib/common/constants"
     import { fly } from "svelte/transition"
     import PlotId from "$lib/common/plotId"
@@ -92,16 +92,16 @@
 
     }
 
-    function addToCart(id){
+    function addToCart(){
 
-        const plotId = PlotId.fromHexString(id)
+        const plotId = $insideOf.id
 
         if(Object.keys($cart).length >= 30){
             pushNotification(notification, "Cart full", "Cart contains maximum items. Please split your order.")
             return
         }
 
-        $cart[id] = {
+        $cart[plotId.string()] = {
             isClaimed: false,
             depth: plotId.depth()
         }
@@ -110,9 +110,10 @@
 
     }
 
-    function removeFromCart(id){
+    function removeFromCart(){
 
-        delete $cart[id]
+        const plotId = $insideOf.id
+        delete $cart[plotId.string()]
         $cart = $cart
         localStorage.setItem("cart", JSON.stringify($cart))
 
@@ -144,7 +145,7 @@
 </svelte:head>
 
 <div class="fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
-    <div class="relative flex flex-col gap-3 p-3 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max">
+    <div class="relative flex flex-col gap-2.5 p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max">
         {#await profile}
             <div class="w-full h-20 animate-pulse">
                 <div class="w-1/2 h-5 mt-1 rounded-full bg-zinc-800"></div>
@@ -198,7 +199,7 @@
                 {:else}
                     <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
                 {/if}
-            {:else}
+            {:else if !$justClaimed.has(id)}
                 {#if $user}
                     <div class="w-full h-px bg-zinc-800"></div>
                     {#if $user.plotCredits}
@@ -210,7 +211,7 @@
                             <div class="w-px h-4 bg-zinc-700"></div>
                             <div class="text-sm">${PRICE[depth] / 100}</div>
                         </div>
-                        {#if $cart[id]}
+                        {#if $cart && $cart[id]}
                             <button on:click={() => removeFromCart(id)} class="button0">Remove from cart</button>
                         {:else}
                             <button on:click={() => addToCart(id)} class="button0">Add to cart</button>

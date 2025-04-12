@@ -86,6 +86,15 @@
                 </button>
             {/each}
         </div>
+        <div class="pt-3 mt-3 space-y-3 border-t border-zinc-800">
+            <div class="flex gap-1 font-bold">
+                <div>Total:</div>
+                <div>${total}</div>
+            </div>
+            {#if plots.length && !hasUnavailable}
+                <button on:click={claim} class="w-full button0">Claim</button>
+            {/if}
+        </div>
     {:else}
         <div class="flex items-center justify-center h-32 opacity-50 pointer-events-none select-none w-72">
             <div class="space-y-1">
@@ -94,13 +103,4 @@
             </div>
         </div>
     {/if}
-    <div class="pt-3 mt-3 space-y-3 border-t border-zinc-800">
-        <div class="flex gap-1 font-bold">
-            <div>Total:</div>
-            <div>${total}</div>
-        </div>
-        {#if plots.length && !hasUnavailable}
-            <button on:click={claim} class="w-full button0">Claim</button>
-        {/if}
-    </div>
 </div>

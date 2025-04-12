@@ -29,12 +29,14 @@ const leaderboard = writable([])
 const tempEmail = writable("")
 const myPlots = writable([])
 const cart = writable({})
+const justClaimed = writable(new Set())
 
 const refs = {
     renderer: null,
     renderManager : null,
     scene: null,
     camera: null,
+    rootPlot: null,
 }
 
 const defaultSettings = {
@@ -78,5 +80,6 @@ export {
     inputFocused,
     showChangeUsernameModal,
     showCartWidget,
-    cart
+    cart,
+    justClaimed
 }

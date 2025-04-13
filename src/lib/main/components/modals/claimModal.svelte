@@ -6,10 +6,9 @@
     import { API_ORIGIN } from "$lib/common/constants"
     import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { insideOf } from "$lib/main/store"
-    import { modalsShowing, loadScreenOpacity, notification, justClaimed } from "$lib/main/store"
+    import { modalsShowing, loadScreenOpacity, notification, pendingOrder } from "$lib/main/store"
     import { pollUpdates } from "$lib/main/pollUpdates"
     import { pushNotification } from "$lib/common/utils"
-    import { confetti } from "$lib/main/decoration"
 
     const dispatch = createEventDispatcher()
 
@@ -31,19 +30,11 @@
         if(!res.ok)
             return
 
-        dispatch("close")
+        $pendingOrder.add(plotId)
         pollUpdates()
-
         pushNotification(notification, "Plot claimed!", "It make take a minute to appear.")
-
-        $justClaimed.add(plotId)
-        $justClaimed = $justClaimed
-
-        setTimeout(() => confetti($insideOf.pos, $insideOf.parent.blockSize), 500)
-
-        //show whats next modal
-        
-
+        dispatch("close")
+       
     }
 
 </script>

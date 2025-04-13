@@ -35,6 +35,7 @@
     import { loadStripe } from "@stripe/stripe-js";
     import CartWidget from "../../lib/main/components/cartWidget/cartWidget.svelte";
     import PaymentModal from "../../lib/main/components/modals/paymentModal.svelte";
+    import { handleStripeIntent } from "$lib/main/handleStripeIntent"
     
     let rootPlot
     let glCanvas
@@ -117,6 +118,11 @@
 
         if($page.url.searchParams.get("showLogin") == "true")
             $showAuthModal = true
+
+        // if user was redirected after payment
+        const resumePayment = $page.url.searchParams.get("payment_intent_client_secret")
+        if(resumePayment)
+            handleStripeIntent(resumePayment)
 
         $loadScreenOpacity = 0
 

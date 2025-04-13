@@ -55,7 +55,11 @@
             plotIds.push(id)
         }
 
-        $paymentSession = { plotIds, total: tot }
+        $paymentSession = { 
+            method: "payment", 
+            total: tot,
+            plotIds
+        }
 
     }
 

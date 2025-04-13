@@ -29,7 +29,7 @@ const leaderboard = writable([])
 const tempEmail = writable("")
 const myPlots = writable([])
 const cart = writable({})
-const justClaimed = writable(new Set())
+const pendingOrder = writable(new Set())
 
 const refs = {
     renderer: null,
@@ -81,5 +81,5 @@ export {
     showChangeUsernameModal,
     showCartWidget,
     cart,
-    justClaimed
+    pendingOrder
 }

@@ -1,11 +1,15 @@
-import { get } from "svelte/store";
+
+
 import { API_ORIGIN } from "../common/constants";
-import { user, newPlots } from "./store";
+import { user as _user, newPlots, refs } from "$lib/main/store"
+import { confetti } from "./decoration";
+import { get } from "svelte/store";
+import PlotId from "../common/plotId";
 
 const RETRY_SECONDS = 5;
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 10;
 
-export async function pollUpdates(tries = 0) {
+export async function pollUpdates(anticipatedChanges, tries = 0) {
 
     if (tries >= MAX_RETRIES) 
         return
@@ -14,36 +18,72 @@ export async function pollUpdates(tries = 0) {
 
         const res = await fetch(`${API_ORIGIN}/user`, {
             headers: { 
-                Authorization: localStorage.getItem("auth_token") 
+                "Authorization": localStorage.getItem("auth_token") 
             }
         })
 
         if (!res.ok) 
             throw new Error("Failed to poll changes")
 
-        const { data } = await res.json()
-        const currentUserData = get(user)
-        const currentPlotIds = new Set(currentUserData.plotIds.map(e => e.plotId))
-        let hasUpdates = false
+        const { data: user } = await res.json()
 
-        data.plotIds = data.plotIds.map(plotId => {
+        // if user data contains the new plot ids, then update was successful
+        if(anticipatedChanges.plotIds !== null){
 
-            const isNew = !currentPlotIds.has(plotId)
-            if (isNew){
-                hasUpdates = true
-                newPlots.update(i => i + 1)
+            let isUpdated = false
+
+            // assume that if one was found, all update was successful
+            user.plotIds = user.plotIds.map(plotId => {
+
+                const obj = { plotId, isNew: false }
+                if(anticipatedChanges.plotIds.has(plotId))
+                    isUpdated = obj.isNew = true
+
+                return obj
+
+            })
+
+            if(isUpdated){
+
+                newPlots.update(amt => amt + anticipatedChanges.plotIds.size)
+
+                // confetti on all new plots
+                const plotIds = anticipatedChanges.plotIds
+                setTimeout(() => {
+
+                    for(const id of plotIds){
+
+                        const plotId = PlotId.fromHexString(id)
+                        const plot = refs.rootPlot.findPlotById(plotId)
+                        if(plot)
+                            confetti(plot.pos, plot.parent.blockSize)
+
+                    }
+
+                }, 1000)
+
+                // show whats next modal if anticipated changes.length is equal to user.plotsIds.length (meaning they had no plots before)
+
+                anticipatedChanges.plotIds = null
+                _user.set(user) // update user store to new data
+
             }
-            
-            return { plotId, isNew }
 
-        })
+        }
 
-        if (currentUserData.subscribed !== data.subscribed)
-            hasUpdates = true
+        if(anticipatedChanges.subscription){
 
-        if (hasUpdates) {
-            user.set(data)
-            return
+            const curUser = get(_user)
+            if(!curUser.subscribed && anticipatedChanges.subscription){
+
+                // show new subscriber modal
+                
+                anticipatedChanges.subscription = false
+                curUser.subscribed = true
+                _user.set(curUser)
+
+            }
+
         }
 
     } catch (error) {
@@ -51,6 +91,10 @@ export async function pollUpdates(tries = 0) {
         return
     }
 
-    setTimeout(() => pollUpdates(tries + 1), RETRY_SECONDS * 1000)
+    if(anticipatedChanges.plotIds !== null || anticipatedChanges.subscription)
+        setTimeout(() => pollUpdates(anticipatedChanges, tries + 1), RETRY_SECONDS * 1000)
 
 }
+
+
+

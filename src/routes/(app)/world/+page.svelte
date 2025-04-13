@@ -4,7 +4,7 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, justClaimed } from "$lib/main/store"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder } from "$lib/main/store"
     import { API_ORIGIN, PRICE } from "$lib/common/constants"
     import { fly } from "svelte/transition"
     import PlotId from "$lib/common/plotId"
@@ -199,7 +199,7 @@
                 {:else}
                     <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
                 {/if}
-            {:else if !$justClaimed.has(id)}
+            {:else if !$pendingOrder.has(id)}
                 {#if $user}
                     <div class="w-full h-px bg-zinc-800"></div>
                     {#if $user.plotCredits}

@@ -36,6 +36,7 @@
     import CartWidget from "../../lib/main/components/cartWidget/cartWidget.svelte";
     import PaymentModal from "../../lib/main/components/modals/paymentModal.svelte";
     import { handleStripeIntent } from "$lib/main/handleStripeIntent"
+    import Subscribe from "../../lib/main/components/subscription/subscribe.svelte";
     
     let rootPlot
     let glCanvas
@@ -810,6 +811,8 @@
 {#if $paymentSession}
     <PaymentModal/>
 {/if}   
+
+<Subscribe/>
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>

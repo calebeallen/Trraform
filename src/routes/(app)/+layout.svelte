@@ -812,7 +812,7 @@
     <PaymentModal/>
 {/if}   
 
-<Subscribe/>
+<!-- <Subscribe/> -->
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>

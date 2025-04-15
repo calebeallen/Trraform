@@ -9,7 +9,7 @@
 
 
 <div transition:fade={{duration: 150}} class="fixed top-0 left-0 grid w-full h-full px-2 overflow-auto bg-black bg-opacity-50 place-items-center">
-    <div transition:fly={{duration: 150, y: 50}} class="relative w-full max-w-sm p-4 overflow-hidden bg-black shadow-2xl sm:p-5 shadow-black rounded-3xl">
+    <div transition:fly={{duration: 150, y: 50}} class="relative w-full max-w-sm p-5 overflow-hidden bg-black shadow-2xl sm:p-5 shadow-black rounded-3xl">
         <SmokeBg/> 
         <div class="relative space-y-4 font-semibold sm:space-y-5">
             <div class="flex flex-wrap items-end gap-1 sm:gap-2">

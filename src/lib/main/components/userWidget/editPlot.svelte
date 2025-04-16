@@ -79,7 +79,7 @@
 
         const bs = _buildData[1]
 
-        if(!$user.subscribed && bs > BUILD_SIZE_STD){
+        if(!$user.subActive && bs > BUILD_SIZE_STD){
             showBuildError(`Build exceeds maximum size (${BUILD_SIZE_STD}x${BUILD_SIZE_STD}x${BUILD_SIZE_STD}).`)
             return
         }
@@ -154,7 +154,7 @@
 
         linkError = saveError = ""
 
-        if($user.subscribed && link != "" && !isURL(link)){
+        if($user.subActive && link != "" && !isURL(link)){
             linkError = "Invalid URL"
             return
         }
@@ -256,7 +256,7 @@
         <form on:submit|preventDefault={save} class="mt-4 space-y-4">
             <input bind:value={name} class="w-full std-input" type="text" placeholder="Name" maxlength={NAME_MAX_LENGTH}>
             <textarea bind:value={desc} class="block w-full m-0 leading-none border-none appearance-none resize-none std-input" type="text" placeholder="Description" rows="3" maxlength={DESC_MAX_LENGTH}/>
-            {#if $user?.subscribed}
+            {#if $user?.subActive}
                 <div>
                     <input bind:value={link} class="w-full std-input" type="text" placeholder="Link" maxlength={LINK_MAX_LENGTH}>
                     {#if linkError}

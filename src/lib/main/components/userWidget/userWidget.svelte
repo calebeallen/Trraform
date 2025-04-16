@@ -5,7 +5,7 @@
     import { fly } from "svelte/transition";
     import PlotList from "./plotList.svelte";
     import EditPlot from "./editPlot.svelte";
-    import { user, showUserWidget, myPlots, showChangeUsernameModal, notification, newPlots } from "$lib/main/store"
+    import { user, showUserWidget, myPlots, showChangeUsernameModal, notification, newPlots, showCancelSubscriptionModal, showRenewSubscriptionModal } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
     import { goto } from "$app/navigation"
     import { API_ORIGIN } from "$lib/common/constants"
@@ -16,7 +16,9 @@
     let editingPlot = null
     let disableFindOpenPlot = false
 
-    onMount(() => $newPlots = 0)
+    onMount(() => {
+        $newPlots = 0
+    })
 
     function mousedown(e){
 
@@ -54,13 +56,6 @@
 
     }
 
-    function cancelSubscription(){
-
-        showUserOptions = false
-
-
-    }
-
     function logout(){
 
         showUserOptions = false
@@ -81,7 +76,7 @@
     <div class="flex items-center justify-between gap-3 pb-3 text-xs border-b sm:text-sm border-zinc-800">
         <div class="relative flex items-center gap-0.5 ml-1">        
             <div class="text-sm font-semibold truncate shrink sm:text-base">{$user?.username}</div>
-            {#if $user?.subscribed}
+            {#if $user?.subActive}
                 <img class="w-3.5 aspect-square" src="/verified.svg" alt="">
             {/if}
             <button bind:this={userOptionsButton} on:click={() => showUserOptions = !showUserOptions} class="h-full">
@@ -95,10 +90,22 @@
                     }} tabindex="-1" class="expanded-option">
                         <span class="select-none">Change username</span>
                     </button>
-                    {#if $user?.subscribed}
-                        <button on:click={cancelSubscription} tabindex="-1" class="expanded-option">
-                            <span class="select-none">Cancel subscription</span>
-                        </button>
+                    {#if $user?.subActive}
+                        {#if $user?.subCanceled}
+                            <button on:click={() => {
+                                $showRenewSubscriptionModal = true
+                                showUserOptions = false
+                            }} tabindex="-1" class="expanded-option">
+                                <span class="select-none">Renew subscription</span>
+                            </button>
+                        {:else}
+                            <button on:click={() => {
+                                $showCancelSubscriptionModal = true
+                                showUserOptions = false
+                            }} tabindex="-1" class="expanded-option">
+                                <span class="select-none">Cancel subscription</span>
+                            </button>
+                        {/if}
                     {/if}
                     <button on:click={logout} tabindex="-1" class="expanded-option">
                         <span class="text-red-500 select-none">Log out</span>

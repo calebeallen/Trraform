@@ -1,15 +1,40 @@
 
 <script>
+
     import { fade, fly } from "svelte/transition";
-
-
+    import { user, showAuthModal, paymentSession } from "$lib/main/store"
     import SmokeBg from "./smokeBg.svelte";
+    import { createEventDispatcher } from "svelte";
+
+    const dispatch = createEventDispatcher()
+    let contentContainer
+
+    function click(e){
+
+        if(!contentContainer.contains(e.target))
+            dispatch("close")
+
+    }
+
+    function initSubscription(){
+
+        if(!$user)
+            $showAuthModal = true
+        else{
+            $paymentSession = { method: "sub" }
+        }
+        
+        dispatch("close")
+
+    }
 
 </script>
 
 
-<div transition:fade={{duration: 150}} class="fixed top-0 left-0 grid w-full h-full px-2 overflow-auto bg-black bg-opacity-50 place-items-center">
-    <div transition:fly={{duration: 150, y: 50}} class="relative w-full max-w-sm p-5 overflow-hidden bg-black shadow-2xl sm:p-5 shadow-black rounded-3xl">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div on:click={click} transition:fade={{duration: 150}} class="fixed top-0 left-0 grid w-full h-full px-2 overflow-auto bg-black bg-opacity-50 place-items-center">
+    <div bind:this={contentContainer} transition:fly={{duration: 150, y: 50}} class="relative w-full max-w-sm p-5 overflow-hidden bg-black shadow-2xl sm:p-5 shadow-black rounded-3xl">
         <SmokeBg/> 
         <div class="relative space-y-4 font-semibold sm:space-y-5">
             <div class="flex flex-wrap items-end gap-1 sm:gap-2">
@@ -51,10 +76,13 @@
                         <b>BONUS:</b> One plot credit each month for the next <b>6 months!</b>
                     </div>
                 </li>
-                <button class="w-full p-2 font-extrabold rounded-lg bg-fuchsia-500">Try it!</button>
+                <button on:click={initSubscription} class="w-full p-2 font-extrabold transition-colors rounded-lg bg-fuchsia-500 outline-fuchsia-400 outline-1 outline hover:bg-fuchsia-400">Try it!</button>
                 <div class="text-xs font-normal"><a class="font-semibold" href="/terms-of-service" target="_blank">Terms</a> apply, cancel anytime.</div>
             </ul>
         </div>
+        <button on:click={() => dispatch("close")} class="absolute w-5 h-5 transition-opacity top-5 right-5 active:opacity-60">
+            <img src="/close.svg" alt="close">
+        </button>
     </div>
 </div>
 

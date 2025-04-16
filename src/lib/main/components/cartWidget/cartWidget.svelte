@@ -1,8 +1,9 @@
 
 <script>
 
-    import { cart, paymentSession } from "$lib/main/store"
+    import { cart, paymentSession, showSubscriptionModal, user } from "$lib/main/store"
     import { PRICE } from "$lib/common/constants"
+    import SmokeBg from "../subscription/smokeBg.svelte";
 
     let plots = []
     let total = ""
@@ -56,7 +57,7 @@
         }
 
         $paymentSession = { 
-            method: "payment", 
+            method: "pay", 
             total: tot,
             plotIds
         }
@@ -69,6 +70,7 @@
     <div class="pb-3 border-b border-zinc-800">
         <div class="font-bold sm:text-base">Your cart</div>
     </div>
+   
     {#if plots.length}
         <div class="p-px mt-3 space-y-2 overflow-y-auto scrollbar-clean shrink w-72">
             {#each plots as { id, isClaimed, price } }
@@ -91,6 +93,14 @@
             {/each}
         </div>
         <div class="pt-3 mt-3 space-y-3 border-t border-zinc-800">
+            {#if !$user?.subActive}
+                <button on:click={() => {
+                    $showSubscriptionModal = true
+                }} class="relative max-w-sm p-3 overflow-hidden text-sm text-left transition-colors bg-black w-72 hover:bg-zinc-950 outline-zinc-700 outline-1 outline rounded-2xl">
+                    <SmokeBg/>
+                    <div class="relative font-semibold">Get <b>6 more plots</b> plus <b> 8x greater</b> build space, <b>verified badges</b> <img class="w-3.5 aspect-square inline" src="/verified.svg" alt="">, <b>links</b>, and more on <b>ALL</b> plots!</div>
+                </button>
+            {/if}
             <div class="flex gap-1 font-bold">
                 <div>Total:</div>
                 <div>${total}</div>

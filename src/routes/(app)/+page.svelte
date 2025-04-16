@@ -8,9 +8,10 @@
 
         import { fly } from "svelte/transition"
         import { goto } from "$app/navigation"
-        import { isMobileBrowser, showHowItWorksModal, leaderboard } from "$lib/main/store"
+        import { isMobileBrowser, showHowItWorksModal, user } from "$lib/main/store"
         import Leaderboard from "$lib/main/components/leaderboard.svelte";
-        import { setCookie, getCookie } from "$lib/common/cookie"
+        
+        import Promo from "../../lib/main/components/subscription/promo.svelte";
 
     </script>
 
@@ -73,6 +74,9 @@
     </div>
     
     <div transition:fly={{ x: 400 }}  class="fixed bottom-0 right-0 hidden w-full p-2 pointer-events-none md:block">
+        {#if !$user?.subActive}
+            <Promo/>
+        {/if}
         <Leaderboard/>
     </div>
 

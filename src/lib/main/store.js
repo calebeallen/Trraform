@@ -11,6 +11,9 @@ const showClaimModal = writable(false)
 const showShareModal = writable(false)
 const showReportModal = writable(false)
 const showChangeUsernameModal = writable(false)
+const showSubscriptionModal = writable(false)
+const showCancelSubscriptionModal = writable(false)
+const showRenewSubscriptionModal = writable(false)
 const modalsShowing = writable(0)
 
 const showUserWidget = writable(false)
@@ -81,5 +84,8 @@ export {
     showChangeUsernameModal,
     showCartWidget,
     cart,
-    pendingOrder
+    pendingOrder,
+    showSubscriptionModal,
+    showCancelSubscriptionModal,
+    showRenewSubscriptionModal
 }

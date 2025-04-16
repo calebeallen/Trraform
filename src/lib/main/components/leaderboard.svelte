@@ -8,7 +8,7 @@
 </script>
 
 
-<div class="w-full p-3 ml-auto space-y-2 pointer-events-auto max-w-80 rounded-2xl bg-zinc-900 outline-1 outline outline-zinc-800">
+<div class="w-full p-3 ml-auto space-y-2 pointer-events-auto max-w-96 rounded-2xl bg-zinc-900 outline-1 outline outline-zinc-800">
     <div class="font-bold">Top plots</div>
     <div class="flex items-center w-full gap-2">
         <div class="w-full h-px bg-zinc-800"></div>

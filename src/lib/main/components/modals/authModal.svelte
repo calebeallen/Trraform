@@ -225,6 +225,7 @@
             if(error)
                 throw new Error(message)
 
+            data.plotIds = data.plotIds.map(plotId => ({ plotId, isNew: false }))
             $user = data
 
         } catch {}

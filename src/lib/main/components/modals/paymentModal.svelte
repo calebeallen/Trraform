@@ -13,6 +13,7 @@
     let total = ""
 
     const appearance = {
+        theme: 'flat',
         variables: { 
             colorPrimary: '#a1a1aa',
             colorBackground: '#27272a',
@@ -35,9 +36,9 @@
 
         session = $paymentSession
 
-        if(session.method === "payment")
+        if(session.method === "pay")
             initPayment()
-        else if(session.method === "subscription")
+        else if(session.method === "sub")
             initSubscription()
 
     })
@@ -152,7 +153,7 @@
 
         $loadScreenOpacity = 50
 
-        if(session.method === "payment"){
+        if(session.method === "pay"){
 
             const { error } = await createIntent()
             if(error){
@@ -160,12 +161,16 @@
                 return
             }
 
+        } else if(session.method === "sub") {
+
+            const { error: submitError } = await elements.submit()
+            if (submitError) 
+                throw new Error(submitError)
+            
         }
 
         const redirect = new URL($page.url.href)
         redirect.searchParams.set("payment_intent_client_secret", clientSecret)
-
-        console.log(clientSecret)
 
         const { error } = await $stripe.confirmPayment({
             elements,
@@ -194,8 +199,14 @@
 <Modal header="Payment" class="max-w-lg" on:close={() => $paymentSession = null}>
     <div class="relative mt-3 space-y-4">
         <form on:submit|preventDefault={submit} id="payment-form">
+            <div class="p-3 rounded-xl outline-zinc-700 outline outline-1 bg-zinc-900">
                 <div id="payment-element"></div>
-            <button type="submit" class="w-full mt-4 button0" id="submit">Pay ${total}</button>
+            </div>
+            {#if $paymentSession?.method == "pay"}
+                <button type="submit" class="w-full mt-4 button0" id="submit">Pay ${total}</button>
+            {:else}
+                <button type="submit" class="w-full mt-4 button0" id="submit">Subscribe $4.99/month</button>
+            {/if}
         </form>
     </div>
 </Modal>

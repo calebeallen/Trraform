@@ -13,7 +13,7 @@
     let cartItemCount = 0
 
     $: {
-        cartItemCount = Object.keys($cart).length
+        cartItemCount = Object.keys($cart ?? {}).length
     }
 
     $:{
@@ -98,7 +98,12 @@
             $showCartWidget = false
         }} class="{ $showUserWidget ? "bg-zinc-800" : "" } flex items-center text-zinc-400 text-xs sm:text-sm option">
             <img class="option-icon" src="/user.svg" alt="">
-            <div class="hidden px-1 sm:block">{$user?.username}</div>
+            <div class="items-center hidden gap-1 px-1 sm:flex">
+                <div>{$user?.username}</div>
+                {#if $user.subActive}
+                    <img class="w-3.5 aspect-square" src="/verified.svg" alt="" style=" display: inline;">
+                {/if}
+            </div>
             {#if $newPlots}
                 <div class="alert">
                     <div>{$newPlots}</div>

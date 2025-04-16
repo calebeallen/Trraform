@@ -47,8 +47,7 @@ export async function handleStripeIntent(clientSecret){
 
             pushNotification(notification, `Payment ${paymentIntent.status}`, "It may take a few minutes for updates to show.")
 
-            console.log(details)
-            if(details.type === "pay"){
+            if(details.type === "plot-purchase"){
 
                 // clear cart and flag the purchased plots in pending so that the user doesn't place
                 // a duplicate order between polling intervals

@@ -12,27 +12,27 @@
 
 </script>
 
-<Modal header="Next steps" class="max-w-lg" on:close>
+<Modal header="Next steps" class="max-w-sm" on:close>
     <div class="flex flex-col gap-5 mt-2">
-        <section class="flex items-center gap-2">
+        <section>
             <img class="icon" src="/blockGroup.svg" alt="">
             <div>
                 <h1>Build</h1>
                 <p>Head over to the <a class="font-bold" href="/editor" target="_blank">editor</a> and build something for your new plot. You can also use the editor to place subplots anywhere within your build.</p>
             </div>
         </section>
-        <section class="flex items-center gap-2">
+        <section>
             <img class="icon" src="/pen.svg" alt="">
             <div>
                 <h1>Customize your plot</h1>
-                <p>Click the <img class="w-4 aspect-square" src="/plot1.svg" alt="" style=" display: inline; vertical-align: text-center;"> icon in the top right to view your plots. From here you can set your plot's build, name, description, and link.</p>
+                <p>Upload your build and give your plot a name, description, and link (for subscription users).</p>
             </div>
         </section>
-        <section class="flex items-center gap-2">
+        <section>
             <img class="icon" src="/share.svg" alt="">
             <div>
                 <h1>Share!</h1>
-                <p>Share your plot on <img class="w-3 aspect-square" src="/x.svg" alt="" style=" display: inline; vertical-align: text-baseline;"> to show the world what you've built!</p>
+                <p>Share your plot on to show the world what you've built!</p>
             </div>
         </section>
         <button on:click={() => dispatch("close")} class="w-full button0">Got it!</button>
@@ -43,7 +43,7 @@
 
     section{
 
-        @apply flex gap-4;
+        @apply flex w-full gap-4;
 
     }
 

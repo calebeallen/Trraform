@@ -1,7 +1,8 @@
 
 
 import { API_ORIGIN } from "../common/constants";
-import { user as _user, newPlots, refs } from "$lib/main/store"
+import { pushNotification } from "$lib/common/utils"
+import { user as _user, newPlots, refs, showNextStepsModal, notification } from "$lib/main/store"
 import { confetti } from "./decoration";
 import { get } from "svelte/store";
 import PlotId from "../common/plotId";
@@ -26,6 +27,10 @@ export async function pollUpdates(anticipatedChanges, tries = 0) {
             throw new Error("Failed to poll changes")
 
         const { data: user } = await res.json()
+
+
+
+        console.log(anticipatedChanges, user)
 
         // if user data contains the new plot ids, then update was successful
         if(anticipatedChanges.plotIds !== null){
@@ -63,6 +68,11 @@ export async function pollUpdates(anticipatedChanges, tries = 0) {
                 }, 1000)
 
                 // show whats next modal if anticipated changes.length is equal to user.plotsIds.length (meaning they had no plots before)
+                if(anticipatedChanges.plotIds.size === user.plotIds.length){
+                    setTimeout(() => showNextStepsModal.set(true), 3000)
+                }
+
+                pushNotification(notification, "Plots received", "Click your profile to view your plots.")
 
                 anticipatedChanges.plotIds = null
                 _user.set(user) // update user store to new data
@@ -74,12 +84,12 @@ export async function pollUpdates(anticipatedChanges, tries = 0) {
         if(anticipatedChanges.subscription){
 
             const curUser = get(_user)
-            if(!curUser.subscribed && anticipatedChanges.subscription){
+            if(!curUser.subActive && anticipatedChanges.subscription){
 
-                // show new subscriber modal
+                pushNotification(notification, "Subscription active", "Thanks for supporting Trraform!")
                 
                 anticipatedChanges.subscription = false
-                curUser.subscribed = true
+                curUser.subActive = true
                 _user.set(curUser)
 
             }

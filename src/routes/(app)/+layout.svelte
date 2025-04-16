@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart, showSubscriptionModal, showCancelSubscriptionModal, showRenewSubscriptionModal } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -37,6 +37,8 @@
     import PaymentModal from "../../lib/main/components/modals/paymentModal.svelte";
     import { handleStripeIntent } from "$lib/main/handleStripeIntent"
     import Subscribe from "../../lib/main/components/subscription/subscribe.svelte";
+    import CancelSubscription from "../../lib/main/components/subscription/cancelSubscription.svelte";
+    import RenewSubscription from "../../lib/main/components/subscription/renewSubscription.svelte";
     
     let rootPlot
     let glCanvas
@@ -100,7 +102,7 @@
                 $user = data
                 localStorage.setItem("auth_token", data.token)
                 const cartSave = localStorage.getItem("cart")
-                if(cartSave !== "null")
+                if(cartSave)
                     $cart = JSON.parse(cartSave)
                 else
                     $cart = {}
@@ -808,11 +810,21 @@
     <ChangeUsernameModal on:close={() => $showChangeUsernameModal = false}/>
 {/if}
 
+{#if $showCancelSubscriptionModal}
+    <CancelSubscription on:close={() => $showCancelSubscriptionModal = false}/>
+{/if}
+
+{#if $showRenewSubscriptionModal}
+    <RenewSubscription on:close={() => $showRenewSubscriptionModal = false}/>
+{/if}
+
+{#if $showSubscriptionModal} 
+    <Subscribe on:close={() => $showSubscriptionModal = false}/>
+{/if}
+
 {#if $paymentSession}
     <PaymentModal/>
 {/if}   
-
-<!-- <Subscribe/> -->
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>

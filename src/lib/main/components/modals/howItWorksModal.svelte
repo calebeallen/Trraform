@@ -12,16 +12,9 @@
 
 </script>
 
-<Modal header="How it works" class="max-w-lg" on:close>
+<Modal header="How it works" class="max-w-sm" on:close>
     <div class="flex flex-col items-center gap-5 mt-2">
-        <section class="flex items-center gap-2">
-            <img class="icon" src="/search.svg" alt="">
-            <div>
-                <h1>What is Trraform?</h1>
-                <p>Trraform is a communal fractal voxel world where anyone can build and explore. It is one of the most unique spaces for you to show the world anything you want.</p>
-            </div>
-        </section>
-        <section class="flex items-center gap-2">
+        <section>
             <img class="icon" src="/search.svg" alt="">
             <div>
                 <h1>Explore</h1>
@@ -32,14 +25,14 @@
             <img class="icon" src="/flag.svg" alt="">
             <div>
                 <h1>Claim your spot</h1>
-                <p>Find any open plot and make it yours. Every user can claim 2 plots for free.</p>
+                <p>Find any open plot and make it yours.</p>
             </div>
         </section>
         <section>
             <img class="icon" src="/blockGroup.svg" alt="">
             <div>
                 <h1>Build something</h1>
-                <p>Use the <a class="font-semibold" href="/editor" target="_blank">Editor</a> to create anything.</p>
+                <p>Use the <a class="font-semibold" href="/editor" target="_blank">Editor</a> to create anything. When you're done, upload your build to your plot so that everyone can see it.</p>
             </div>
         </section>
         <button on:click={() => dispatch("close")} class="w-full button0">Got it!</button>
@@ -50,7 +43,7 @@
 
     section{
 
-        @apply flex gap-4;
+        @apply flex w-full gap-4;
 
     }
 

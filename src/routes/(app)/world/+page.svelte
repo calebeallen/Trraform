@@ -4,11 +4,11 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder } from "$lib/main/store"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder, showHowItWorksModal } from "$lib/main/store"
     import { API_ORIGIN, PRICE } from "$lib/common/constants"
     import { fly } from "svelte/transition"
-    import PlotId from "$lib/common/plotId"
     import { pushNotification } from "$lib/common/utils"
+    import { onMount } from "svelte";
 
     export let data
     
@@ -20,6 +20,15 @@
 
     let canVote = false
     let minTillVote = ""
+
+    onMount(() => {
+
+        if(!localStorage.getItem("how_it_works_modal")){
+            $showHowItWorksModal = true
+            localStorage.setItem("how_it_works_modal", true) 
+        }
+
+    })
 
     $: if ($insideOf !== null) {
 
@@ -96,7 +105,7 @@
 
         const plotId = $insideOf.id
 
-        if(Object.keys($cart).length >= 30){
+        if(Object.keys($cart ?? {}).length >= 30){
             pushNotification(notification, "Cart full", "Cart contains maximum items. Please split your order.")
             return
         }
@@ -197,13 +206,13 @@
                 {#if canVote}
                     <button class="mt-1 button0" on:click={() => castVote(id)}>Vote</button>
                 {:else}
-                    <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minutes</div>
+                    <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minute{#if minTillVote > 1}s{/if}.</div>
                 {/if}
             {:else if !$pendingOrder.has(id)}
                 {#if $user}
                     <div class="w-full h-px bg-zinc-800"></div>
                     {#if $user.plotCredits}
-                        <div class="text-sm">You have <strong>{$user.plotCredits}</strong> unclaimed plots!</div>
+                        <div class="text-sm">You have <strong>{$user.plotCredits}</strong> plot credit{#if $user.plotCredits.length > 1}s{/if}!</div>
                         <button class="mt-1 button0" on:click={() => $showClaimModal = true}>Claim</button>
                     {:else}
                         <div class="flex items-center gap-2 text-sm text-zinc-300">

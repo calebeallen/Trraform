@@ -44,8 +44,11 @@
         })
         const { data } = await res.json()
 
-        if(res.ok)
+        if(res.ok){
+            $user.username = newUsername
+            $user = $user
             dispatch("close")
+        }
 
         else if(data?.usernameTaken)
             usernameError = "Username taken"

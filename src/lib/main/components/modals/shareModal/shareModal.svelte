@@ -23,10 +23,10 @@
 
         $modalsShowing++
 
-        const plotIdStr = $insideOf.id.string()
+        plotIdStr = $insideOf.id.string()
 
         if($insideOf.owner !== null)
-            plotImgSrc = `${IMAGES_BUCKET_URL}/${plotIdStr}`
+            plotImgSrc = `${IMAGES_BUCKET_URL}/${plotIdStr}.png`
         else    
             plotImgSrc = "/default.png"
 
@@ -72,7 +72,7 @@
         {:else}
             <img class="object-cover h-full rounded-3xl" src={plotImgSrc} alt="build">
             <div class="absolute top-0 left-0 flex items-baseline justify-between w-full p-4">
-                <h1 class="font-bold sm:text-lg">Share Plot {plotIdStr}</h1>
+                <h1 class="font-bold sm:text-lg">Share Plot 0x{plotIdStr}</h1>
                 <button on:click={() => dispatch("close")} class="w-5 h-5 transition-opacity active:opacity-60">
                     <img src="/close.svg" alt="close">
                 </button>

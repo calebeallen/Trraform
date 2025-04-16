@@ -4,6 +4,7 @@
     import { cart, paymentSession, showSubscriptionModal, user } from "$lib/main/store"
     import { PRICE } from "$lib/common/constants"
     import SmokeBg from "../subscription/smokeBg.svelte";
+    import Promo2 from "../subscription/promo2.svelte";
 
     let plots = []
     let total = ""
@@ -94,12 +95,9 @@
         </div>
         <div class="pt-3 mt-3 space-y-3 border-t border-zinc-800">
             {#if !$user?.subActive}
-                <button on:click={() => {
-                    $showSubscriptionModal = true
-                }} class="relative max-w-sm p-3 overflow-hidden text-sm text-left transition-colors bg-black w-72 hover:bg-zinc-950 outline-zinc-700 outline-1 outline rounded-2xl">
-                    <SmokeBg/>
-                    <div class="relative font-semibold">Get <b>6 more plots</b> plus <b> 8x greater</b> build space, <b>verified badges</b> <img class="w-3.5 aspect-square inline" src="/verified.svg" alt="">, <b>links</b>, and more on <b>ALL</b> plots!</div>
-                </button>
+                <div class="w-72">
+                    <Promo2/>
+                </div>
             {/if}
             <div class="flex gap-1 font-bold">
                 <div>Total:</div>

@@ -9,6 +9,7 @@
     import { pollUpdates } from "$lib/main/pollUpdates"
     import { pushNotification } from "$lib/common/utils"
     import SmokeBg from "../subscription/smokeBg.svelte";
+    import Promo2 from "../subscription/promo2.svelte";
 
     let conflict = false
 
@@ -69,13 +70,7 @@
 <Modal header="Claim plot?" class="max-w-sm" on:close>
     <div class="relative mt-3 space-y-4">
         {#if !$user?.subActive}
-            <button on:click={() => {
-                $showSubscriptionModal = true
-                dispatch("close")
-            }} class="relative w-full p-3 overflow-hidden text-left transition-colors bg-black hover:bg-zinc-950 outline-zinc-700 outline-1 outline rounded-2xl">
-                <SmokeBg/>
-                <div class="relative text-sm font-semibold">Get <b>6 more plots</b> plus <b> 8x greater</b> build space, <b>verified badges</b> <img class="w-3.5 aspect-square inline" src="/verified.svg" alt="">, <b>links</b>, and more on <b>ALL</b> plots!</div>
-            </button>
+            <Promo2/>
         {/if}
         <div class="flex justify-between w-full p-3 bg-zinc-900 outline-zinc-700 outline-1 outline rounded-2xl">
             <div>

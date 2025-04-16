@@ -14,8 +14,8 @@ const MAX_DEPTH = 2
 const D0_PLOT_COUNT = 34998
 const PLOT_COUNT = 24
 
-const BUILD_SIZE_STD = 40
-const BUILD_SIZE_LARGE = 80
+const BUILD_SIZE_STD = 32
+const BUILD_SIZE_LARGE = 64
 const MIN_BUILD_SIZE = 6
 const LOW_RES = 2
 const CHUNK_SIZE = 6

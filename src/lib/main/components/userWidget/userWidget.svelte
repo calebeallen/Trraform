@@ -10,6 +10,7 @@
     import { goto } from "$app/navigation"
     import { API_ORIGIN } from "$lib/common/constants"
     import { onMount } from "svelte";
+    import Promo2 from "../subscription/promo2.svelte";
 
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
     let showUserOptions, userOptionsContainer, userOptionsButton
@@ -142,6 +143,11 @@
         {:else}
             <EditPlot bind:editingPlot/>
         {/if}
+    {/if}
+    {#if !$user?.subActive}
+        <div class="sm:w-[458px] w-[224px] mt-3">
+            <Promo2/>
+        </div>
     {/if}
 </div>
 

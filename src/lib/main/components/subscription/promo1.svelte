@@ -16,5 +16,10 @@
             </div>
         <img class="h-20 rounded " src="/space.png" alt="">
         </div>
+        <div class="relative flex items-center gap-2 mt-2">
+            <div class="w-full h-0.5 bg-zinc-700"></div>
+            <div class="text-sm font-bold w-max shrink-0 text-zinc-300">Click for more!</div>
+            <div class="w-full h-0.5 bg-zinc-700"></div>
+        </div>
     </div>
 </button>

@@ -10,10 +10,10 @@
     import { pushNotification } from "$lib/common/utils"
     import { preprocessPNG } from "$lib/common/buildImage"
 
-    const NAME_MAX_LENGTH = 48
+    const NAME_MAX_LENGTH = 32
     const DESC_MAX_LENGTH = 128
     const LINK_MAX_LENGTH = 256
-    const LINK_TITLE_MAX_LENGTH = 64
+    const LINK_TITLE_MAX_LENGTH = 48
 
     export let editingPlot
     let name = ""

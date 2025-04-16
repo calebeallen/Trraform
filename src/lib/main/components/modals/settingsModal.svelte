@@ -131,7 +131,7 @@
 
         <div class="flex items-center gap-1">
             <span>Plot render limit</span>
-            <Tip class="bottom-0 left-0 translate-x-4" text="The target number of plots that can be rendered at once. Can "/>
+            <Tip class="bottom-0 left-0 translate-x-4" text="The target number of plots that can be rendered at once."/>
         </div>
         <Slider bind:value={renderLimitValue} min={RENDER_LIMIT_MIN} max={RENDER_LIMIT_MAX}/>
         <div class="text-center w-14">{renderLimitDisplay}</div>

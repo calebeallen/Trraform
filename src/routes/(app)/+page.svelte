@@ -11,7 +11,7 @@
         import { isMobileBrowser, showHowItWorksModal, user } from "$lib/main/store"
         import Leaderboard from "$lib/main/components/leaderboard.svelte";
         
-        import Promo from "../../lib/main/components/subscription/promo.svelte";
+        import Promo from "../../lib/main/components/subscription/promo1.svelte";
 
     </script>
 

@@ -3,7 +3,7 @@ const PLOT_VERSION = 0
 const EDITOR_VERSION = "1.0"
 const MAIN_VERSION = "1.0"
 
-const API_ORIGIN = "http://localhost:8080"
+const API_ORIGIN = "https://api-test.trraform.com"
 
 const PLOT_DATA_BUCKET_URL = "https://plots.trraform.com"
 const CHUNK_BUCKET_URL = "https://chunks.trraform.com"

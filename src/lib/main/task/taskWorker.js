@@ -3,7 +3,7 @@
 
 import { Vector3 } from "three"
 import { ColorLibrary } from "../../common/colorLibrary"
-import { PLOT_COUNT, LOW_RES, CHUNK_SIZE, MAX_DEPTH, CHUNK_BUCKET_URL } from "../../common/constants"
+import { PLOT_COUNT, LOW_RES, CHUNK_SIZE, MAX_DEPTH, CHUNK_BUCKET_URL, BUILD_SIZE_STD } from "../../common/constants"
 import { I2P, P2I, backFace, bottomFace, expand, frontFace, getVertexIndicies, leftFace, rightFace, topFace, decodePlotData } from "../../common/utils"
 import PlotId from "../../common/plotId"
 
@@ -32,7 +32,7 @@ onmessage = async e => {
 
             case "process_plot_data":
 
-                [response, transferable] = processPlotData(data.plotDataU8, data.placeSubplots)
+                [response, transferable] = await processPlotData(data.plotDataU8, data.placeSubplots)
                 break
 
             case "merge_geometries":
@@ -114,9 +114,28 @@ async function getChunk(chunkId){
 // places unplaced subplots
 // generates low detail geometry
 // generates full detail geometry with poly reduction
-function processPlotData(plotDataU8, placeSubplots = true){
+async function processPlotData(plotDataU8, placeSubplots = true){
 
-    const { owner, name, desc, link, linkTitle, verified, buildData } = decodePlotData(plotDataU8)
+    let { owner, name, desc, link, linkTitle, verified, buildData } = decodePlotData(plotDataU8)
+
+    // for canceled subscriptions, remove benefits
+    if(!verified && buildData[1] > BUILD_SIZE_STD){
+
+        const res = await fetch("/default_cactus.dat")
+        const buf = await res.arrayBuffer()
+       
+        const dv = new DataView(buf)
+        const len = buf.byteLength / 2
+        const _buildData = new Uint16Array(len)
+        
+        for (let i = 0; i < len; i++) 
+            _buildData[i] = dv.getUint16(i * 2, true)
+
+        buildData = _buildData
+        link = ""
+        linkTitle = ""
+
+    }
 
     const buildSize = buildData[1]
     const plotData = {

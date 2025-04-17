@@ -70,3 +70,13 @@ export default class Chunk{
     }
 
 }
+
+
+/* for stress testing */
+async function testData(){
+
+    const data = await fetch("/test_plot.dat")
+    const buf = await data.arrayBuffer()
+    return new Uint8Array(buf)
+    
+}

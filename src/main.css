@@ -24,13 +24,13 @@
 
     .button0{
 
-        @apply px-2 py-1 text-xs sm:text-sm text-center transition-colors bg-blue-700 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-blue-600 enabled:active:bg-blue-700 focus:outline outline outline-1 outline-blue-600 font-semibold;
+        @apply px-2 py-1 text-xs font-semibold text-center transition-colors bg-blue-700 rounded-lg sm:text-sm disabled:opacity-70 disabled:cursor-not-allowed enabled:hover:bg-blue-600 enabled:active:bg-blue-700 focus:outline outline outline-1 outline-blue-600;
 
     }
 
     .std-input{
 
-        @apply p-1 placeholder:text-zinc-500 sm:text-sm text-xs m-0 resize-none rounded-lg outline outline-1 outline-zinc-700 bg-zinc-900 transition-colors;
+        @apply p-1 m-0 text-xs transition-colors rounded-lg resize-none placeholder:text-zinc-500 sm:text-sm outline outline-1 outline-zinc-700 bg-zinc-900;
 
     }
     

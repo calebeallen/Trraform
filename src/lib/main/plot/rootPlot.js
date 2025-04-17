@@ -56,7 +56,7 @@ export default class RootPlot {
                 const chunks = new Array(chunkCount)
                 for(let i = 0; i < chunkCount; i++){
 
-                    const chunkId = `0_${i}`
+                    const chunkId = `0_${i.toString(16).toLowerCase()}`
                     chunks[i] = new Chunk(chunkId, null)
         
                 }

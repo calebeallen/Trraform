@@ -19,6 +19,7 @@ export default class Plot extends PlotData {
         this.chunk = chunk // reference shared between all plots that belong to this chunk
         this.verified = false
         this.owner = null
+        this.isLoaded = false
 
         const c = pos.clone().addScalar(parent.blockSize / 2)
         this.sphere = new Sphere(c, Math.sqrt((parent.blockSize / 2 ) ** 2 * 3)) //does not change, is the absolute bounds of the plot
@@ -56,6 +57,7 @@ export default class Plot extends PlotData {
 
         this.buildSize = 16
         this.blockSize = this.parent.blockSize / this.buildSize
+        this.isLoaded = false
 
         this.geometryData = null
 
@@ -70,6 +72,7 @@ export default class Plot extends PlotData {
                 const plotDataU8 = await this.chunk.getPlotData(this.id)
 
                 if(plotDataU8 === null){
+                    this.isLoaded = true
                     resolve(this)
                     return
                 }
@@ -144,6 +147,7 @@ export default class Plot extends PlotData {
 
                 }
 
+                this.isLoaded = true
                 resolve(this)
                 
             })

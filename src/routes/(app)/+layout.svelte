@@ -255,16 +255,16 @@
         if(plots.length == 0)
             return
 
-        // //render plots
-        // const plotIdSet = new Set(plots.map(a => a.plot.id.id))
-        // for(let i = plots.length - 1; i >= 0; i--){
+        //render plots
+        const plotIdSet = new Set(plots.map(a => a.plot.id.id))
+        for(let i = plots.length - 1; i >= 0; i--){
 
-        //     if(!refs.renderManager.hasAvailability())
-        //         break
+            if(!refs.renderManager.hasAvailability())
+                break
 
-        //     refs.renderManager.managedRender(plots[i].plot, refs.camera, plotIdSet)
+            refs.renderManager.managedRender(plots[i].plot, refs.camera, plotIdSet)
 
-        // }
+        }
     
     }
 
@@ -303,14 +303,31 @@
         for(const { plot, dist } of plots){
 
             const key = plot.id.string()
+
+            if(!plot.isLoaded)
+                continue
+
+            if(plot.owner !== null && !plot.verified)
+                continue
+
             if(!(key in tags)){
 
                 const elem = document.createElement("button")
-                elem.classList.add("plot-tag")
                 elem.name = key
-                elem.innerText = plot.name || key
                 elem.tabIndex = -1
                 elem.onclick = handleTagClick
+                let attOpac = false
+                if(plot.owner === null)
+                    elem.classList.add("open-plot-tag")
+                else{
+                    attOpac = true
+                    const verifiedSvg = document.createElement("img")
+                    verifiedSvg.setAttribute("src", "/verified.svg")
+                    verifiedSvg.classList.add("tag-verified-svg")
+                    elem.classList.add("plot-tag")
+                    elem.innerText = plot.name || key + " "
+                    elem.append(verifiedSvg)
+                }
                 tagContainer.appendChild(elem)
 
                 tags[key] = {
@@ -318,6 +335,7 @@
                     elem,
                     dist,
                     t: 0,
+                    attOpac,
                     zIndex: 0
                 }
 
@@ -335,7 +353,7 @@
     }
 
     const quad = t => 1 - (t - 1)**2
-    function updateTag({plot, elem, dist, t, zIndex}, attenuate){
+    function updateTag({plot, elem, dist, t, attOpac, zIndex}, attenuate){
 
         const v4 = plot.tagPosition.clone()
         v4.applyMatrix4(refs.camera.viewMatrix)
@@ -355,7 +373,8 @@
         let a = 1 / Math.max(dist, 1)
         let opacity, scale 
         if(attenuate){
-            opacity = Math.max(Math.min(a + 0.5, 1), MIN_OPACITY)
+            if(attOpac)
+                opacity = Math.max(Math.min(a + 0.5, 1), MIN_OPACITY)
             scale = Math.max(Math.min(a, 1), MIN_SCALE) * quad(t) * settings.tagSize / 2
         } else {
             opacity = 1
@@ -441,6 +460,8 @@
     }
 
     function moveToPlot(plot) {
+
+        console.log(plot)
         
         if(plot instanceof RootPlot){
 
@@ -837,6 +858,19 @@
 
     :global(.plot-tag) {
         @apply absolute px-1 py-0.5 bg-zinc-900 rounded-lg text-sm;
+    }
+
+    :global(.tag-verified-svg) {
+        @apply w-3.5 aspect-square inline -translate-y-px ml-0.5;
+    }
+    
+    :global(.open-plot-tag) {
+        @apply absolute bg-blue-600  rounded-full w-5 h-5;
+    }
+
+    :global(.open-plot-tag::after) {
+        content: "";
+        @apply absolute left-1/2 border-t-8 border-t-blue-600 border-x-transparent border-x-[6px] -translate-x-1/2 w-0 h-0 -bottom-2.5;
     }
     
     .widget-container{

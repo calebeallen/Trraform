@@ -212,7 +212,7 @@
                 {#if $user}
                     <div class="w-full h-px bg-zinc-800"></div>
                     {#if $user.plotCredits}
-                        <div class="text-sm">You have <strong>{$user.plotCredits}</strong> plot credit{#if $user.plotCredits.length > 1}s{/if}!</div>
+                        <div class="text-sm">You have <strong>{$user.plotCredits}</strong> plot credit{#if $user.plotCredits > 1}s{/if}!</div>
                         <button class="mt-1 button0" on:click={() => $showClaimModal = true}>Claim</button>
                     {:else}
                         <div class="flex items-center gap-2 text-sm text-zinc-300">

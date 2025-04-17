@@ -21,12 +21,9 @@ export default class PlotId {
             id = BigInt(`0x${sanitized}`)
 
         } catch {
-            throw new Error("Invalid plot id (not parseable as BigInt)")
+            throw new Error("Invalid plot id (not parsable as BigInt)")
         }
-    
-        // Check range: must be > 0 and < 2**32
-        if (id === 0n || id >= (1n << 32n))
-            throw new Error("Invalid plot id (out of range)")
+
     
         return new PlotId(id)
 
@@ -112,12 +109,9 @@ export default class PlotId {
 
         // Convert BigInt to lowercase hex
         let str = this.id.toString(16).toLowerCase()
-
-        // Ensure even-length hex (so something like 0x0F doesn't lose the leading '0')
-        if (str.length % 2 !== 0)
-            str = `0${str}`;
         
         return hexPrefix ? `0x${str}` : str
+
     }
   
     bigInt() {

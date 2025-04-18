@@ -307,7 +307,7 @@
             if(!plot.isLoaded)
                 continue
 
-            if(plot.owner !== null && !plot.verified)
+            if(plot.owner !== null && !plot.verified && attenuate)
                 continue
 
             if(!(key in tags)){
@@ -321,12 +321,14 @@
                     elem.classList.add("open-plot-tag")
                 else{
                     attOpac = true
-                    const verifiedSvg = document.createElement("img")
-                    verifiedSvg.setAttribute("src", "/verified.svg")
-                    verifiedSvg.classList.add("tag-verified-svg")
                     elem.classList.add("plot-tag")
                     elem.innerText = plot.name || key + " "
-                    elem.append(verifiedSvg)
+                    if(plot.verified){
+                        const verifiedSvg = document.createElement("img")
+                        verifiedSvg.setAttribute("src", "/verified.svg")
+                        verifiedSvg.classList.add("tag-verified-svg")
+                        elem.append(verifiedSvg)
+                    }
                 }
                 tagContainer.appendChild(elem)
 
@@ -358,8 +360,10 @@
         const v4 = plot.tagPosition.clone()
         v4.applyMatrix4(refs.camera.viewMatrix)
 
-        const x = (v4.x / v4.w * 0.5 + 0.5) * window.innerWidth
-        const y = (-v4.y / v4.w * 0.5 + 0.5) * window.innerHeight
+        const { width, height } = tagContainer.getBoundingClientRect()
+
+        const x = (v4.x / v4.w * 0.5 + 0.5) * width
+        const y = (-v4.y / v4.w * 0.5 + 0.5) * height
         const z = v4.z / v4.w
 
         if (z >= 1) {
@@ -647,7 +651,7 @@
 
     function mousewheel(e){
 
-        if( $inputFocused || $modalsShowing > 0 )
+        if( $inputFocused || $modalsShowing > 0 || $page?.route?.id === "/(app)" )
 
             return
 
@@ -661,7 +665,7 @@
 
     function touchevent(e){ 
 
-        if( $inputFocused || $modalsShowing > 0 || refs.camera.update === refs.camera.standard )
+        if( $inputFocused || $modalsShowing > 0 || refs.camera.update === refs.camera.standard || $page?.route?.id === "/(app)" )
 
             return
 

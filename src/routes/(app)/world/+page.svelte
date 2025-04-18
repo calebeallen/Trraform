@@ -46,8 +46,18 @@
                     link = `https://${link}`
             }
 
+            // change
+            let userOwned = false
+            if($user?.plotIds)
+                for(const { plotId } of $user?.plotIds )
+                    if(plotId == idStr){
+                        userOwned = true
+                        break
+                    }
+
             res({ 
                 owner : plot.owner, 
+                userOwned,
                 id : idStr,
                 depth: plot.id.depth(),
                 verified: plot.verified,
@@ -160,7 +170,7 @@
                 <div class="w-1/2 h-5 mt-1 rounded-full bg-zinc-800"></div>
                 <div class="w-1/4 h-3 mt-1 rounded-full bg-zinc-800"></div>
             </div>
-        {:then { id, owner, depth, verified, name, desc, link, linkTitle } }
+        {:then { id, owner, userOwned, depth, verified, name, desc, link, linkTitle } }
             <div>
                 <div class="flex items-baseline justify-between gap-2">
                     <h3 class="max-w-full text-sm break-all w-max sm:text-base">{name} {#if verified}<img class="w-3.5 aspect-square" src="/verified.svg" alt="" style=" display: inline; vertical-align: middle;">{/if}</h3>
@@ -190,12 +200,16 @@
                     <div class="text-xs opacity-70">id: 0x{id}</div>
                 </div>
             </div>
-            {#if owner}
+            {#if owner || userOwned}
                 {#if desc || link}
                     <div class="w-full h-px bg-zinc-800"></div>
                 {/if}
-                {#if desc}
-                    <p class="text-zinc-300">{desc}</p>
+                {#if owner}
+                    {#if desc}
+                        <p class="text-zinc-300">{desc}</p>
+                    {/if}
+                {:else}
+                    <p class="text-zinc-300">Your plot is on its way!</p>
                 {/if}
                 {#if link}
                     <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">

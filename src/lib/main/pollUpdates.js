@@ -2,7 +2,7 @@
 
 import { API_ORIGIN } from "../common/constants";
 import { pushNotification } from "$lib/common/utils"
-import { user as _user, newPlots, refs, showNextStepsModal, notification } from "$lib/main/store"
+import { user as _user, newPlots, refs, showNextStepsModal, notification, insideOf } from "$lib/main/store"
 import { confetti } from "./decoration";
 import { get } from "svelte/store";
 import PlotId from "../common/plotId";
@@ -76,6 +76,7 @@ export async function pollUpdates(anticipatedChanges, tries = 0) {
 
                 anticipatedChanges.plotIds = null
                 _user.set(user) // update user store to new data
+                insideOf.update(_=>_)
 
             }
 

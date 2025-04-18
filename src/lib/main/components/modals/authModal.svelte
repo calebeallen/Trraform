@@ -332,7 +332,7 @@
                         {#if showPassword}
                             <img class="w-4 rounded opacity-50 aspect-square" src="/eyeSlashed.svg" alt="">
                         {:else}
-                            <img class="w-5 rounded aspect-square" src="/eyeGif.gif" alt="">
+                            <img class="w-4 rounded opacity-50 aspect-square" src="/eye.svg" alt="">
                         {/if}
                     </button>
                 </div>

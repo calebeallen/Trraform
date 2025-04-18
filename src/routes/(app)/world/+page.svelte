@@ -134,22 +134,22 @@
     
     <!-- HTML Meta Tags -->
     <title>Trraform</title>
-    <meta name="description" content="Millions of worlds powered by Polygon.">
+    <meta name="description" content="Build and explore millions of worlds.">
 
     <!-- Facebook Meta Tags -->
     <meta property="og:type" content="website">
     <meta property="og:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta property="og:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta property="og:description" content={data?.ogDesc ?? "Millions of worlds."}>
-    <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/banner.png"}>
+    <meta property="og:description" content={data?.ogDesc ?? "Build and explore millions of worlds."}>
+    <meta property="og:image" content={data?.ogImage ?? "https://trraform.com/og-image.png"}>
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta property="twitter:domain" content="trraform.com">
     <meta property="twitter:url" content={data?.ogUrl ?? "https://trraform.com/world"}>
     <meta name="twitter:title" content={data?.ogTitle ?? "Trraform"}>
-    <meta name="twitter:description" content={data?.ogDesc ?? "Millions of worlds."}>
-    <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/banner.png"}>
+    <meta name="twitter:description" content={data?.ogDesc ?? "Build and explore millions of worlds."}>
+    <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/og-image.png"}>
 
 </svelte:head>
 

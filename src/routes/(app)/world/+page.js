@@ -1,7 +1,6 @@
 export const prerender = false;
 
 import PlotId from "$lib/common/plotId"
-import Camera from "$lib/common/camera"
 
 export async function load({ url }) {
 

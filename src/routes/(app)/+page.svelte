@@ -19,22 +19,22 @@
             
         <!-- HTML Meta Tags -->
         <title>Trraform</title>
-        <meta name="description" content="Millions of worlds powered by Polygon.">
+        <meta name="description" content="Build and explore millions of worlds.">
 
         <!-- Facebook Meta Tags -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://trraform.com">
         <meta property="og:title" content="Trraform">
-        <meta property="og:description" content="Millions of worlds powered by Polygon.">
-        <meta property="og:image" content="https://trraform.com/banner.png">
+        <meta property="og:description" content="Build and explore millions of worlds.">
+        <meta property="og:image" content="https://trraform.com/og-image.png">
 
         <!-- Twitter Meta Tags -->
         <meta name="twitter:card" content="summary_large_image">
         <meta property="twitter:domain" content="trraform.com">
         <meta property="twitter:url" content="https://trraform.com">
         <meta name="twitter:title" content="Trraform">
-        <meta name="twitter:description" content="Millions of worlds powered by Polygon.">
-        <meta name="twitter:image" content="https://trraform.com/banner.png">
+        <meta name="twitter:description" content="Build and explore millions of worlds.">
+        <meta name="twitter:image" content="https://trraform.com/og-image.png">
 
     </svelte:head>
 

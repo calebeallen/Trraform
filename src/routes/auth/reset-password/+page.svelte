@@ -63,7 +63,7 @@
 
         } catch {
 
-            resetError = "An error occured, please request a new link."
+            resetError = "An error occurred, please request a new link."
 
         }
 
@@ -100,7 +100,7 @@
                         {#if showPassword}
                             <img class="w-4 rounded opacity-50 aspect-square" src="/eyeSlashed.svg" alt="">
                         {:else}
-                            <img class="w-5 rounded aspect-square" src="/eyeGif.gif" alt="">
+                            <img class="w-4 rounded aspect-square" src="/eye.svg" alt="">
                         {/if}
                     </button>
                 </div>

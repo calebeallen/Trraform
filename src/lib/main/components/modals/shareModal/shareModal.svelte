@@ -27,7 +27,7 @@
         plotIdStr = $insideOf.id.string()
 
         if($insideOf.owner !== null)
-            plotImgSrc = `${IMAGES_BUCKET_URL}/${plotIdStr}.png`
+            plotImgSrc = $insideOf.id.getImgUrl()
         else    
             plotImgSrc = "/default.png"
 
@@ -54,7 +54,7 @@
 
     function close(){
 
-        dispatch("close")
+        dispatch("close")   
 
     }
 

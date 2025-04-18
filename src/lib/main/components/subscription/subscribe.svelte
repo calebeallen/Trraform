@@ -40,12 +40,12 @@
     <div bind:this={contentContainer} transition:fly={{duration: 150, y: 50}} class="relative w-full max-w-sm p-5 overflow-hidden bg-black shadow-2xl sm:p-5 shadow-black rounded-3xl">
         <SmokeBg/> 
         <div class="relative space-y-4 font-semibold sm:space-y-5">
-            <div class="flex flex-wrap items-end gap-1 sm:gap-2">
-                <h1 class="text-3xl font-extrabold w-44 sm:text-4xl sm:w-48">Support Trraform & Stand Out</h1>
-                <div class="text-zinc-200"><b class="text-lg sm:text-xl">$4.99</b>/mo</div>
+            <div class="w-80">
+                <h1 class="inline text-3xl font-extrabold sm:text-4xl">Support Trraform & Stand Out</h1>
+                <div class="inline text-zinc-200"><b class="ml-1 text-lg sm:text-xl">$4.99</b>/mo</div>
             </div>
             <div class="text-sm sm:text-base">
-                <b>Catch eyes</b> and <b>grow</b> your community, store, and/or personal brand with one of the most <b>unique platforms</b> to ever exist.
+                Help fund the project, <b>catch eyes</b>, and <b>grow</b> your community, store, and/or personal brand with one of the most <b>unique platforms</b> to ever exist.
             </div>
             <ul class="p-4 space-y-3.5 overflow-hidden font-semibold bg-zinc-900 text-zinc-200 rounded-xl outline-fuchsia-400 outline outline-1 sm:text-base text-sm" style="box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.4);">
                 <div class="font-extrabold">Here's what you'll get:</div>
@@ -82,7 +82,7 @@
                 <li class="flex items-baseline gap-1">
                     <div class="shrink-0">🔥</div>
                     <div>
-                        More features on the way!
+                        More features in development!
                     </div>
                 </li>
                 <button on:click={initSubscription} class="w-full p-2 font-extrabold transition-colors rounded-lg bg-fuchsia-500 outline-fuchsia-400 outline-1 outline hover:bg-fuchsia-400">Try it!</button>

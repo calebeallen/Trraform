@@ -14,7 +14,7 @@
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
     import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart, showSubscriptionModal, showCancelSubscriptionModal, showRenewSubscriptionModal } from "$lib/main/store"
-    import { MAX_DEPTH, API_ORIGIN } from "$lib/common/constants"
+    import { MAX_DEPTH, API_ORIGIN, STRIPE_PUB_KEY } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
     import RenderManager from "$lib/main/renderManager"
@@ -112,7 +112,7 @@
         }
 
 
-        $stripe = await loadStripe('pk_test_51RCYJGGgpUJInHeUFiJ7rMaDW6ScPPU8Git55wQkr13bAzHOqs0w5yUMRwqXxdTFSgzrelQNXVIV5rXlpAm8mV8500dr0ExiFj')
+        $stripe = await loadStripe(STRIPE_PUB_KEY)
 
         /* begin rendering */
         refs.renderer.setAnimationLoop(renderLoop)

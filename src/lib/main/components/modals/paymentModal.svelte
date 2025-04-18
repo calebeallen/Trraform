@@ -142,6 +142,8 @@
 
             clientSecret = data.clientSecret
 
+            console.log(clientSecret)
+
         } catch(e) {
             return { error: e }
         }

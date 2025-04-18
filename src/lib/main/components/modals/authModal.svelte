@@ -5,6 +5,7 @@
     import Modal from "$lib/common/components/modal.svelte";
     import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { API_ORIGIN } from "$lib/common/constants"
+    import { page } from "$app/stores"
     import { showResetPasswordModal, loadScreenOpacity, tempEmail, showSendVerificationEmailModal, user, modalsShowing } from "$lib/main/store"
     import isEmail from "validator/lib/isEmail";
 
@@ -37,6 +38,9 @@
     $:header = mode === "login" ? "Log In" : "Create Account"
 
     onMount(() => {
+
+        if($page.url.searchParams.get("showLogin") == "true")
+            mode = "login"
 
         $modalsShowing++
 

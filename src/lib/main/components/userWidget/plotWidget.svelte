@@ -44,7 +44,7 @@
         <img class="object-cover h-full" src={plotData.imgUrl} alt="build"/> 
         <div class="absolute bottom-0 flex flex-col w-full gap-px p-1 transition-opacity opacity-0 group-hover:opacity-100">
             <button on:click={() => goto(`/world?plotId=${plotData.id}`)} class="flex items-center w-full gap-1 px-1 py-0.5 bg-zinc-950 bg-opacity-0 rounded-xl hover:bg-opacity-50">
-                <img class="w-3.5 sm:w-4 aspect-square" src="/navigate.svg" alt="">
+                <img class="w-3.5 sm:w-4 aspect-square" src="/goto.svg" alt="">
                 <div class="text-xs sm:text-sm">Go to</div>
             </button>
             <button on:click={() => editingPlot = plot} class="flex items-center w-full gap-1 px-1 py-0.5  bg-zinc-950 bg-opacity-0 rounded-xl hover:bg-opacity-50">

@@ -2,12 +2,15 @@
 <script>
 
     import Modal from "../../../common/components/modal.svelte";
-    import { loadScreenOpacity, notification, user } from "$lib/main/store"
+    import { loadScreenOpacity, notification, user, modalsShowing } from "$lib/main/store"
     import { API_ORIGIN } from "$lib/common/constants"
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
     import { pushNotification } from "$lib/common/utils"
 
     const dispatch = createEventDispatcher()
+
+    onMount(() => $modalsShowing++)
+    onDestroy(() => $modalsShowing--)
 
     async function renewSubscription(){
 

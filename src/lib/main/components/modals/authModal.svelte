@@ -8,27 +8,31 @@
     import { showResetPasswordModal, loadScreenOpacity, tempEmail, showSendVerificationEmailModal, user, modalsShowing } from "$lib/main/store"
     import isEmail from "validator/lib/isEmail";
 
-    const USERNAME_MAX_LEN = 48
+    const USERNAME_MAX_LEN = 32
     const EMAIL_MAX_LEN = 254
-    const PASSWORD_MIN_LEN = 8
     const PASSWORD_MAX_LEN = 128
 
     const dispatch = createEventDispatcher()
 
-    let header = "Log In"
-    let mode = "login"
+    let header = ""
+    let mode = "createacc"
 
     let usernameValue = ""
     let emailValue = ""
     let passwordInput
     let passwordValue = ""
 
+    let credentialError = null
     let usernameError = ""
     let emailError = ""
     let passwordError = ""
     let googleError = ""
 
+    let cfTurnstileError = ""
+    let disableSubmit = false
+
     let showPassword = false
+    let cfToken = null
 
     $:header = mode === "login" ? "Log In" : "Create Account"
 
@@ -46,11 +50,26 @@
             { theme: "filled_black", text: "continue_with" } 
         )
 
-        google.accounts.id.prompt()
-
     })
 
     onDestroy(() => $modalsShowing--)
+
+    async function CFTurnstile(){
+
+        let resolve
+        const promise = new Promise(res => resolve = res)
+
+        const id = turnstile.render("#cf-turnstile-0", {
+            sitekey: "0x4AAAAAABD14SF04aEcSB49",
+            callback: token => {
+                turnstile.remove(id)
+                resolve(token)
+            }
+        }) 
+
+        return promise
+
+    }
 
     function isUsername(username){
 
@@ -69,123 +88,152 @@
     function switchMode(newMode){
 
         mode = newMode
-
+    
         passwordValue = passwordInput.value = ""
         emailValue = ""
+        usernameValue = ""
 
-        emailError = passwordError = usernameError = ""
+        emailError = passwordError = usernameError = cfTurnstileError = credentialError = googleError = ""
         showPassword = false
+
+        disableSubmit = false
 
     }
 
     async function submit(){
 
         // clear errors
-        emailError = passwordError = usernameError = ""
+        emailError = passwordError = usernameError = cfTurnstileError = credentialError = googleError = ""
         passwordValue = passwordInput.value
 
-        $loadScreenOpacity = 50
+        // copy values so that user cannot modify them while the below promise is waiting
+        // server checks for validity, but just to be safe
+        const email = emailValue.toLowerCase().trim()
+        const password = passwordInput.value
         
+        disableSubmit = true
         if(mode === "login")
-            await passwordLogIn()
-        else if(mode === "createacc")
-            await createAccount()
-
-        $loadScreenOpacity = 0
+            await passwordLogIn(email, password)
+        else if(mode === "createacc"){
+            const username = usernameValue
+            await createAccount(username, email, password)
+        }
+        disableSubmit = false
         
     }
 
-    async function createAccount(){
-
-        const email = emailValue.toLowerCase().trim()
+    async function createAccount(username, email, password){
         
-        usernameError = isUsername(usernameValue) ? "" : "Invalid username"
+        usernameError = isUsername(username) ? "" : "Invalid username"
         emailError = isEmail(email) ? "" : "Invalid email"
-        passwordError = isPassword(passwordValue) ? "" : "Invalid password"
+        passwordError = isPassword(password) ? "" : "Invalid password"
 
         if(usernameError || emailError || passwordError)
             return
-
-        const payload = {
-            username: usernameValue,
-            email: email,
-            password: passwordValue
+            
+        // do bot check
+        if(!cfToken){
+            disableSubmit = true
+            cfToken = await CFTurnstile()
+            disableSubmit = false
         }
-        const res = await fetch(`${API_ORIGIN}/auth/create-account`, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        })
-        const { data, error } = await res.json()
 
-        usernameError = data?.usernameExist ? "Username taken" : ""
-        emailError = data?.emailExist ? "Email already registered" : ""
-        
-        if(error || usernameError || emailError)
-            return
+        $loadScreenOpacity = 50
 
-        $tempEmail = email
-        $showSendVerificationEmailModal = true
-        dispatch("close")
+        try{
+
+            const payload = {
+                username,
+                email,
+                password,
+                cfToken
+            }
+
+            const res = await fetch(`${API_ORIGIN}/auth/create-account`, {
+                method: "POST",
+                body: JSON.stringify(payload)
+            })
+            const { data, message } = await res.json()
+
+            if (!res.ok) {
+
+                if(data?.invalidCfToken)
+                    cfTurnstileError = "Verification failed, please try again."
+
+                if(data?.usernameConflict)
+                    usernameError = "Username taken"
+
+                if(data?.emailConflict)
+                    emailError = "Email already registered"
+
+                throw new Error(message)
+
+            }
+
+            $tempEmail = email
+            $showSendVerificationEmailModal = true
+            dispatch("close")
+
+        } catch {
+            cfToken = null
+        } finally {
+            $loadScreenOpacity = 0
+        }
 
     }
 
-    async function passwordLogIn(){
+    async function passwordLogIn(email, password){
 
-        const email = emailValue.toLowerCase().trim()
-
-        emailError = isEmail(email) ? "" : "Invalid email"
-        passwordError = isPassword(passwordValue) ? "" : "Invalid password"
-
-        if(emailError || passwordError)
+        // do a basic format check first
+        if(!isEmail(email) || !isPassword(password)){
+            credentialError = "Invalid email/password"
             return
-
-        const payload = {
-            email: email,
-            password: passwordValue
         }
-        const res = await fetch(`${API_ORIGIN}/auth/password-login`, {
-            method: "POST",
-            body: JSON.stringify(payload)
-        })
-        const { data, error } = await res.json()
 
-        if(data === null && error)
-            throw new Error("Unknown error")
+        $loadScreenOpacity = 50
 
-        if(error){
+        try {
+
+            const res = await fetch(`${API_ORIGIN}/auth/password-login`, {
+                method: "POST",
+                body: JSON.stringify({ email, password })
+            })
+            const { data, message } = await res.json()
+
+            if(!res.ok){
+                
+                if(data?.credentialError)
+                    credentialError = "Invalid email/password"
             
-            if(!data.userExists){
-                emailError = "Invalid email"
-                return
+                if(data?.needsVerification){
+                    $tempEmail = email
+                    $showSendVerificationEmailModal = true
+                    dispatch("close")
+                }
+
+                throw new Error(message)
+
             }
             
-            if(!data.passwordCorrect){
-                passwordError = "Invalid password"
-                return
-            }
-        
-            if(!data.emailVerified){
-                $tempEmail = email
-                $showSendVerificationEmailModal = true
-                dispatch("close")
-                return
-            }
+            //otherwise user is authorized. save jwt, get user data
+            await getUserData(data.token)
 
+            $tempEmail = ""
+            dispatch("close")
+
+        } catch(e) {
+            console.error(e)
+        } finally {
+            $loadScreenOpacity = 0
         }
-        
-        //otherwise, save jwt, get user data
-        await getUserData(data.token)
-
-        $tempEmail = ""
-        dispatch("close")
-
         
     }
 
     async function googleLogIn(response) {
 
-        $loadScreenOpacity = 50
         googleError = ""
+
+        $loadScreenOpacity = 50
 
         try {
 
@@ -193,20 +241,20 @@
                 method: "POST",
                 body: JSON.stringify({ token: response.credential })
             })
-            const { data, error, message } = await res.json()
+            const { data, message } = await res.json()
 
-            if(error)
+            if(!res.ok)
                 throw new Error(message)
 
             await getUserData(data.token)
+            dispatch("close")
 
         } catch {
             googleError = "Error logging in with google."
+        } finally {
+            $loadScreenOpacity = 0
         }
-
-        $loadScreenOpacity = 0
-        dispatch("close")
-
+       
     }
 
     async function getUserData(token){
@@ -233,6 +281,7 @@
     }
 
 </script>
+
 
 
 <Modal class="max-w-sm" closeOnClickOutside={false} bind:header on:close>
@@ -265,6 +314,9 @@
             {/if}
             <!-- email -->
             <div>
+                {#if credentialError}
+                    <div class="mb-1 text-xs text-red-500">{credentialError}</div>
+                {/if}
                 <div class="input-container">
                     <input bind:value={emailValue} class="" type="text" placeholder="Email" maxlength={EMAIL_MAX_LEN}>
                 </div>
@@ -285,10 +337,7 @@
                     </button>
                 </div>
                 {#if mode === "login"}
-                    <div class="flex justify-between mt-1 text-xs">
-                        <div class="text-xs text-red-500">{passwordError}</div>
-                        <button on:click={() => $showResetPasswordModal = true} type="button" class="transition-colors text-zinc-400 hover:text-zinc-300">Forgot password?</button>
-                    </div>
+                    <button on:click={() => $showResetPasswordModal = true} type="button" class="mt-0.5 transition-colors text-zinc-400 hover:text-zinc-300 text-xs">Forgot password?</button>
                 {:else if mode === "createacc"}
                     <div class="mt-1 text-xs space-y-0.5">
                         <div class="text-zinc-400">8-128 characters. Letters, numbers, and symbols only. No whitespace.</div>
@@ -298,14 +347,21 @@
                     </div>
                 {/if}
             </div>
+            <!-- CF Turnstile -->
+            {#if mode === "createacc"} 
+                <div>
+                    <div id="cf-turnstile-0"></div>
+                    <div class="text-xs text-red-500 mt-0.5">{cfTurnstileError}</div>
+                </div>
+            {/if}
             <div>
-                <button type="submit" class="w-full button0">{#if mode === "login"}Log in{:else if mode === "createacc"}Create account{/if}</button>
+                <button type="submit" class="w-full button0 {disableSubmit ? "pointer-events-none opacity-50" : ""}">{#if mode === "login"}Log in{:else if mode === "createacc"}Create account{/if}</button>
                 <button type="button" on:click={() => {
                     if(mode === "login")
                         switchMode("createacc")
                     else if (mode === "createacc")
                         switchMode("login")
-                }} class="mt-2 text-xs text-zinc-400 hover:text-zinc-300 transition-color">
+                }} class="mt-2 text-xs transition-colors text-zinc-400 hover:text-zinc-300">
                     {#if mode === "login"}
                         Don't have an account? Sign up here.
                     {:else if mode === "createacc"}
@@ -315,7 +371,7 @@
             </div>
         </form>
         <div class="w-full h-px bg-zinc-700"></div>
-        <div class="text-xs text-zinc-400">By creating an account or signing in, you agree to our <a href="/"><strong>Terms of Service</strong></a> and <a href="/"><strong>Privacy Policy</strong></a>.</div>
+        <div class="text-xs text-zinc-400">By creating an account or signing in, you agree to our <a href="/terms-of-service" target="_blank"><strong>Terms of Service</strong></a> and <a href="/privacy-policy" target="_blank"><strong>Privacy Policy</strong></a>.</div>
     </div>
 </Modal>
 

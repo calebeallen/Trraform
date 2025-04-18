@@ -2,12 +2,15 @@
 <script>
 
     import { fade, fly } from "svelte/transition";
-    import { user, showAuthModal, paymentSession } from "$lib/main/store"
+    import { user, showAuthModal, paymentSession, modalsShowing } from "$lib/main/store"
     import SmokeBg from "./smokeBg.svelte";
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
 
     const dispatch = createEventDispatcher()
     let contentContainer
+
+    onMount(() => $modalsShowing++)
+    onDestroy(() => $modalsShowing--)
 
     function click(e){
 
@@ -38,7 +41,7 @@
         <SmokeBg/> 
         <div class="relative space-y-4 font-semibold sm:space-y-5">
             <div class="flex flex-wrap items-end gap-1 sm:gap-2">
-                <h1 class="text-3xl font-extrabold w-44 sm:text-4xl sm:w-52">Build More & Stand Out</h1>
+                <h1 class="text-3xl font-extrabold w-44 sm:text-4xl sm:w-48">Support Trraform & Stand Out</h1>
                 <div class="text-zinc-200"><b class="text-lg sm:text-xl">$4.99</b>/mo</div>
             </div>
             <div class="text-sm sm:text-base">
@@ -74,6 +77,12 @@
                     <div class="pt-px shrink-0">🔥</div>
                     <div>
                         <b>BONUS:</b> One plot credit each month for the next <b>6 months!</b>
+                    </div>
+                </li>
+                <li class="flex items-baseline gap-1">
+                    <div class="shrink-0">🔥</div>
+                    <div>
+                        More features on the way!
                     </div>
                 </li>
                 <button on:click={initSubscription} class="w-full p-2 font-extrabold transition-colors rounded-lg bg-fuchsia-500 outline-fuchsia-400 outline-1 outline hover:bg-fuchsia-400">Try it!</button>

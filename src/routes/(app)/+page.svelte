@@ -10,8 +10,7 @@
         import { goto } from "$app/navigation"
         import { isMobileBrowser, showHowItWorksModal, user } from "$lib/main/store"
         import Leaderboard from "$lib/main/components/leaderboard.svelte";
-        
-        import Promo from "../../lib/main/components/subscription/promo1.svelte";
+    
 
     </script>
 
@@ -39,15 +38,15 @@
 
     </svelte:head>
 
-    <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full p-2 sm:p-2 sm:max-w-max">
-        <div class="flex items-center gap-2 opacity-70">
-            <a class="w-4 aspect-square" href="https://discord.gg/KGYYePyfuQ" target="_blank">
+    <div transition:fly={ { x: -500, opacity: 1 } } class="fixed bottom-0 left-0 w-full px-2 py-8 sm:p-8 sm:max-w-max">
+        <div class="flex items-center gap-3 opacity-70">
+            <a class="w-5 aspect-square" href="https://discord.gg/KGYYePyfuQ" target="_blank">
                 <img  src="/discord.svg" alt="">
             </a>
-            <a class="w-4 aspect-square" href="https://www.instagram.com/trraform_" target="_blank">
+            <a class="w-5 aspect-square" href="https://www.instagram.com/trraform_" target="_blank">
                 <img src="/instagram.svg" alt="">
             </a>
-            <a class="w-4 aspect-square" href="https://www.tiktok.com/@trraform" target="_blank">
+            <a class="w-5 aspect-square" href="https://www.tiktok.com/@trraform" target="_blank">
                 <img src="/tiktok.svg" alt=""> 
             </a>
         </div>
@@ -62,21 +61,18 @@
                 <a class="nav-option" target="_self" href="/editor">Build</a>
             {/if}
         </nav>
-        <div class="flex flex-col items-stretch w-full gap-2 mt-2 text-xs sm:text-sm sm:justify-normal sm:flex-row opacity-70">
-            <div class="flex items-center justify-center gap-2">
-                <a href="/terms-of-service" target="_blank">Terms of service</a>
-                <div class="w-px h-3.5 sm:h-4 bg-white"></div>
-                <a href="/privacy-policy" target="_blank">Privacy policy</a>
-                <div class="w-px h-3.5 sm:h-4 bg-white"></div>
-                <button on:click={() => $showHowItWorksModal = true}>How it works</button>
-            </div>
+    </div>
+
+    <div class="fixed left-0 w-full bottom-2">
+        <div class="flex items-center justify-center gap-2 mx-auto text-xs sm:text-sm text-zinc-400">
+            <div>© 2025 Trraform</div>
+            <a href="/terms-of-service" target="_blank">Terms of service</a>
+            <a href="/privacy-policy" target="_blank">Privacy policy</a>
+            <button on:click={() => $showHowItWorksModal = true}>How it works</button>
         </div>
     </div>
     
-    <div transition:fly={{ x: 400 }}  class="fixed bottom-0 right-0 hidden w-full p-2 pointer-events-none md:block">
-        {#if !$user?.subActive}
-            <Promo/>
-        {/if}
+    <div transition:fly={{ x: 400 }}  class="fixed bottom-0 right-0 hidden w-full p-8 pointer-events-none md:block">
         <Leaderboard/>
     </div>
 

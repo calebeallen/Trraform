@@ -139,15 +139,15 @@
     <!-- plots list -->
     {#if $user}
         {#if editingPlot === null}
+            {#if !$user?.subActive}
+            <div class="sm:w-[458px] w-[281px] mx-auto mt-3">
+                <Promo2/>
+            </div>
+            {/if}
             <PlotList bind:editingPlot/>
         {:else}
             <EditPlot bind:editingPlot/>
         {/if}
-    {/if}
-    {#if !$user?.subActive}
-        <div class="sm:w-[458px] w-[224px] mt-3">
-            <Promo2/>
-        </div>
     {/if}
 </div>
 

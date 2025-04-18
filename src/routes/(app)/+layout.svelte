@@ -647,7 +647,7 @@
 
     function mousewheel(e){
 
-        if( $inputFocused || $modalsShowing > 0  )
+        if( $inputFocused || $modalsShowing > 0 )
 
             return
 
@@ -737,6 +737,7 @@
             $inputFocused = false
 
     }
+
 
 </script>
 
@@ -853,15 +854,14 @@
         
 <Notification store={notification}/>
 
-
 <style lang="postcss">
 
     :global(.plot-tag) {
-        @apply absolute px-1 py-0.5 bg-zinc-900 rounded-lg text-sm;
+        @apply absolute px-1 py-0.5 bg-zinc-900 rounded-lg text-sm select-none;
     }
 
     :global(.tag-verified-svg) {
-        @apply w-3.5 aspect-square inline -translate-y-px ml-0.5;
+        @apply w-3.5 aspect-square inline -translate-y-px ml-0.5 pointer-events-none;
     }
     
     :global(.open-plot-tag) {

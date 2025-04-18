@@ -3,7 +3,7 @@
 
     import Modal from "../../../common/components/modal.svelte";
     import { createEventDispatcher, onDestroy, onMount } from "svelte";
-    import { modalsShowing } from "$lib/main/store"
+    import { modalsShowing, showSubscriptionModal } from "$lib/main/store"
 
     const dispatch = createEventDispatcher()
 
@@ -35,7 +35,10 @@
                 <p>Share your plot on to show the world what you've built!</p>
             </div>
         </section>
-        <button on:click={() => dispatch("close")} class="w-full button0">Got it!</button>
+        <button on:click={() => {
+            $showSubscriptionModal = true
+            dispatch("close")
+            }} class="w-full button0">Got it!</button>
     </div>
 </Modal>
 

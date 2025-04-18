@@ -6,74 +6,108 @@
 </script>
 
 <div class="overflow-auto bg-grad">
-    <div class="w-full max-w-screen-md px-2 mx-auto my-32 space-y-3">
-        <div class="flex items-center gap-2">
-            <img class="w-12 h-12" src="/logo.svg" alt="logo">
-            <h1>Privacy Policy</h1>
-        </div>
-        <p>Last updated 3/26/2025</p>
-        <h2>Introduction</h2>
-        <p>This Privacy Policy describes the privacy practices of Trraform (“we”, “us”, “our”, “our platform”) in connection with any of our services. This Privacy Policy outlines how we handle data related to your use of our services. Please read this privacy notice carefully and thoroughly, as it is crucial that you understand how your data will be handled through your use of any of our services.</p>
-        
-        <p>By visiting our website, or using any other related service, you agree to this Privacy Policy. If you do not agree with the terms listed in this policy, do not use our services. Please review our Terms of Service as well.</p>
-        
-        <h2>Definitions</h2>
-        <p><strong>Plot, digital asset, crypto asset:</strong> A token that represents a discrete unit of digital land within a virtual world. Users can upload and manage a "build" (a user generated voxel structure) associated with the plot as well as other properties (such as a name, description, and link).</p>
-        <p><strong>Personal data:</strong> Information that identifies or can be linked to an individual. It excludes aggregated or anonymized data that cannot identify a specific person. References to "personal data" in this privacy policy include its definition under the Data Protection Act 2018.</p>
-        <p><strong>Cookies:</strong> Small text files stored on your device by a website to remember your preferences, enhance functionality, and analyze usage.</p>
-        <p><strong>Local storage:</strong> A browser-based storage mechanism that retains data on your device to provide a faster and more personalized user experience.</p>
-        
-        <h2>Data We Collect</h2>
-        <p>Trraform collects and stores information willingly provided by users aged 18 and older through data they upload to the plots they own. This data may include the plot's build, name, description, and link. Users are strictly advised to avoid uploading any personal, sensitive, or confidential information to their plots.</p>
-        
-        <p>While Trraform provides a platform for creative expression and user-generated content, we do not monitor or verify the information uploaded to plots. Any personal or sensitive data that users choose to upload is done at their own risk. Trraform explicitly disclaims any liability for harm, loss, or damages arising from the unauthorized sharing, misuse, or exposure of such information. This includes, but is not limited to, financial loss, identity theft, or reputational damage resulting from a user's decision to upload sensitive information.</p>
-        
-        <p>Trraform may utilize third-party cloud providers, such as Cloudflare, to host its web services. These providers may automatically collect certain data to ensure the functionality, security, and performance of the platform. This data may include, but is not limited to, your IP address, browser type and version, operating system, referring URL, date and time of your visit, general geographic location (based on your IP address), and other technical details. By using Trraform, you acknowledge that such data collection is governed by the respective privacy policies of these third-party providers.</p>
-        
-        <p>Trraform permits users 13 and older to use our services with restrictions to features that require users to connect a crypto wallet. Users who submit user-generated content to our platform must have a connected wallet and therefore must be 18 years or older. We do not knowingly collect or process personal data from minors. Users are strictly advised not to upload content containing personal or sensitive information, including information related to minors.</p>
-        
-        <p>By using Trraform, users acknowledge their sole responsibility for the content they submit and agree to comply with all applicable guidelines and policies. Trraform reserves the right to take appropriate actions, including removing content or restricting access, if it becomes aware of uploads that violate these terms or present potential risks to users or the platform.</p>
-        
-        <h2>Data Availability and Retention</h2>
-        <p>All data submitted to Trraform is publicly accessible to anyone using our services. Therefore, you should never submit sensitive information to our platform. User-uploaded data remains stored on the platform until it is modified or removed by the user or by Trraform. Trraform reserves the right to modify or remove any user-submitted data at its sole discretion, without prior notice or explanation.</p>
-        
-        <h2>Cookies and Local Storage</h2>
-        <p>We use cookies and local storage to enhance your experience on our website. These cookies improve functionality by remembering your preferences, such as settings or wallet information (including the wallet provider you used in a previous visit), for seamless use across visits. All information is stored locally on your device and is not saved on our servers.</p>
-        
-        <p>We do not merge or associate data collected through cookies with third-party data for targeted advertising, advertising analytics, or share any user or device-specific data with data brokers.</p>
-        
-        <p>Cookies can be managed, blocked, or restricted through your web browser settings. Instructions for doing so can be found in your browser’s Help section. Since cookies are browser-specific, you’ll need to adjust your preferences for each browser or device you use.</p>
-        
-        <p>For mobile devices, refer to your device’s instruction manual or help resources to manage cookie settings. Additional information about cookies and how to disable them can be found at <a href="https://www.allaboutcookies.org">www.allaboutcookies.org</a>.</p>
-        
-        <p>Please note that restricting or disabling cookies may impact the functionality of the site, potentially limiting access to certain services or features. We are not responsible for any issues or degraded performance caused by your cookie preferences.</p>
-        
-        <h2>Crypto Wallet Connections</h2>
-        <p>Accessing certain features of our services may require you to connect a 3rd party wallet (such as MetaMask, Coinbase Wallet, Trust Wallet, etc.) to our website. Please note that these wallets may collect and process data in accordance with their own Privacy Policy and Terms of Service. Each wallet provider has a different Privacy Policy and Terms of Service. We strongly encourage you to review their terms and privacy policies carefully before using their services and connecting your wallet to our website.</p>
-        
-        <p>To ensure your privacy and security, we avoid directly storing any personal information to identify you. Instead, we rely on your crypto wallet to authenticate your interactions with our services. Authentication is conducted using cryptographic signatures generated by your wallet provider. Each time a signature is required, we will explicitly request your approval.</p>
-        
-        <p>It is important to note that Trraform will NEVER access, request, or store your private key(s) under any circumstances. Your private keys are exclusively managed by your wallet provider, which provides a secure interface for generating cryptographic signatures and conducting blockchain transactions. At no point does Trraform have access to or control over your private keys. Your security is solely in the hands of your wallet provider, ensuring a safe and trusted interaction with our platform.</p>
-        
-        <h2>Blockchain Notice</h2>
-        <p>Trraform utilizes the Polygon blockchain to manage ownership of digital assets and facilitate transactions. All transactions conducted on the blockchain are publicly available, verifiable, and traceable. Public blockchains are distributed ledgers designed to immutably record transactions across a decentralized network of computers. These blockchains may be subject to forensic analysis, which could potentially re-identify transacting individuals and reveal personal data, particularly when combined with other information.</p>
-        
-        <p>Since blockchains are decentralized or operated by third-party networks outside of our control, Trraform cannot erase, modify, or alter any data recorded on these networks.</p>
-        
-        <h2>Links to Third Party Websites</h2>
-        <p>While using our services, you may encounter links to third-party websites, mobile applications, or online services. Many of these links are provided by other users of our platform. These links do not imply endorsement or affiliation with any third party. Additionally, our content may appear on web pages, mobile applications, or online services not operated or associated with us.</p>
-        
-        <p>We do not control these third-party websites, applications, or services, nor are we responsible for their actions or policies. These third parties may have their own rules regarding the collection, use, and sharing of your personal data. We strongly encourage you to review the privacy policies of any third-party websites, applications, or services you access.</p>
-        
-        <h2>Overseas Data Disclosure</h2>
-        <p>To provide our services, we may store, process, or transfer your data (see “Data We Collect” for specifics on what types of data are transferred) to servers located in other countries depending on the third-party providers we use (e.g., hosting and content delivery services) such as Cloudflare.</p>
-        
-        <p>We ensure that any data transferred overseas is handled securely and in compliance with applicable data protection laws. Where required, we implement safeguards such as encryption, data anonymization, or contractual clauses to protect your information. Please note that blockchain transactions associated with our platform are decentralized and globally accessible, meaning the data recorded on the blockchain is not restricted to any specific jurisdiction.</p>
-        
-        <h2>Contact</h2>
-        <p>For questions and concerns regarding this Privacy Policy, you can contact us by email through <a href="mailto:trraformsupport@gmail.com">trraformsupport@gmail.com</a> or through Discord. If you are concerned that we have not complied with your legal rights or privacy laws including GDPR or CCPA laws, you may contact us or your local data protection authority.</p>
-        
-    </div>
+    <div class="w-full max-w-screen-sm p-2 py-20 mx-auto ">
+        <h1 class="text-2xl font-bold">Trraform Privacy Policy</h1>
+        <p class="mb-8 text-xs text-gray-400">Last updated 17 April 2025</p>
+        <p class="mb-4">Last updated: 17 April 2025</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">1. Introduction</h2>
+        <p class="mb-4">Trraform (“<strong>Trraform</strong>,” “we,” “us,” or “our”) provides an online voxel‑world project accessible at <a href="https://trraform.com" class="underline">trraform.com</a> (the “<strong>Service</strong>”). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use the Service. If you do not agree with this Policy, please do not use the Service.</p>
+        <p class="mb-4">For data‑protection purposes Trraform is the data controller. You can reach us at <a href="mailto:support@trraform.com" class="underline">support@trraform.com</a>.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">2. Information We Collect</h2>
+        <h3 class="mb-1 font-medium">2.1 Account Information</h3>
+        <ul class="mb-4 list-disc list-inside">
+          <li>E‑mail address</li>
+          <li>Username</li>
+          <li>Password hash (bcrypt)</li>
+          <li>Stripe customer ID (no card data stored by us)</li>
+        </ul>
+        <h3 class="mb-1 font-medium">2.2 Content &amp; Builds</h3>
+        <p class="mb-4">Any data you voluntarily upload to your voxel plots—such as build data, names, descriptions, or links—may be public and can contain personal data if you choose to include it.</p>
+        <h3 class="mb-1 font-medium">2.3 Payment &amp; Subscription Data</h3>
+        <p class="mb-4">Payments are processed by Stripe. We receive and store only non‑sensitive metadata such as customer IDs, subscription status, and payment timestamps.</p>
+        <h3 class="mb-1 font-medium">2.4 Analytics &amp; Usage Data</h3>
+        <p class="mb-4">We use Cloudflare’s built‑in analytics to obtain aggregated traffic insights (e.g., page views, bandwidth, anonymized IP ranges). No additional analytics scripts are deployed.</p>
+        <h3 class="mb-1 font-medium">2.5 Cookies &amp; Local Storage</h3>
+        <p class="mb-4">We set first‑party cookies or local‑storage tokens to:</p>
+        <ul class="mb-4 list-disc list-inside">
+          <li>Keep you signed in between sessions</li>
+          <li>Remember whether to show onboarding modals or similar UI state</li>
+        </ul>
+        <p class="mb-4">We do not set third‑party cookies. Google and Cloudflare may set cookies when you use Google sign‑in or Cloudflare Turnstile.</p>
+        <h3 class="mb-1 font-medium">2.6 Voluntary Reports</h3>
+        <p class="mb-4">If you submit a plot report or support request we store the information you provide.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">3. How We Collect Information</h2>
+        <ul class="mb-4 list-disc list-inside">
+          <li><strong>Directly from you</strong>: via registration forms, plot editors, reports, and e‑mail correspondence.</li>
+          <li><strong>Automatically</strong>: server and Cloudflare logs, first‑party cookies/local storage.</li>
+          <li><strong>From third parties</strong>: OAuth login with Google and payment metadata from Stripe.</li>
+        </ul>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">4. Why We Use Information</h2>
+        <ul class="mb-4 list-disc list-inside">
+          <li>Operate, maintain, and improve the Service (legal basis: Contract)</li>
+          <li>Process payments and manage subscriptions (Contract)</li>
+          <li>Provide customer support and respond to reports (Contract)</li>
+          <li>Send transactional emails such as account‑verification and password‑reset messages (Contract)</li>
+          <li>Ensure security, prevent fraud, and fix errors (Legitimate Interest)</li>
+          <li>Measure performance with aggregated analytics (Legitimate Interest)</li>
+          <li>Use cookies and Google sign‑in (Consent where required)</li>
+        </ul>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">5. Sharing &amp; Disclosure</h2>
+        <h3 class="mb-1 font-medium">5.1 Service Providers</h3>
+        <p class="mb-4">We share information with vendors who help us run the Service, including:</p>
+        <ul class="mb-4 list-disc list-inside">
+          <li>Cloudflare (Pages, R2, Turnstile, analytics, edge caching)</li>
+          <li>Stripe (payments)</li>
+          <li>MongoDB Atlas (database)</li>
+          <li>AWS (backups)</li>
+          <li>Discord (error‑logging webhook)</li>
+        </ul>
+        <h3 class="mb-1 font-medium">5.2 Public Content</h3>
+        <p class="mb-4">Usernames and all voxel builds as well as plot names, descriptions, and links are inherently public.</p>
+        <h3 class="mb-1 font-medium">5.3 Legal Requirements &amp; Business Transfers</h3>
+        <p class="mb-4">We may disclose information if required by law or to protect the rights and safety of Trraform or others. If the project is sold or transferred, user data will transfer with it.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">6. International Data Transfers</h2>
+        <p class="mb-4">We store and process data in the United States. If you reside outside the U.S., especially in the EU/EEA, your data will be transferred to the U.S. We rely on Standard Contractual Clauses to legitimize such transfers.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">7. Data Retention</h2>
+        <p class="mb-4">We keep account data for as long as you have an account and for up to 30 days after deletion to allow recovery. Server logs are retained for operational purposes with no set deletion date. Backups are rotated on a regular schedule.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">8. Your Rights &amp; Choices</h2>
+        <p class="mb-2">Depending on where you live, you may have the right to:</p>
+        <ul class="mb-4 list-disc list-inside">
+          <li><strong>Access</strong> and receive a copy of your personal data</li>
+          <li><strong>Correct</strong> inaccurate or incomplete data</li>
+          <li><strong>Delete</strong> your account, plots, and related data</li>
+          <li><strong>Port</strong> your data in a structured, machine‑readable format (JSON)</li>
+          <li><strong>Opt‑out</strong> of non‑essential emails</li>
+          <li>Send a <strong>Do Not Track</strong> or <strong>Global Privacy Control</strong> signal, which we honor for analytics cookies</li>
+        </ul>
+        <p class="mb-4">To exercise any of these rights, email <a href="mailto:support@trraform.com" class="underline">support@trraform.com</a>.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">9. Children’s Privacy</h2>
+        <p class="mb-4">Trraform is not directed to children under 13. Users aged 13–17 must have a parent or legal guardian’s consent. We do not knowingly collect data from anyone under 13.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">10. Security</h2>
+        <ul class="mb-4 list-disc list-inside">
+          <li>All traffic encrypted via TLS</li>
+          <li>Passwords hashed with bcrypt</li>
+          <li>Web Application Firewall and rate limiting on critical routes</li>
+          <li>2‑factor authentication on admin accounts</li>
+          <li>Least‑privilege staff access to production systems</li>
+        </ul>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">11. Changes to This Policy</h2>
+        <p class="mb-4">We may update this Privacy Policy from time to time. Material changes will be announced via a banner on the homepage and will take effect when posted unless stated otherwise.</p>
+    
+        <h2 class="mt-6 mb-2 text-lg font-semibold">12. Contact Us</h2>
+        <p class="mb-4">For questions or concerns about this Privacy Policy, contact us at <a href="mailto:support@trraform.com" class="underline">support@trraform.com</a>.</p>
+      </div>
 </div>
 
 
@@ -82,36 +116,6 @@
     .bg-grad{
         @apply fixed top-0 left-0 w-screen h-screen;
         background: linear-gradient(45deg, #3498db3d 0%, black 100%);
-    }
-
-    h1{
-
-        @apply font-bold text-3xl;
-
-    }
-
-    h2{
-
-        @apply font-bold;
-
-    }
-
-    p{
-
-        @apply text-sm text-zinc-300;
-
-    }
-
-    b{
-
-        @apply text-zinc-300;
-
-    }
-
-    a{
-
-        @apply font-semibold;
-
     }
     
 </style>

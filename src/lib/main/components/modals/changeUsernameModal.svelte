@@ -1,8 +1,8 @@
 
 <script>
 
-    import { createEventDispatcher, onMount } from "svelte";
-    import { user, loadScreenOpacity } from "$lib/main/store"
+    import { createEventDispatcher, onDestroy, onMount } from "svelte";
+    import { user, loadScreenOpacity, modalsShowing } from "$lib/main/store"
     import { API_ORIGIN } from "$lib/common/constants"
     import Modal from "../../../common/components/modal.svelte";
   
@@ -12,9 +12,11 @@
 
     onMount(() => {
 
+        $modalsShowing++
         newUsername = $user.username
 
     })
+    onDestroy(() => $modalsShowing--)
 
     function isUsername(username){
 

@@ -91,7 +91,7 @@
     </div>
     <div class="w-px h-6 bg-zinc-700"></div>
     {#if !$user}
-        <button class="px-6 button0" on:click={() => $showAuthModal = true}>Login</button>
+        <button class="px-2 button0" on:click={() => $showAuthModal = true}>Get started</button>
     {:else}
         <button on:click={() => {
             $showUserWidget = !$showUserWidget

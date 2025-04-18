@@ -1,14 +1,13 @@
 
 <script>
 
-    import { onMount } from "svelte";
-    import { paymentSession, stripe, loadScreenOpacity, cart, notification } from "$lib/main/store"
+    import { onDestroy, onMount } from "svelte";
+    import { paymentSession, stripe, loadScreenOpacity, cart, notification, modalsShowing } from "$lib/main/store"
     import { API_ORIGIN } from "$lib/common/constants"
     import { page } from '$app/stores';
     import { pushNotification } from "$lib/common/utils"
     import Modal from "../../../common/components/modal.svelte";
     import { handleStripeIntent } from "$lib/main/handleStripeIntent"
-
     let elements = null
     let total = ""
 
@@ -34,6 +33,7 @@
 
     onMount(() => {
 
+        $modalsShowing++
         session = $paymentSession
 
         if(session.method === "pay")
@@ -42,6 +42,7 @@
             initSubscription()
 
     })
+    onDestroy(() => $modalsShowing--)
 
     function initPayment(){
 

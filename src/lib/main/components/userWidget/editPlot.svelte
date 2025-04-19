@@ -231,10 +231,13 @@
     <div class="p-px max-w-96">
         <div class="relative aspect-square rounded-2xl outline-1 outline outline-zinc-700 bg-zinc-900">
             <img class="object-cover" src={imgUrl} alt="">
-                <button on:click={() => editingPlot = null} class="absolute top-2 left-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
-                    <img class="w-3.5 sm:w-4 aspect-square" src="/arrowLeft.svg" alt="arrow left">
-                    <div>Back</div>
-                </button>
+            <button on:click={() => editingPlot = null} class="absolute top-2 left-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
+                <img class="w-3.5 sm:w-4 aspect-square" src="/arrowLeft.svg" alt="arrow left">
+                <div>Back</div>
+            </button>
+            <a href="/editor" target="_blank" class="absolute top-2 right-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
+                <div class="font-bold">Open editor</div>
+            </a>
             <div class="absolute bottom-0 flex items-center justify-center w-full gap-4 p-2">
                 <button on:click={loadFromEditor} class="relative group">
                     <div class="build-option-tag">Load from editor</div>

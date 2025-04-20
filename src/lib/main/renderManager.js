@@ -5,7 +5,7 @@ import Task from "./task/task"
 
 
 const CLEAN_UP_AMT = 10
-const THROTTLE = 15
+const THROTTLE = 20
 const DT_LOAD = 0.5 
 const DT_REFRESH = 0.5
 
@@ -27,9 +27,13 @@ export default class RenderManager {
 
     setLodDistances(ratio){
 
-        for(const { lod } of this.renderedChunks)
+        for(const { lod } of this.renderedChunks){
+            
+            if(lod)
             for(const level of lod.levels)
                 level.distance *= ratio
+
+        }
 
     }
 

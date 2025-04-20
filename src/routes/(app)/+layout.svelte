@@ -39,6 +39,9 @@
     import Subscribe from "../../lib/main/components/subscription/subscribe.svelte";
     import CancelSubscription from "../../lib/main/components/subscription/cancelSubscription.svelte";
     import RenewSubscription from "../../lib/main/components/subscription/renewSubscription.svelte";
+    import Onboarding from "../../lib/main/components/onboarding.svelte"
+
+    let showOnboarding = false
     
     let rootPlot
     let glCanvas
@@ -126,6 +129,9 @@
         const resumePayment = $page.url.searchParams.get("payment_intent_client_secret")
         if(resumePayment)
             handleStripeIntent(resumePayment)
+
+        // if(!localStorage.getItem("onboarded"))
+            showOnboarding = true
 
         $loadScreenOpacity = 0
 
@@ -244,7 +250,7 @@
         refs.camera.accelerationMagnitude = distSum * 10
 
         //get k closest plots
-        const plots = inside.getKClosestWithHeuristic(25, refs.camera, 0.5)
+        const plots = inside.getKClosestWithHeuristic(50, refs.camera, 0.25)
 
         // update scene
         updateTags(dt, plots, true)
@@ -498,7 +504,7 @@
 
             timeScale = timeScale < 0.9 ? 0.9 : timeScale > 3 ? 3 : timeScale
 
-            refs.camera.moveTo(s1, s2, parentSphere.center, childSphere.center, refs.camera.orbit, timeScale)
+            refs.camera.moveTo(s1, s2, parentSphere.center, childSphere.center, refs.camera.autoRotate, timeScale)
 
         }
 
@@ -851,7 +857,11 @@
 
 {#if $paymentSession}
     <PaymentModal/>
-{/if}   
+{/if}
+
+{#if showOnboarding}
+    <Onboarding on:close={() => showOnboarding = false}/>
+{/if}
 
 {#if $loadScreenOpacity !== 0}
     <Loading bind:opacity={$loadScreenOpacity}/>

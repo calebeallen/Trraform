@@ -7,7 +7,6 @@
     import MyPlot from "$lib/main/plot/myPlot"
     import { onMount } from "svelte";
 
-    export let editingPlot
     let loadingPlots = false
     let scrollContainer
     let listContainer
@@ -71,7 +70,7 @@
     {#if $user.plotIds?.length}
         <div bind:this={listContainer} class="grid grid-cols-1 gap-2 p-px mx-auto sm:grid-cols-2 sm:w-[458px] w-[224px]">
             {#each $myPlots as plot (plot?.id?.id)}
-                <PlotWidget bind:editingPlot plot={plot}></PlotWidget>
+                <PlotWidget plot={plot}></PlotWidget>
             {/each}
         </div>
     {:else}

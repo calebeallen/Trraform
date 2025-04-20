@@ -5,8 +5,8 @@
 
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
+    import { editingPlot } from "$lib/main/store"
 
-    export let editingPlot
     export let plot
     let plotData = {}
     let loading = true
@@ -47,7 +47,7 @@
                 <img class="w-3.5 sm:w-4 aspect-square" src="/goto.svg" alt="">
                 <div class="text-xs sm:text-sm">Go to</div>
             </button>
-            <button on:click={() => editingPlot = plot} class="flex items-center w-full gap-1 px-1 py-0.5  bg-zinc-950 bg-opacity-0 rounded-xl hover:bg-opacity-50">
+            <button on:click={() => $editingPlot = plot} class="flex items-center w-full gap-1 px-1 py-0.5  bg-zinc-950 bg-opacity-0 rounded-xl hover:bg-opacity-50">
                 <img class="w-3.5 sm:w-4 aspect-square" src="/pencil.svg" alt="">
                 <div class="text-xs sm:text-sm">Edit</div>
             </button>

@@ -5,7 +5,7 @@
     import { fly } from "svelte/transition";
     import PlotList from "./plotList.svelte";
     import EditPlot from "./editPlot.svelte";
-    import { user, showUserWidget, myPlots, showChangeUsernameModal, notification, newPlots, showCancelSubscriptionModal, showRenewSubscriptionModal } from "$lib/main/store"
+    import { user, showUserWidget, myPlots, showChangeUsernameModal, notification, newPlots, showCancelSubscriptionModal, showRenewSubscriptionModal, editingPlot } from "$lib/main/store"
     import { pushNotification } from "$lib/common/utils"
     import { goto } from "$app/navigation"
     import { API_ORIGIN } from "$lib/common/constants"
@@ -14,7 +14,6 @@
 
     let selectedDepth = 0, showDepthDropdown = false, depthDropdownOptions = ["depth 0", "depth 1", "depth 2"], depthDropdownContainer, dropdownButtonContainer
     let showUserOptions, userOptionsContainer, userOptionsButton
-    let editingPlot = null
     let disableFindOpenPlot = false
 
     onMount(() => {
@@ -138,15 +137,15 @@
     </div>
     <!-- plots list -->
     {#if $user}
-        {#if editingPlot === null}
+        {#if $editingPlot === null}
             {#if !$user?.subActive}
             <div class="sm:w-[458px] w-[281px] mx-auto mt-3">
                 <Promo2/>
             </div>
             {/if}
-            <PlotList bind:editingPlot/>
+            <PlotList/>
         {:else}
-            <EditPlot bind:editingPlot/>
+            <EditPlot/>
         {/if}
     {/if}
 </div>

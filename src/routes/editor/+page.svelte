@@ -10,12 +10,13 @@
     import { onMount } from "svelte";
     import { goto } from "$app/navigation"
     import { WebGLRenderer, Scene, Color, LineSegments, MeshBasicMaterial, Vector3, LinearSRGBColorSpace, Vector2, Spherical, Raycaster, Sphere } from "three";
-    import { BUILD_SIZE, COLOR_INDEX, COLOR_SELECT, EYEDROP, GRID_SIZING, MODE, ModifyEvent, OBJECT_SELECT, OVERLAP, REFS, addEvent, LOADING, SHOW_ONBOARDING_MODAL, GRID_Y_POS } from "$lib/editor/store";
+    import { BUILD_SIZE, COLOR_INDEX, COLOR_SELECT, EYEDROP, GRID_SIZING, MODE, ModifyEvent, OBJECT_SELECT, OVERLAP, REFS, addEvent, LOADING, SHOW_ONBOARDING_MODAL, GRID_Y_POS, NOTIFICATION } from "$lib/editor/store";
     import { GridGeometry } from "$lib/editor/geometries/gridGeometry" 
     import Build from "$lib/editor/build"
     import Octree from "$lib/editor/structures/octree"
     import { P2I } from "$lib/common/utils";
     import { EDITOR_VERSION, PLOT_COUNT } from "$lib/common/constants"
+    import { pushNotification } from "$lib/common/utils"
     import Camera from "$lib/common/camera"
     import MobileDetect from "mobile-detect";
     
@@ -29,9 +30,12 @@
 
         const mobileDetect = new MobileDetect(navigator.userAgent)
 
-        if(mobileDetect.mobile())
+        if(mobileDetect.mobile()){
 
-            goto("/")
+            pushNotification(NOTIFICATION, "Mobile browser not supported", "The editor may not work correctly, please use a desktop browser.")
+
+        }
+
 
         REFS.renderer = new WebGLRenderer({ 
 

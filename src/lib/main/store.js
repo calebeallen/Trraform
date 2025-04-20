@@ -19,6 +19,7 @@ const modalsShowing = writable(0)
 const showUserWidget = writable(false)
 const showCartWidget = writable(false)
 
+const editingPlot = writable(null)
 const stripe = writable(null)
 const paymentSession = writable(null)
 const user = writable(null)
@@ -87,5 +88,6 @@ export {
     pendingOrder,
     showSubscriptionModal,
     showCancelSubscriptionModal,
-    showRenewSubscriptionModal
+    showRenewSubscriptionModal,
+    editingPlot
 }

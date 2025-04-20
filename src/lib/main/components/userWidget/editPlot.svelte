@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import { BUILD_SIZE_STD, BUILD_SIZE_LARGE, API_ORIGIN } from "$lib/common/constants"
     import isURL from "validator/lib/isURL";
-    import { user, loadScreenOpacity, notification } from "$lib/main/store"
+    import { user, loadScreenOpacity, notification, editingPlot } from "$lib/main/store"
     import { fade } from "svelte/transition";
     import MyPlot from "$lib/main/plot/myPlot"
     import { pushNotification } from "$lib/common/utils"
@@ -15,7 +15,6 @@
     const LINK_MAX_LENGTH = 256
     const LINK_TITLE_MAX_LENGTH = 48
 
-    export let editingPlot
     let name = ""
     let desc = ""
     let link = ""
@@ -33,15 +32,15 @@
 
     onMount(async () => {
 
-        await editingPlot.load()
-        editingPlot.isNew = false
+        await $editingPlot.load()
+        $editingPlot.isNew = false
 
-        name = editingPlot.name
-        desc = editingPlot.desc
-        link = editingPlot.link
-        linkTitle = editingPlot.linkTitle
-        buildData = editingPlot.buildData
-        imgUrl = await editingPlot.getImgUrl()
+        name = $editingPlot.name
+        desc = $editingPlot.desc
+        link = $editingPlot.link
+        linkTitle = $editingPlot.linkTitle
+        buildData = $editingPlot.buildData
+        imgUrl = await $editingPlot.getImgUrl()
         
     })
 
@@ -169,7 +168,7 @@
         }
 
         const plotData = {
-            plotId: editingPlot.id.string(),
+            plotId: $editingPlot.id.string(),
             name,
             description: desc,
             link,
@@ -194,14 +193,14 @@
 
             pushNotification(notification, "Plot updated", "It will take a few minutes for these updates to show.")
 
-            editingPlot.name = name
-            editingPlot.desc = desc
-            editingPlot.link = link
-            editingPlot.linkTitle = linkTitle
-            editingPlot.buildData = buildData
-            await editingPlot.updateImgUrl()
+            $editingPlot.name = name
+            $editingPlot.desc = desc
+            $editingPlot.link = link
+            $editingPlot.linkTitle = linkTitle
+            $editingPlot.buildData = buildData
+            await $editingPlot.updateImgUrl()
             
-            editingPlot = null
+            $editingPlot = null
 
         } catch {
 
@@ -216,11 +215,11 @@
 
     $:{
 
-        changed = name !== editingPlot.name || 
-        desc !== editingPlot.desc || 
-        link !== editingPlot.link || 
-        linkTitle !== editingPlot.linkTitle || 
-        !isSameBuild(buildData, editingPlot.buildData)
+        changed = name !== $editingPlot.name || 
+        desc !== $editingPlot.desc || 
+        link !== $editingPlot.link || 
+        linkTitle !== $editingPlot.linkTitle || 
+        !isSameBuild(buildData, $editingPlot.buildData)
 
     }
 
@@ -231,11 +230,36 @@
     <div class="p-px max-w-96">
         <div class="relative aspect-square rounded-2xl outline-1 outline outline-zinc-700 bg-zinc-900">
             <img class="object-cover" src={imgUrl} alt="">
-            <button on:click={() => editingPlot = null} class="absolute top-2 left-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
+            <div class="absolute top-0 left-0 flex items-center justify-between w-full px-3 py-2">
+                <div class="text-sm font-semibold ">Current build</div>
+                <button on:click={() => $editingPlot = null} class="block build-option">
+                    <img class="build-option-icon" src="/arrowLeft.svg" alt="">
+                    <div>Back</div>
+                </button>
+            </div>
+            <!-- <button on:click={() => $editingPlot = null} class="absolute top-2 left-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
                 <img class="w-3.5 sm:w-4 aspect-square" src="/arrowLeft.svg" alt="arrow left">
                 <div>Back</div>
-            </button>
-            <a href="/editor" target="_blank" class="absolute top-2 right-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
+            </button> -->
+            <div class="absolute bottom-2 left-2">
+                <a href="/editor" target="_blank" class="build-option">
+                    <img class="build-option-icon" src="/pen.svg" alt="">
+                    <div>Open editor</div>
+                </a>
+                <button on:click={loadFromEditor} class="build-option">
+                    <img class="build-option-icon" src="/floppy.svg" alt="">
+                    <div>Import build from editor</div>
+                </button>
+                <button on:click={buildInput.click()} class="build-option">
+                    <img class="build-option-icon" src="/upload.svg" alt="">
+                    <div>Upload build file</div>
+                </button>
+                <button on:click={download} class="build-option">
+                    <img class="build-option-icon" src="/download.svg" alt="">
+                    <div>Download current build</div>
+                </button>
+            </div>
+            <!-- <a href="/editor" target="_blank" class="absolute top-2 right-2 text-sm flex items-center gap-0.5 mr-1 hover:opacity-70 transition-opacity">
                 <div class="font-bold">Open editor</div>
             </a>
             <div class="absolute bottom-0 flex items-center justify-center w-full gap-4 p-2">
@@ -251,7 +275,7 @@
                     <div class="build-option-tag">Download build</div>
                     <img class="build-option" src="/download.svg" alt="download">
                 </button>
-            </div>
+            </div> -->
         </div>
         {#if buildError}
             <div out:fade class="mt-1 text-xs text-red-500">{buildError}</div>
@@ -284,8 +308,16 @@
         @apply absolute top-0 -mt-1 text-xs font-semibold -translate-x-1/2 -translate-y-full w-max left-1/2 opacity-0 group-hover:opacity-100 transition-opacity ;
     }
 
-    .build-option{
+    .build-option-0{
         @apply w-5 sm:w-6 aspect-square transition-opacity group-hover:opacity-70;
+    }
+
+    .build-option{
+        @apply text-sm hover:opacity-60 transition-opacity flex items-center gap-1 font-semibold py-0.5;
+    }
+
+    .build-option-icon{
+        @apply w-4 aspect-square;
     }
 
 </style>

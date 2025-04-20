@@ -57,9 +57,7 @@
                 localStorage.setItem("showHowItWorks", "")
                 goto("/world")
             }} class="nav-option" href="/world">Explore</button>
-            {#if !$isMobileBrowser}
-                <a class="nav-option" target="_self" href="/editor">Build</a>
-            {/if}
+            <a class="nav-option" target="_blank" href="/editor">Build</a>
         </nav>
     </div>
 

@@ -4,11 +4,12 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder, showHowItWorksModal } from "$lib/main/store"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder, showHowItWorksModal, editingPlot, myPlots, showUserWidget } from "$lib/main/store"
     import { API_ORIGIN, PRICE } from "$lib/common/constants"
     import { fly } from "svelte/transition"
     import { pushNotification } from "$lib/common/utils"
     import { onMount } from "svelte";
+    import MyPlot from "$lib/main/plot/myPlot"
 
     export let data
     
@@ -138,6 +139,33 @@
 
     }
 
+    function setEditing(){
+
+        $editingPlot = null
+
+        setTimeout(() => {
+            //check if it is already in the myplots list
+            for(const plot of $myPlots){
+                if(plot.id.equals($insideOf.id)){
+                    $editingPlot = plot
+                    $showUserWidget = true
+                    return
+                }
+            }
+
+            //otherwise create temp one
+            const idStr = $insideOf.id.string()
+            for(const { plotId } of $user.plotIds){
+                if(idStr == plotId){
+                    $editingPlot = new MyPlot($insideOf.id)
+                    $showUserWidget = true
+                    return
+                }
+            }
+        }, 1)
+
+    }
+
 </script>
 
 <svelte:head>
@@ -200,6 +228,7 @@
                     <div class="text-xs opacity-70">id: 0x{id}</div>
                 </div>
             </div>
+            <!-- if plot has an owner (owner is null), if plot is owned by user (owner will null after claiming) -->
             {#if owner || userOwned}
                 {#if desc || link}
                     <div class="w-full h-px bg-zinc-800"></div>
@@ -208,8 +237,6 @@
                     {#if desc}
                         <p class="text-zinc-300">{desc}</p>
                     {/if}
-                {:else}
-                    <p class="text-zinc-300">Your plot is on its way!</p>
                 {/if}
                 {#if link}
                     <a href={link} target="_blank" class="flex items-center gap-1 transition-opacity max-w-max opacity-70 active:opacity-40">
@@ -217,10 +244,14 @@
                         <p>{linkTitle}</p>
                     </a>
                 {/if}
-                {#if canVote}
-                    <button class="mt-1 button0" on:click={() => castVote(id)}>Vote</button>
+                {#if userOwned}
+                    <button on:click={setEditing} class="p-1 text-sm font-semibold transition-colors rounded-lg bg-zinc-600 outline-zinc-500 outline outline-1 hover:bg-zinc-500">Edit plot</button>
                 {:else}
-                    <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minute{#if minTillVote > 1}s{/if}.</div>
+                    {#if canVote}
+                        <button class="mt-1 button0" on:click={() => castVote(id)}>Vote</button>
+                    {:else}
+                        <div class="w-full mt-1 text-sm text-center text-zinc-500">Vote again in {minTillVote} minute{#if minTillVote > 1}s{/if}.</div>
+                    {/if}
                 {/if}
             {:else if !$pendingOrder.has(id)}
                 {#if $user}

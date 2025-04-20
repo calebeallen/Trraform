@@ -13,7 +13,7 @@
     import Loading from "$lib/common/components/loading.svelte"
     import Notification from "$lib/common/components/notification.svelte";
     import PlotId from "$lib/common/plotId"
-    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart, showSubscriptionModal, showCancelSubscriptionModal, showRenewSubscriptionModal } from "$lib/main/store"
+    import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart, showSubscriptionModal, showCancelSubscriptionModal, showRenewSubscriptionModal, editingPlot } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN, STRIPE_PUB_KEY } from "$lib/common/constants"
     import RootPlot from "$lib/main/plot/rootPlot"
     import { stars } from "$lib/main/decoration"
@@ -307,8 +307,6 @@
             if(!plot.isLoaded)
                 continue
 
-            if(plot.owner !== null && !plot.verified && attenuate)
-                continue
 
             if(!(key in tags)){
 
@@ -317,7 +315,7 @@
                 elem.tabIndex = -1
                 elem.onclick = handleTagClick
                 let attOpac = false
-                if(plot.owner === null)
+                if(plot.owner === null || (!plot.verified && attenuate))
                     elem.classList.add("open-plot-tag")
                 else{
                     attOpac = true
@@ -772,7 +770,10 @@
     on:touchmove|passive={touchevent} 
     on:touchend|passive={touchevent} 
     on:mousewheel|passive={mousewheel} 
-    class="fixed top-0 left-0 w-screen h-screen select-none">
+    on:click={() => {
+        if(!$editingPlot)
+            $showUserWidget = false
+    }} class="fixed top-0 left-0 w-screen h-screen select-none">
 </div>
 
 <slot/>
@@ -869,12 +870,12 @@
     }
     
     :global(.open-plot-tag) {
-        @apply absolute bg-blue-600  rounded-full w-5 h-5;
+        @apply absolute bg-blue-600  rounded-full w-3.5 h-3.5;
     }
 
     :global(.open-plot-tag::after) {
         content: "";
-        @apply absolute left-1/2 border-t-8 border-t-blue-600 border-x-transparent border-x-[6px] -translate-x-1/2 w-0 h-0 -bottom-2.5;
+        @apply absolute left-1/2 border-t-[6px] border-t-blue-600 border-x-transparent border-x-[4px] -translate-x-1/2 w-0 h-0 -bottom-2;
     }
     
     .widget-container{

@@ -130,7 +130,7 @@
         if(resumePayment)
             handleStripeIntent(resumePayment)
 
-        if(!localStorage.getItem("onboarded"))
+        if(localStorage.getItem("onboarded"))
             showOnboarding = true
 
         $loadScreenOpacity = 0

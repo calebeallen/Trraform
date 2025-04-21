@@ -52,11 +52,7 @@
         </div>
         <h1 class="mt-1 text-4xl font-bold sm:text-5xl">Millions of Worlds</h1>
         <nav class="w-full mt-3 space-y-3">
-            <button on:click={() => {
-                $showHowItWorksModal = localStorage.getItem("showHowItWorks") === null
-                localStorage.setItem("showHowItWorks", "")
-                goto("/world")
-            }} class="nav-option" href="/world">Explore</button>
+            <a class="nav-option" href="/world">Explore</a>
             <a class="nav-option" target="_blank" href="/editor">Build</a>
         </nav>
     </div>

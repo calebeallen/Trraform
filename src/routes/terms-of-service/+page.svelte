@@ -71,7 +71,7 @@
         <!-- 8 -->
         <div id="subscription">
           <h2 class="text-lg font-semibold">Subscriptions</h2>
-          <p>The monthly subscription costs $4.99 via Stripe and auto‑renews unless canceled. Benefits include a verification badge, a nametag above all owned plots, an increased build‑size limit (64 × 64 × 64), and one plot credit per renewal for the first six successful renewals.</p>
+          <p>The monthly subscription costs $3.99 via Stripe and auto‑renews unless canceled. Benefits include a verification badge, a nametag above all owned plots, an increased build‑size limit (64 × 64 × 64), and one plot credit per renewal for the first six successful renewals.</p>
           <p><strong>Cancellation.</strong>Users can cancel their subscriptions at anytime by navigating to their profile and selecting the "Cancel subscription" option. Users will retain access to all subscription exclusive features until the end of the current billing cycle. Users can renew their subscription at anytime. Upon cancellation, users will lose access to all subscription benefits with the exception of plot credits they already received from previous renews. Builds larger than 32 × 32 × 32 will be hidden from public display but remain accessible and downloadable by the user.</p>
           <p><strong>Payment failures.</strong> Stripe retries failed payments for 7 days. If recovery fails, the subscription lapses and benefits are removed immediately. Standard cancellation procedure will apply.</p>
         </div>

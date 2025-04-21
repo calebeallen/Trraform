@@ -4,7 +4,7 @@
     //stop refresh on android when scroll up
     //disable when modal
     //flag blue dot menu options
-    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder, showHowItWorksModal, editingPlot, myPlots, showUserWidget } from "$lib/main/store"
+    import { insideOf, user, showAuthModal, showReportModal, showShareModal, showClaimModal, cart, notification, pendingOrder, showHowItWorksModal, editingPlot, myPlots, showUserWidget, isMobileBrowser } from "$lib/main/store"
     import { API_ORIGIN, PRICE } from "$lib/common/constants"
     import { fly } from "svelte/transition"
     import { pushNotification } from "$lib/common/utils"
@@ -25,7 +25,7 @@
 
     onMount(() => {
 
-        if(!localStorage.getItem("show_controls")){
+        if(!localStorage.getItem("show_controls") && !$isMobileBrowser){
             showControls = true
             localStorage.setItem("show_controls", true)
         }
@@ -202,7 +202,7 @@
 }}/>
 
 {#if showControls}
-    <div transition:fly={{ y: 25 }} class="fixed text-lg font-bold -translate-x-1/2 left-1/2 bottom-1/4">WASD to move, SHIFT to fly fast</div>
+    <div transition:fly={{ y: 25 }} class="fixed font-bold text-center -translate-x-1/2 sm:text-lg left-1/2 bottom-1/4">WASD to move, SHIFT to fly fast</div>
 {/if}
 
 

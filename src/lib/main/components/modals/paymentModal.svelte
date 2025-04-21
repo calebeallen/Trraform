@@ -208,7 +208,7 @@
             {#if $paymentSession?.method == "pay"}
                 <button type="submit" class="w-full mt-4 button0" id="submit">Pay ${total}</button>
             {:else}
-                <button type="submit" class="w-full mt-4 button0" id="submit">Subscribe $4.99/month</button>
+                <button type="submit" class="w-full mt-4 button0" id="submit">Subscribe $3.99/month</button>
             {/if}
         </form>
     </div>

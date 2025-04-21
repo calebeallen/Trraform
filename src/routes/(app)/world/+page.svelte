@@ -17,6 +17,7 @@
     let profile = {}
     let showProfile = false
 
+    let showControls = false
     let plusOneAnimation = false
 
     let canVote = false
@@ -24,9 +25,9 @@
 
     onMount(() => {
 
-        if(!localStorage.getItem("how_it_works_modal")){
-            $showHowItWorksModal = true
-            localStorage.setItem("how_it_works_modal", true) 
+        if(!localStorage.getItem("show_controls")){
+            showControls = true
+            localStorage.setItem("show_controls", true)
         }
 
     })
@@ -190,6 +191,20 @@
     <meta name="twitter:image" content={data?.ogImage ?? "https://trraform.com/og-image.png"}>
 
 </svelte:head>
+
+<svelte:document on:keydown={e => {
+
+    const key = e.key.toLowerCase()
+
+    if(key === "w" || key === "a" || key === "s" || key === "d")
+        showControls = false
+
+}}/>
+
+{#if showControls}
+    <div transition:fly={{ y: 25 }} class="fixed text-lg font-bold -translate-x-1/2 left-1/2 bottom-1/4">WASD to move, SHIFT to fly fast</div>
+{/if}
+
 
 <div class="fixed sm:bottom-3 bottom-2 sm:left-3 left-2 w-[calc(100vw-16px)] sm:max-w-80 transition-transform { showProfile === false ? "-translate-x-[calc(100%+20px)]" : ""}">
     <div class="relative flex flex-col gap-2.5 p-2.5 bg-zinc-900 outline-1 outline outline-zinc-800 rounded-2xl h-max">

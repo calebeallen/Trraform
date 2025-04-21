@@ -41,11 +41,11 @@
         <SmokeBg/> 
         <div class="relative space-y-4 font-semibold sm:space-y-5">
             <div class="w-80">
-                <h1 class="inline text-3xl font-extrabold sm:text-4xl">Support Trraform & Stand Out</h1>
-                <div class="inline text-zinc-200"><b class="ml-1 text-lg sm:text-xl">$4.99</b>/mo</div>
+                <h1 class="inline text-3xl font-extrabold sm:text-4xl">Help Support Trraform</h1>
+                <div class="inline text-zinc-200"><b class="ml-1 text-lg sm:text-xl">$3.99</b>/mo</div>
             </div>
             <div class="text-sm sm:text-base">
-                Help fund the project, <b>catch eyes</b>, and <b>grow</b> your community, store, and/or personal brand with one of the most <b>unique platforms</b> to ever exist.
+                Unfortunately, servers are expensive. To keep Trraform ad free, we rely on the support of our amazing community.
             </div>
             <ul class="p-4 space-y-3.5 overflow-hidden font-semibold bg-zinc-900 text-zinc-200 rounded-xl outline-fuchsia-400 outline outline-1 sm:text-base text-sm" style="box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.4);">
                 <div class="font-extrabold">Here's what you'll get:</div>

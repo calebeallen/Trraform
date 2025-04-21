@@ -5,7 +5,7 @@ import Task from "./task/task"
 
 
 const CLEAN_UP_AMT = 10
-const THROTTLE = 20
+const THROTTLE = 30
 const DT_LOAD = 0.5 
 const DT_REFRESH = 0.5
 

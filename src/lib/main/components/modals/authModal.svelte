@@ -293,9 +293,9 @@
 <Modal class="max-w-sm" closeOnClickOutside={false} bind:header on:close>
     <div class="flex flex-col gap-4 mt-4">
         <div class="w-full">
-            <div class="relative w-full rounded-xl bg-zinc-900 outline outline-1 outline-zinc-700">
+            <div class="relative rounded-xl w-max bg-zinc-900 outline outline-1 outline-zinc-700">
                 <div class="absolute flex items-center gap-2 -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2 w-max">
-                    <img class="w-7 aspect-square" src="/google.svg" alt="">
+                    <img class="w-6 aspect-square" src="/google.svg" alt="">
                     <div class="text-sm font-semibold w-max shrink-0">Continue with Google</div>
                 </div>
                 <button bind:this={googleBtn} class="w-full rounded outline outline-1 outline-zinc-700 opacity-[0.0001]" id="google-login-btn"></button>

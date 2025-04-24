@@ -1,7 +1,6 @@
 import { Sphere, Vector3 } from "three"
 import Task from "../task/task"
 
-
 export default class Chunk{
 
     constructor(chunkId, parent){

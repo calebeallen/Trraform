@@ -40,6 +40,7 @@
     import CancelSubscription from "../../lib/main/components/subscription/cancelSubscription.svelte";
     import RenewSubscription from "../../lib/main/components/subscription/renewSubscription.svelte";
     import Onboarding from "../../lib/main/components/onboarding.svelte"
+    import { initRoot } from "$lib/main/render/engine"
 
     let showOnboarding = false
     
@@ -53,6 +54,8 @@
     let lastTouches = []
     
     onMount(async () => {
+
+        await initRoot()
         
         const stored = localStorage.getItem("settings")
         if(stored)
@@ -76,6 +79,7 @@
 
         /* root plot */
         rootPlot = new RootPlot()
+
         refs.rootPlot = rootPlot
         await rootPlot.load()
         await refs.renderManager.renderStatic(rootPlot)
@@ -468,8 +472,6 @@
     }
 
     function moveToPlot(plot) {
-
-        console.log(plot)
         
         if(plot instanceof RootPlot){
 

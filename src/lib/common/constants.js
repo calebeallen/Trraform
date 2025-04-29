@@ -6,12 +6,12 @@ const MAIN_VERSION = "1.0"
 const API_ORIGIN = "https://api.trraform.com"
 
 const PLOT_DATA_BUCKET_URL = "https://plots.trraform.com"
-const CHUNK_BUCKET_URL = "https://dev-chunks.trraform.com"
+const CHUNK_BUCKET_URL = "https://chunk-dev.trraform.com"
 const IMAGES_BUCKET_URL = "https://images.trraform.com"
 
 const STRIPE_PUB_KEY = "pk_live_51RCYJBKDz3cnvAQjzGgF8QWb6O91KkDXsDYMhMeS2OkV1vQykhspD7nSGAjAdBnvWCiq3sNZAHojnV6UfHp5vaHA00CEFKVpFZ"
-
 const PRICE = [399, 299, 199]
+
 const MAX_DEPTH = 2
 const D0_PLOT_COUNT = 34998
 const PLOT_COUNT = 24

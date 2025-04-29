@@ -1,19 +1,25 @@
 
-import { root } from "./engine"
+import { BoxGeometry, BufferAttribute, BufferGeometry, Color, InstancedBufferAttribute, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, Quaternion, Sphere, Vector3 } from "three"
+import Task from "../task/task"
+import { root, material } from "./engine"
+import { refs } from "../store"
+
+const boxGeom = new BoxGeometry(1,1,1)
+const boxMat = new MeshBasicMaterial({color: 0xffffff})
 
 class BaseChunk {
 
     constructor(layer, parent, mapIdx){
 
-        this.id = `L${layer}_${mapIdx}`
+        this.id = `l${layer}_${mapIdx.toString(16)}`
         this.parent = parent
         this.children = []
         this.childrenLoaded = new Set()
-        this.childIdToSectionRange = null
+        this.sections = null
 
         this.mesh = null
         this.isLoaded = false
-        
+        this._loading = null
         
         const childIndices = root.chunkMaps[layer][mapIdx]
 
@@ -26,7 +32,7 @@ class BaseChunk {
 
             for(const childIdx of childIndices){
 
-                const chunk = new Chunk(`L${layer + 1}_${childIdx}`, this)
+                const chunk = new Chunk(`l${layer + 1}_${childIdx.toString(16)}`, this)
                 const plotIndices = root.chunkMaps[2][childIdx]
 
                 // populate chunks with plots
@@ -47,27 +53,109 @@ class BaseChunk {
     // for child plot to call
     cullSection(childChunk, cull = true){
 
-        if(cull)
-            this.childrenLoaded.add(childChunk.id)
-        else
-            this.childrenLoaded.remove(childChunk.id)
+        const section = this.sections[childChunk.id]
 
+        if(!section)
+            return
+        
+        const { range, matrices } = section
+
+        if(cull) {
+
+            const m4 = new Matrix4()
+            m4.scale(new Vector3())
+
+            for(let i = range[0]; i < range[1]; i++){
+
+
+                this.mesh.setMatrixAt(i, m4)
+            }
+
+        } else {
+            
+            for(let i = range[0], j = 0; i < range[1]; i++, j++)
+
+                this.mesh.setMatrixAt(i, matrices[j])
+
+        }
+
+        this.mesh.instanceMatrix.needsUpdate = true
+        
 
     }
 
     // for removing the 
-    async load(){
+    load(){
 
-        // load parent chain and unload low detail section
-        if(this.parent !== null){
-            await this.parent.load()
-            this.parent.cullSection(this, true)
-        }
-        
-        // get mesh data from r2 for this.id
-        // create child id => section vertex ranges map
+        if(this._loading === null)
 
-        this.isLoaded = true
+            this._loading = new Promise(async resolve => {
+
+                // console.log(this.id)
+
+                // load parent chain and unload low detail section
+                if(this.parent !== null)
+                    await this.parent.load()
+
+                // // get mesh data from r2 for this.id
+                // // create child id => section vertex ranges map
+                const task = new Task("get_chunk", { chunkId: this.id })
+                const data = await task.run()
+
+                let totalBoxes = 0
+                for(const id in data){
+
+                    const len = data[id].length / 36
+                    totalBoxes += len
+            
+                }
+                
+                const mesh = new InstancedMesh(boxGeom, boxMat, totalBoxes)    
+                const quat = new Quaternion()
+                const color = new Color()
+                const sections = {}
+
+                let i = 0
+                for(const id in data){
+
+                    const f32 = new Float32Array(data[id].buffer)
+                    const range = [i, i + f32.length / 9]
+                    const matrices = []
+
+                    for(let j = 0; j < f32.length; j += 9, i++){
+
+                        const m4 = new Matrix4()
+                        const min = new Vector3(f32[j], f32[j+1], f32[j+2])
+                        const max = new Vector3(f32[j+3], f32[j+4], f32[j+5])
+                        const randOffset = new Vector3().random().divideScalar(100) //to prevent z fighting
+                        const center = min.clone().add(max).divideScalar(2).add(randOffset)
+                        const scale = max.clone().sub(min)
+
+                        m4.compose(center, quat, scale)
+                        mesh.setMatrixAt(i, m4)
+
+                        color.setRGB(f32[j+6],f32[j+7],f32[j+8])
+                        mesh.setColorAt(i, color)
+                        matrices.push(m4)
+
+                    }
+
+                    sections[id] = { range, matrices }
+
+                }
+                
+                this.sections = sections
+                this.mesh = mesh
+                refs.scene.add(mesh)
+                if(this.parent !== null)
+                    this.parent.cullSection(this, true)
+
+                this.isLoaded = true
+                resolve()
+
+            })
+
+        return this._loading
 
     }
 
@@ -83,7 +171,7 @@ class BaseChunk {
         // clear mesh
         // create child id => section vertex ranges map
 
-
+        this._loading = null
         this.isLoaded = false
 
     }
@@ -100,19 +188,120 @@ class Chunk {
         this.mesh = null
         this.children = []
         this.plots = []
+        this.childrenLoaded = new Set()
+        this._loading = null
 
     }
 
     load(){
 
-        if(this.parent)
+        if(this._loading === null)
+
+            this._loading = new Promise(async resolve => {
+
+                await this.parent.load()
+
+                // get chunk data from r2
+                const getTask = new Task("get_chunk", { chunkId: this.id }) 
+                const chunkData = await getTask.run()
+
+                // process plots in parallel
+                await Promise.all(this.plots.map(plot => {
+                    const plotData = chunkData[plot.id.string()] ?? null
+                    return plot.load(plotData)
+                }))
+
+                const packaged = { position : [], color : [], index: [], min : [], max : [], scale : [] }
+                
+                // package data to be merged
+                for(const plot of this.plots){
+
+                    if(plot.geometryData == null)
+                        continue
+
+                    const geomData = plot.geometryData
+
+                    packaged.position.push(geomData.position)
+                    packaged.color.push(geomData.color)
+                    packaged.index.push(geomData.index)
+
+                    //compute bounds relative to world
+                    const scale = plot.blockSize
+                    const center = new Vector3(...geomData.center)
+                    const centerDiff = new Vector3(...geomData.dp)
+                    const min = center.clone().sub(centerDiff)
+                    const max = center.clone().add(centerDiff)
+
+                    min.multiplyScalar(scale).add(plot.pos)
+                    max.multiplyScalar(scale).add(plot.pos)
+
+                    packaged.min.push(min.toArray())
+                    packaged.max.push(max.toArray())
+                    packaged.scale.push(scale)
+
+                }
+
+                // merge build geometries
+                const mergeTask = new Task( "merge_geometries", { geometryData : packaged } )
+                const merged = await mergeTask.run()
+
+                // create mesh
+                const geometry = new BufferGeometry()
+                geometry.setAttribute("position", new BufferAttribute(merged.position, 3))
+                geometry.setAttribute("color", new BufferAttribute(merged.color, 3))
+                geometry.setIndex(new BufferAttribute(merged.index, 1))
+                geometry.attributes.color.normalized = true
+                geometry.attributes.position.onUpload(() => geometry.attributes.position.array = null)
+                geometry.attributes.color.onUpload(() => geometry.attributes.color.array = null)
+                geometry.index.onUpload(() => geometry.index.array = null)
+                geometry.boundingSphere = new Sphere(new Vector3(), Math.hypot(...merged.dp))
+
+                const mesh = new Mesh(geometry, material)
+                const pos = new Vector3().fromArray(merged.center)
+                const s = merged.scale
+                mesh.position.copy(pos)
+                mesh.scale.set(s,s,s)
+                mesh.updateMatrix()
+                mesh.matrixWorld.copy(mesh.matrix)
+                mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false
+
+                this.mesh = mesh
+                refs.scene.add(mesh)
+
+                this.parent.childrenLoaded.add(this.id)
+            
+                if(this.parent instanceof BaseChunk)
+                    this.parent.cullSection(this, true)
+
+                this.isLoaded = true
+                resolve()
+
+            })
+
+        return this._loading
 
     }
 
 
-    unload(){
+    async unload(){
 
+        if(!this.isLoaded || this.childrenLoaded.size)
+            return false
 
+        if(this.parent instanceof BaseChunk)
+            this.parent.cullSection(this, false)
+
+        this.parent.childrenLoaded.remove(this.id)
+
+        for(const plot of this.plots)
+            await plot.safeClear()
+
+        refs.scene.remove(mesh)
+        this.mesh = null
+        this._loading = null
+        this.isLoaded = false
+
+        return true
 
     }
 

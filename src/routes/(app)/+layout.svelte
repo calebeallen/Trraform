@@ -15,9 +15,8 @@
     import PlotId from "$lib/common/plotId"
     import { isMobileBrowser, insideOf, refs, settings, notification, loadScreenOpacity, showSettingsModal, showHowItWorksModal, leaderboard, showNextStepsModal, showAuthModal, showResetPasswordModal, showSendVerificationEmailModal, user, showUserWidget, modalsShowing, showClaimModal, showShareModal, showReportModal, inputFocused, showChangeUsernameModal, stripe, showCartWidget, paymentSession, cart, showSubscriptionModal, showCancelSubscriptionModal, showRenewSubscriptionModal, editingPlot } from "$lib/main/store"
     import { MAX_DEPTH, API_ORIGIN, STRIPE_PUB_KEY } from "$lib/common/constants"
-    import RootPlot from "$lib/main/plot/rootPlot"
+    import RootPlot from "$lib/main/render/rootPlot"
     import { stars } from "$lib/main/decoration"
-    import RenderManager from "$lib/main/renderManager"
     import { pushNotification } from "$lib/common/utils"
     import HeaderBar from "$lib/main/components/headerBar.svelte"
     import SettingsModal from "$lib/main/components/modals/settingsModal.svelte";
@@ -40,11 +39,10 @@
     import CancelSubscription from "../../lib/main/components/subscription/cancelSubscription.svelte";
     import RenewSubscription from "../../lib/main/components/subscription/renewSubscription.svelte";
     import Onboarding from "../../lib/main/components/onboarding.svelte"
-    import { initRoot } from "$lib/main/render/engine"
+    import { initRoot, root, RenderManager } from "$lib/main/render/engine"
 
     let showOnboarding = false
     
-    let rootPlot
     let glCanvas
     let tagContainer
     let t1 = 0
@@ -55,8 +53,6 @@
     
     onMount(async () => {
 
-        await initRoot()
-        
         const stored = localStorage.getItem("settings")
         if(stored)
             Object.assign(settings, JSON.parse(stored))
@@ -75,19 +71,13 @@
 
         resize()
 
-        refs.renderManager = new RenderManager(refs.scene)
+        await initRoot()
+        refs.renderManager = new RenderManager()
 
-        /* root plot */
-        rootPlot = new RootPlot()
-
-        refs.rootPlot = rootPlot
-        await rootPlot.load()
-        await refs.renderManager.renderStatic(rootPlot)
-
-        //set initial position
-        refs.camera.position.setFromSphericalCoords(rootPlot.boundingSphere.radius * 2, Math.PI * 0.5, 0).add(rootPlot.boundingSphere.center)
-        refs.camera.target.copy(rootPlot.boundingSphere.center)
-        refs.camera.lookAt(rootPlot.boundingSphere.center)
+        // set up camera
+        refs.camera.position.setFromSphericalCoords(root.plot.boundingSphere.radius * 2, Math.PI * 0.5, 0).add(root.plot.boundingSphere.center)
+        refs.camera.target.copy(root.plot.boundingSphere.center)
+        refs.camera.lookAt(root.plot.boundingSphere.center)
         refs.camera.updateSphere()
         refs.camera.update = refs.camera.autoRotate
 
@@ -179,7 +169,6 @@
         const dt = (t2 - t1) / 1000
         t1 = t2
         
-        refs.renderManager.update(dt)
         refs.camera.update(dt)
 
         if(refs.camera.update === refs.camera.autoRotate){
@@ -200,7 +189,7 @@
             
         }
             
-        const insideArr = [rootPlot]
+        const insideArr = [root.plot]
 
         for(let i = 0; i < MAX_DEPTH; i++){
 
@@ -254,7 +243,7 @@
         refs.camera.accelerationMagnitude = distSum * 10
 
         //get k closest plots
-        const plots = inside.getKClosestWithHeuristic(50, refs.camera, 0.25)
+        const plots = inside.getKClosestWithHeuristic(50, refs.camera, 0.5)
 
         // update scene
         updateTags(dt, plots, true)
@@ -269,10 +258,7 @@
         const plotIdSet = new Set(plots.map(a => a.plot.id.id))
         for(let i = plots.length - 1; i >= 0; i--){
 
-            if(!refs.renderManager.hasAvailability())
-                break
-
-            refs.renderManager.managedRender(plots[i].plot, refs.camera, plotIdSet)
+            refs.renderManager.renderWithLock(plots[i].plot)
 
         }
     
@@ -417,7 +403,7 @@
         //if navigation not in world, or if already inside of plot, return
         if (route === "/(app)") {
 
-            moveToPlot(rootPlot)
+            moveToPlot(root.plot)
             $insideOf = null
 
         } else if (route === "/(app)/world") {
@@ -454,19 +440,19 @@
     async function loadPlot(plotId){
 
         const ids = plotId.split()
-        let plot = rootPlot
+        let plot = root.plot
         
         for(const id of ids){
 
             if(!plot.children.length)
                 break
 
-            plot = plot.children[id - 1] 
-            await plot.load()
+            plot = plot.children[id - 1]
             await refs.renderManager.render(plot)
 
         }
 
+        console.log(plot)
         return plot
 
     }

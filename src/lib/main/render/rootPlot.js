@@ -1,15 +1,15 @@
 
-import { Sphere, Vector3 } from "three";
+import { BufferAttribute, BufferGeometry, Mesh, Sphere, Vector3 } from "three";
 import PlotId from "$lib/common/plotId";
 import { expand, I2P, } from "$lib/common/utils";
 import Plot from "./plot";
 import Octree from "$lib/main/structures/octree";
 import Task from "$lib/main/task/task";
-import { root } from "./engine";
+import { material } from "./engine";
 
 export default class RootPlot {
 
-    constructor(){
+    constructor(l2idToIdxs){
 
         this.id = new PlotId(0)
         this.pos = new Vector3()
@@ -18,6 +18,7 @@ export default class RootPlot {
         this.geometryData = {}
         this._loading = null
         this.isRoot = true
+        this.l2idToIdxs = l2idToIdxs
 
     }
 
@@ -35,10 +36,9 @@ export default class RootPlot {
                 const expanded = expand(buildData)
 
                 //get chunk data
-                const idToIdx = root.idToIdx
                 const plotIndices = []
 
-                for(const l of idToIdx)
+                for(const l of this.l2idToIdxs)
                     plotIndices.push(...l)
                 
                 // create child plots
@@ -57,7 +57,7 @@ export default class RootPlot {
 
                 //get geom data
                 const task = new Task("reduce_poly", { expanded, buildSize : bs })
-                const geomData = this.geometryData.stdRes = await task.run()
+                const geomData = this.geometryData = await task.run()
 
                 this.octree = new Octree(this.children, bs)
                 this.buildSize = bs
@@ -68,6 +68,30 @@ export default class RootPlot {
 
         return this._loading
 
+    }
+
+    createMesh(){
+
+        const geometry = new BufferGeometry()
+        geometry.setAttribute("position", new BufferAttribute(this.geometryData.position, 3))
+        geometry.setAttribute("color", new BufferAttribute(this.geometryData.color, 3))
+        geometry.setIndex(new BufferAttribute(this.geometryData.index, 1))
+        geometry.attributes.color.normalized = true
+        geometry.attributes.position.onUpload(() => geometry.attributes.position.array = null)
+        geometry.attributes.color.onUpload(() => geometry.attributes.color.array = null)
+        geometry.index.onUpload(() => geometry.index.array = null)
+        geometry.boundingSphere = new Sphere(new Vector3(), Math.hypot(...this.geometryData.dp))
+
+        const mesh = new Mesh(geometry, material)
+        mesh.position.copy(new Vector3(...this.geometryData.center))
+        mesh.scale.set(this.blockSize, this.blockSize, this.blockSize)
+        mesh.updateMatrix()
+        mesh.matrixWorld.copy(mesh.matrix)
+        mesh.matrixAutoUpdate = mesh.matrixWorldAutoUpdate = false
+        
+        this.geometryData = null
+        return mesh
+    
     }
 
     findPlotById(plotId){

@@ -37,7 +37,7 @@
         profile = new Promise(async res => {
 
             const plot = $insideOf
-            await plot.load()
+            await plot.loadPromise
             const idStr = plot.id.string()
             let link = null
 

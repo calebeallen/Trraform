@@ -31,6 +31,8 @@ export default class Plot extends PlotData {
 
         this.geometryData = null
 
+        this.loadPromise = new Promise(res => this._resolveLoadPromise = res)
+
     }
 
     async safeClear(){
@@ -60,25 +62,25 @@ export default class Plot extends PlotData {
         this.isLoaded = false
 
         this.geometryData = null
+        this.loadPromise = new Promise(res => this._resolveLoadPromise = res)
 
     }
 
-    load(){
+    load(raw){
 
         if(this._loading === null)
 
             this._loading = new Promise(async resolve => {
 
-                const plotDataU8 = await this.chunk.getPlotData(this.id)
-
-                if(plotDataU8 === null){
+                if(raw === null){
                     this.isLoaded = true
+                    this._resolveLoadPromise()
                     resolve(this)
                     return
                 }
 
                 const task = new Task("process_plot_data", { 
-                    plotDataU8,
+                    plotDataU8: raw,
                     placeSubplots: this.id.depth() < MAX_DEPTH
                 })
                 const data = await task.run()
@@ -114,8 +116,8 @@ export default class Plot extends PlotData {
                 // child plots
                 if (this.id.depth() < MAX_DEPTH) {
 
-                    const plotIndicies = data.plotIndicies
-                    const chunkCount = Math.floor(plotIndicies.length / CHUNK_SIZE)
+                    const plotIndices = data.plotIndices
+                    const chunkCount = Math.floor(plotIndices.length / CHUNK_SIZE)
                     const chunks = new Array(chunkCount)
             
                     // create chunks, give chunks a reference to parent chunk
@@ -127,10 +129,10 @@ export default class Plot extends PlotData {
                     }
             
                     //create child plots
-                    for(let i = 0; i < plotIndicies.length; i++){
+                    for(let i = 0; i < plotIndices.length; i++){
             
                         const childPlotId = this.id.mergeChild(i + 1)
-                        const childPos = new Vector3(...I2P(plotIndicies[i], this.buildSize))
+                        const childPos = new Vector3(...I2P(plotIndices[i], this.buildSize))
                         childPos.multiplyScalar(this.blockSize).add(this.pos)
             
                         // pass shared reference of a chunk to its plots
@@ -142,12 +144,10 @@ export default class Plot extends PlotData {
             
                     }
 
-                    for(const chunk of chunks)
-                        chunk.computeBoundingSphere()
-
                 }
 
                 this.isLoaded = true
+                this._resolveLoadPromise()
                 resolve(this)
                 
             })

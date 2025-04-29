@@ -1,11 +1,14 @@
 import { BaseChunk } from "./chunk"
 import RootPlot from "./rootPlot"
+import { refs } from "../store"
+import { MeshBasicMaterial } from "three"
 
+const material = new MeshBasicMaterial({vertexColors: true})
 const root = {
     chunkMaps: null,
     idToIdx: null,
     plot: null,
-    chunk: null
+    chunk: null,
 }
 
 async function initRoot(){
@@ -35,29 +38,61 @@ async function initRoot(){
     const bufL2 = await resL2.arrayBuffer()
     const u32L2 = new Uint32Array(bufL2)
     const mapL2 = []
-    const idToIdx = []
+    const l2idToIdxs = []
     for(let i = 0; i < u32L2.length; i+=2){
 
         if(mapL2[u32L2[i]] === undefined){
             mapL2[u32L2[i]] = []
-            idToIdx[u32L2[i]] = []
+            l2idToIdxs[u32L2[i]] = []
         }
         
         mapL2[u32L2[i]].push(i / 2)
-        idToIdx[u32L2[i]].push(u32L2[i+1])
+        l2idToIdxs[u32L2[i]].push(u32L2[i+1])
 
     }
 
     root.chunkMaps = [mapL0, mapL1, mapL2]
-    root.idToIdx = idToIdx
-
-    root.plot = new RootPlot()
+    root.plot = new RootPlot(l2idToIdxs)
     await root.plot.load()
 
     root.chunk = new BaseChunk(0, null, 0)
+    await root.chunk.load()
 
-    console.log(root.chunk)
+    refs.scene.add(root.plot.createMesh())
 
 }   
 
-export { initRoot, root }
+class RenderManager {
+
+    constructor(){
+
+        this.renderedChunks = new Set()
+        this.locked = false
+
+    }
+
+    async renderWithLock({ chunk }){
+
+        if(this.locked || this.renderedChunks.has(chunk.id))
+            return
+
+        this.locked = true
+        this.renderedChunks.add(chunk.id)
+        await chunk.load()
+        this.locked = false
+
+    }
+
+    async render({ chunk }){
+
+        if(this.renderedChunks.has(chunk.id))
+            return
+
+        this.renderedChunks.add(chunk.id)
+        await chunk.load()
+
+    }
+
+}
+
+export { root, initRoot, RenderManager, material }

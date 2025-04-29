@@ -66,11 +66,11 @@ onmessage = async e => {
 
 // fetches chunk, decodes it into it's parts
 // TODO
-async function getChunk(chunkId){
+async function getChunk(chunkId) {
 
     const res = await fetch(`${CHUNK_BUCKET_URL}/${chunkId}.dat`)
 
-    if(!res.ok)
+    if (!res.ok)
         return [{}, []]
 
     const buf = await res.arrayBuffer()
@@ -81,33 +81,45 @@ async function getChunk(chunkId){
     let cursor = 0
     const dataLength = data.length
 
-    // Create a DataView to read bytes in little-endian format.
-    const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  
+    const dataView = new DataView(data.buffer, data.byteOffset, data.byteLength)
+
     while (cursor < dataLength) {
-  
-        // Read body length (4 bytes, little-endian)
-        const bodyLen = dataView.getUint32(cursor, true) // true for little-endian
+        if (cursor + 2 > dataLength)
+            throw new Error("Not enough bytes to read key length");
+
+        // Read 2-byte key length (little-endian)
+        const keyLen = dataView.getUint16(cursor, true);
+        cursor += 2
+
+        if (cursor + keyLen > dataLength)
+            throw new Error("Not enough bytes to read key")
+
+        // Read key bytes and decode as UTF-8 string
+        const keyBytes = data.slice(cursor, cursor + keyLen)
+        const key = new TextDecoder().decode(keyBytes)
+        cursor += keyLen
+
+        if (cursor + 4 > dataLength)
+            throw new Error("Not enough bytes to read value length")
+
+        // Read 4-byte value length (little-endian)
+        const valueLen = dataView.getUint32(cursor, true)
         cursor += 4
-    
-        // Read key (8 bytes, little-endian) as BigInt
-        const plotIdBigInt = dataView.getBigUint64(cursor, true)
-        const plotId = new PlotId(plotIdBigInt)
-        cursor += 8
 
-        // Extract the body as a new Uint8Array. Using slice creates a new view.
-        const body = data.slice(cursor, cursor + bodyLen);
-        cursor += bodyLen
-    
-        // Insert into the result object; keys are strings.
-        chunk[plotId.string()] = body
-        transferable.push(body.buffer)
+        if (cursor + valueLen > dataLength)
+            throw new Error("Not enough bytes to read value")
 
+        // Read value
+        const value = data.slice(cursor, cursor + valueLen)
+        cursor += valueLen;
+
+        chunk[key] = value
+        transferable.push(value.buffer)
     }
 
     return [chunk, transferable]
-
 }
+
 
 
 /* one function that does everything, should reduce overhead */
@@ -146,7 +158,7 @@ async function processPlotData(plotDataU8, placeSubplots = true){
         linkTitle,
         verified,
         buildSize,
-        plotIndicies: null,
+        plotIndices: null,
         geometryData: null
     }
 
@@ -160,7 +172,7 @@ async function processPlotData(plotDataU8, placeSubplots = true){
     // handle subplot placement if not max depth
     if (placeSubplots) {
 
-        const plotIndicies = new Array(PLOT_COUNT).fill(-1)
+        const plotIndices = new Array(PLOT_COUNT).fill(-1)
         let plotsUnplaced = PLOT_COUNT
 
         // if build is not blank..
@@ -175,7 +187,7 @@ async function processPlotData(plotDataU8, placeSubplots = true){
                 if (buildData[i] & 1) {
 
                     if(val <= PLOT_COUNT && val !== 0){
-                        plotIndicies[val - 1] = idx
+                        plotIndices[val - 1] = idx
                         plotsUnplaced--
                     }
 
@@ -222,11 +234,11 @@ async function processPlotData(plotDataU8, placeSubplots = true){
                 for(let i = 0, j = 0; i < n; i++){
 
                     const idx = topSurfaces[i]
-                    while(plotIndicies[j] != -1 && j < PLOT_COUNT) j++
+                    while(plotIndices[j] != -1 && j < PLOT_COUNT) j++
 
                     if(j < PLOT_COUNT){
                         expanded[idx] = j + 1
-                        plotIndicies[j] = idx
+                        plotIndices[j] = idx
                         plotsUnplaced--
                     }
 
@@ -251,11 +263,11 @@ async function processPlotData(plotDataU8, placeSubplots = true){
             if (expanded !== null && expanded[idx] > 0 && expanded[idx] <= PLOT_COUNT)
                 continue
 
-            while (plotIndicies[j] != -1 && j < PLOT_COUNT) j++
+            while (plotIndices[j] != -1 && j < PLOT_COUNT) j++
 
             if (j < PLOT_COUNT) {
 
-                plotIndicies[j] = idx
+                plotIndices[j] = idx
                 
                 if(expanded !== null)
                     expanded[idx] = j + 1
@@ -264,12 +276,12 @@ async function processPlotData(plotDataU8, placeSubplots = true){
 
         }
 
-        plotData.plotIndicies = plotIndicies
+        plotData.plotIndices = plotIndices
 
         // account for subplot positions in min/max
-        for(let i = 0; i < plotIndicies.length; i++){
+        for(let i = 0; i < plotIndices.length; i++){
 
-            v1.set(...I2P(plotIndicies[i], buildSize))
+            v1.set(...I2P(plotIndices[i], buildSize))
             min.min(v1)
             max.max(v1)
 
@@ -283,31 +295,21 @@ async function processPlotData(plotDataU8, placeSubplots = true){
 
         return [plotData, null]
    
-    const stdRes = reducePoly(expanded, buildSize)[0]
-    const lowRes = makeLowRes(expanded, buildSize, LOW_RES)
-    v2.fromArray(stdRes.dp)
-    v1.fromArray(stdRes.center) 
+    const [ geometryData, transferable ] = reducePoly(expanded, buildSize)
+
+    v2.fromArray(geometryData.dp)
+    v1.fromArray(geometryData.center) 
     v1.sub(v2)
     min.min(v1)
-    v1.fromArray(stdRes.center)
+    v1.fromArray(geometryData.center)
     v1.add(v2)
     max.max(v1)    
 
-    plotData.geometryData = {
-        max: max.toArray(),
-        min: min.toArray(),
-        stdRes,
-        lowRes
-    }
+    geometryData.min = min.toArray()
+    geometryData.max = max.toArray()
+    plotData.geometryData = geometryData
 
-    return [plotData, [
-        stdRes.position.buffer,
-        stdRes.color.buffer,
-        stdRes.index.buffer,
-        lowRes.position.buffer,
-        lowRes.color.buffer,
-        lowRes.index.buffer
-    ]]
+    return [ plotData, transferable ]
 
 }
 
@@ -569,193 +571,6 @@ function reducePoly(buildData /* expanded */, buildSize){
 
 }
 
-function makeLowRes(buildData, size, newSize){
-
-    const chunkSize = Math.ceil(size / newSize) 
-    const chunkVolume = chunkSize ** 3
-    const boxes = []
-
-    for(let cy = 0; cy < newSize; cy++)
-    for(let cz = 0; cz < newSize; cz++)
-    for(let cx = 0; cx < newSize; cx++){
-
-        const yLim = Math.min(size - chunkSize * cy, chunkSize)
-        const zLim = Math.min(size - chunkSize * cz, chunkSize)
-        const xLim = Math.min(size - chunkSize * cx, chunkSize)
-
-        // calculate center of mass and color
-        const averageColor = new Vector3()
-        const centerOfMass = new Vector3()
-        let n = 0
-
-        for(let _y = 0; _y < yLim; _y++)
-        for(let _z = 0; _z < zLim; _z++)
-        for(let _x = 0; _x < xLim; _x++){
-    
-            const x = cx * chunkSize + _x
-            const y = cy * chunkSize + _y
-            const z = cz * chunkSize + _z
-            const i = size * ( y * size + z ) + x
-
-            if(i >= buildData.length)
-
-                continue
-
-            const ci = buildData[i]
-
-            if(ci <= PLOT_COUNT)
-
-                continue
-
-            const c = ColorLibrary.colors[ci]
-
-            centerOfMass.x += x
-            centerOfMass.y += y
-            centerOfMass.z += z
-            averageColor.x += c[0]
-            averageColor.y += c[1]
-            averageColor.z += c[2]
-            n++
-            
-        }
-
-        if(n === 0)
-
-            continue
-
-        centerOfMass.divideScalar(n).floor().addScalar(0.5)
-        averageColor.divideScalar(n)
-
-        //calculate deviation in x,y,z
-        const dev = new Vector3()
-
-        for(let _y = 0; _y < yLim; _y++)
-        for(let _z = 0; _z < zLim; _z++)
-        for(let _x = 0; _x < xLim; _x++){
-
-            const x = cx * chunkSize + _x
-            const y = cy * chunkSize + _y
-            const z = cz * chunkSize + _z
-
-            dev.x += Math.abs(x - centerOfMass.x)
-            dev.y += Math.abs(y - centerOfMass.y)
-            dev.z += Math.abs(z - centerOfMass.z)
-            
-        }
-
-        dev.divideScalar(chunkVolume * 1.2)
-        boxes.push({
-            min : centerOfMass.sub(dev).add(new Vector3().random()),
-            col : averageColor,
-            delta : dev.multiplyScalar(2),
-        })
-
-    }
-
-    const position = new Float32Array(boxes.length * 72)
-    const color = new Uint8Array(boxes.length * 72)
-    const index = new Uint32Array(boxes.length * 36)
-
-    let pi = 0
-    let ii = 0
-    let indCounter = 0
-
-    const _min = new Vector3(Infinity, Infinity, Infinity)
-    const max = new Vector3(-Infinity, -Infinity, -Infinity)
-    const v = new Vector3()
-
-    for (const { min, delta, col } of boxes) {
-        
-        for(let i = 0; i < 6; i++){
-
-            let facePositions
-            const indicies = getVertexIndicies(indCounter)
-
-            switch(i){
-
-                case 0: 
-
-                    facePositions = topFace(min.x, min.y + delta.y, min.z, delta.x, delta.z)
-                    break
-                
-                case 1:
-
-                    facePositions = bottomFace(min.x, min.y, min.z, delta.x, delta.z)
-                    break
-
-                case 2: 
-
-                    facePositions = frontFace(min.x, min.y, min.z + delta.z, delta.x, delta.y)
-                    break
-
-                case 3: 
-
-                    facePositions =  backFace(min.x, min.y, min.z, delta.x, delta.y)
-                    break
-                
-                case 4: 
-
-                    facePositions = rightFace(min.x + delta.x, min.y, min.z, delta.y, delta.z)
-                    break
-
-                case 5: 
-
-                    facePositions = leftFace(min.x, min.y, min.z, delta.y, delta.z)
-                    break
-
-            }
-
-            //brighten color slightly
-            const col1 = ColorLibrary.applyLightRGB(col.toArray(), Math.floor(i / 2))
-
-            for(let j = 0; j < 4; j++, pi++){
-
-                const k = j * 3
-                const k1 = pi * 3
-
-                position[k1] = facePositions[k] 
-                position[k1 + 1] = facePositions[k + 1] 
-                position[k1 + 2] = facePositions[k + 2]
-                v.set(position[k1], position[k1 + 1], position[k1 + 2])
-                _min.min(v)
-                max.max(v)
-
-                color[k1] = col1[0]
-                color[k1 + 1] = col1[1]
-                color[k1 + 2] = col1[2]
-
-            }
-
-            for(let j = 0; j < 6; j++, ii++)
-
-                index[ii] = indicies[j]
-
-            indCounter += 4
-
-        }
-
-    }
-
-    const center = _min.add(max).divideScalar(2)
-
-    for(let i = 0; i < position.length; i+=3){
-
-        position[i] -= center.x
-        position[i + 1] -= center.y
-        position[i + 2] -= center.z
-
-    }
-
-    return { 
-        position, 
-        color, 
-        index, 
-        center : center.toArray(),
-        dp : max.sub(center).toArray()
-    }
-
-}
-
 function mergeGeometries(data){
 
     const n = data.position.length
@@ -844,68 +659,3 @@ function mergeGeometries(data){
     return [{ position, color, index, center: mergedCenter.toArray(), dp: dp.toArray(), scale: minScale }, [position.buffer, color.buffer, index.buffer]]
 
 }
-
-
-// unused but may use later
-function resizeBuildData(buildData, size, newSize){
-
-    const resized = new Uint16Array(newSize ** 3)
-    const chunkSize = Math.ceil(size / newSize) 
-
-    for(let cy = 0; cy < newSize; cy++)
-    for(let cz = 0; cz < newSize; cz++)
-    for(let cx = 0; cx < newSize; cx++){
-
-        const yLim = Math.min(size - chunkSize * cy, chunkSize)
-        const zLim = Math.min(size - chunkSize * cz, chunkSize)
-        const xLim = Math.min(size - chunkSize * cx, chunkSize)
-
-        let mostCommon = 0
-        let max = 0
-        let colorCounts = {}
-
-        for(let _y = 0; _y < yLim; _y++)
-        for(let _z = 0; _z < zLim; _z++)
-        for(let _x = 0; _x < xLim; _x++){
-    
-            const y = cy * chunkSize + _y
-            const z = cz * chunkSize + _z
-            const x = cx * chunkSize + _x
-            const i = size * ( y * size + z ) + x
-
-            if(i >= buildData.length)
-
-                continue
-
-            const col = buildData[i]
-
-            if(col === 0)
-                continue
-
-            if(colorCounts[col] === undefined){
-
-                colorCounts[col] = 1
-
-            }else
-
-                colorCounts[col]++
-
-            if(colorCounts[col] > max){
-
-                max = colorCounts[col]
-                mostCommon = col
-
-            }
-            
-        }
-
-        if(mostCommon)
-
-            resized[newSize * ( cy * newSize + cz ) + cx] = mostCommon
-    
-    }
-
-    return resized
-
-}
-

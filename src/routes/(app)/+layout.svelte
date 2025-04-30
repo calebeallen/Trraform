@@ -452,7 +452,6 @@
 
         }
 
-        console.log(plot)
         return plot
 
     }

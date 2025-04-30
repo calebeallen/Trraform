@@ -62,7 +62,7 @@
         <div id="plots">
           <h2 class="text-lg font-semibold">Virtual Items – Plots &amp; Credits</h2>
           <ul class="ml-6 space-y-2 list-disc">
-            <li><strong>Plots are licensed, not sold.</strong> Initial prices (USD): depth 0 $3.99, depth 1 $2.99, depth 2 $1.99. Prices and supply may change.</li>
+            <li><strong>Plots are licensed, not sold.</strong> Initial prices (USD): depth 0 $4.99, depth 1 $3.99, depth 2 $2.99. Prices and supply may change.</li>
             <li>Each account receives one free plot credit. Credits are non‑transferable, do not expire, and do not guarantee availability.</li>
             <li>Virtual Items have no real‑world monetary value and are not redeemable or refundable for cash.</li>
           </ul>

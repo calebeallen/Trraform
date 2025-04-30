@@ -12,7 +12,7 @@
     const SENSITIVITY_MIN = 1, SENSITIVITY_MAX = 20
     const TAG_COUNT_MIN = 0, TAG_COUNT_MAX = 25
     const TAG_SIZE_MIN = 1, TAG_SIZE_MAX = 10
-    const RENDER_LIMIT_MIN = 150_000, RENDER_LIMIT_MAX = 10_000_000
+    const RENDER_LIMIT_MIN = 150_000, RENDER_LIMIT_MAX = 10_000_000 // if changed, update value in engine.js
 
     let fovValue, sensitivityValue, tagCountValue, tagSizeValue, renderLimitValue
     let fovDisplay, sensitivityDisplay, tagCountDisplay, tagSizeDisplay, renderLimitDisplay

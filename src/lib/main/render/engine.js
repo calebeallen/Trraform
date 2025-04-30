@@ -4,6 +4,8 @@ import { refs, settings } from "../store"
 import { MeshBasicMaterial } from "three"
 import Queue from "../structures/queue"
 
+const RENDER_LIMIT_MAX = 10_000_000
+
 const material = new MeshBasicMaterial({vertexColors: true})
 const root = {
     chunkMaps: null,
@@ -82,8 +84,9 @@ class RenderManager {
 
         this.locked = true
         this.renderedChunks.add(chunk.id)
-        await this.cleanUp()
         await chunk.load()
+        if(settings.renderLimit < RENDER_LIMIT_MAX)
+            await this.cleanUp()
         this.cleanUpQueue.enqueue(chunk)
         this.locked = false
 

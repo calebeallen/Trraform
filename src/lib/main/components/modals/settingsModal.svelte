@@ -12,11 +12,10 @@
     const SENSITIVITY_MIN = 1, SENSITIVITY_MAX = 20
     const TAG_COUNT_MIN = 0, TAG_COUNT_MAX = 25
     const TAG_SIZE_MIN = 1, TAG_SIZE_MAX = 10
-    const RENDER_LIMIT_MIN = 100, RENDER_LIMIT_MAX = 50000
-    const LOW_LOD_DIST_MIN = 10, LOW_LOD_DIST_MAX = 250
+    const RENDER_LIMIT_MIN = 150_000, RENDER_LIMIT_MAX = 10_000_000
 
-    let fovValue, sensitivityValue, tagCountValue, tagSizeValue, renderLimitValue, lowLODDistValue
-    let fovDisplay, sensitivityDisplay, tagCountDisplay, tagSizeDisplay, renderLimitDisplay, lowLODDistDisplay
+    let fovValue, sensitivityValue, tagCountValue, tagSizeValue, renderLimitValue
+    let fovDisplay, sensitivityDisplay, tagCountDisplay, tagSizeDisplay, renderLimitDisplay
 
     onMount(() => {
 
@@ -26,20 +25,11 @@
         sensitivityValue = settings.sensitivity
         tagCountValue = settings.tagCount
         tagSizeValue = settings.tagSize
-        renderLimitValue = settings.renderLimitLinear
-        lowLODDistValue = settings.lowLODDist
+        renderLimitValue = settings.renderLimit
 
     })
 
     onDestroy(() => $modalsShowing--)
-
-    function nonLinear(value, exp, min, max) {
-
-        const range = (max - min)
-        const normalized = (value - min) / range
-        return Math.round(Math.pow(normalized, exp) * range + min)
-
-    }
 
     function formatNumber(num) {
 
@@ -63,20 +53,11 @@
         settings.sensitivity = parseInt(sensitivityValue)
         settings.tagCount = parseInt(tagCountValue)
         settings.tagSize = parseInt(tagSizeValue)
-        settings.renderLimitLinear = parseInt(renderLimitValue)
-
-        if(renderLimitValue == RENDER_LIMIT_MAX)
-            settings.renderLimit = -1
-        else
-            settings.renderLimit = nonLinear(settings.renderLimitLinear, 3, RENDER_LIMIT_MIN, RENDER_LIMIT_MAX)
-
-        const newLowLODDist = parseInt(lowLODDistValue)
-        refs.renderManager.setLodDistances( newLowLODDist / settings.lowLODDist )
-        settings.lowLODDist = newLowLODDist
+        settings.renderLimit = parseInt(renderLimitValue)
 
         refs.camera.updateProjectionMatrix()
 
-        localStorage.setItem("settings", JSON.stringify(settings))
+        localStorage.setItem("settings_0", JSON.stringify(settings))
 
     }
 
@@ -86,8 +67,7 @@
         sensitivityValue = defaultSettings.sensitivity
         tagCountValue = defaultSettings.tagCount
         tagSizeValue = defaultSettings.tagSize
-        renderLimitValue = defaultSettings.renderLimitLinear
-        lowLODDistValue = defaultSettings.lowLODDist
+        renderLimitValue = defaultSettings.renderLimit
 
     }
 
@@ -100,12 +80,8 @@
         if(renderLimitValue == RENDER_LIMIT_MAX)
             renderLimitDisplay = "None"
         else
-            renderLimitDisplay = formatNumber(nonLinear(renderLimitValue, 3, RENDER_LIMIT_MIN, RENDER_LIMIT_MAX))
+            renderLimitDisplay = formatNumber(renderLimitValue)
 
-        if(lowLODDistValue == LOW_LOD_DIST_MAX)
-            lowLODDistDisplay = "None"
-        else
-            lowLODDistDisplay = formatNumber(lowLODDistValue)
     }
 
 </script>
@@ -130,18 +106,11 @@
         <div class="text-center w-14">{tagSizeDisplay}</div>
 
         <div class="flex items-center gap-1">
-            <span>Plot render limit</span>
-            <Tip class="bottom-0 left-0 translate-x-4" text="The target number of plots that can be rendered at once."/>
+            <span>Render limit</span>
+            <Tip class="bottom-0 left-0 translate-x-4" text="The target maximum number of faces to leave rendered at once."/>
         </div>
         <Slider bind:value={renderLimitValue} min={RENDER_LIMIT_MIN} max={RENDER_LIMIT_MAX}/>
         <div class="text-center w-14">{renderLimitDisplay}</div>
-
-        <div class="flex items-center gap-1">
-            <div>Low LOD threshold</div>
-            <Tip class="bottom-0 left-0 translate-x-4" text="The distance threshold at which builds are rendered in low resolution. Lower this threshold to improve performance when many chunks are loaded."/>
-        </div>
-        <Slider bind:value={lowLODDistValue} min={LOW_LOD_DIST_MIN} max={LOW_LOD_DIST_MAX}/>
-        <div class="text-center w-14">{lowLODDistDisplay}</div>
 
     </div>
     <div class="flex w-full gap-3 mt-6">

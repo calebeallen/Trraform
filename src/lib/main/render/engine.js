@@ -1,7 +1,8 @@
 import { BaseChunk } from "./chunk"
 import RootPlot from "./rootPlot"
-import { refs } from "../store"
+import { refs, settings } from "../store"
 import { MeshBasicMaterial } from "three"
+import Queue from "../structures/queue"
 
 const material = new MeshBasicMaterial({vertexColors: true})
 const root = {
@@ -9,6 +10,7 @@ const root = {
     idToIdx: null,
     plot: null,
     chunk: null,
+    renderedFaces: 0
 }
 
 async function initRoot(){
@@ -67,7 +69,9 @@ class RenderManager {
     constructor(){
 
         this.renderedChunks = new Set()
+        this.cleanUpQueue = new Queue()
         this.locked = false
+        this.load = 0
 
     }
 
@@ -78,7 +82,9 @@ class RenderManager {
 
         this.locked = true
         this.renderedChunks.add(chunk.id)
+        await this.cleanUp()
         await chunk.load()
+        this.cleanUpQueue.enqueue(chunk)
         this.locked = false
 
     }
@@ -90,6 +96,31 @@ class RenderManager {
 
         this.renderedChunks.add(chunk.id)
         await chunk.load()
+
+    }
+
+    async cleanUp(){
+
+        const cleanPer = 0.05
+
+        if(root.renderedFaces > settings.renderLimit){
+
+            const thresh = Math.ceil(settings.renderLimit * (1 - cleanPer))
+            while(root.renderedFaces > thresh && this.cleanUpQueue.size()){
+
+                const chunk = this.cleanUpQueue.dequeue()
+                const success = await chunk.unload()
+
+                if(success)
+                    this.renderedChunks.delete(chunk.id)
+                else
+                    this.cleanUpQueue.enqueue(chunk)
+
+
+            }
+
+        }
+        
 
     }
 

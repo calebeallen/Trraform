@@ -48,9 +48,7 @@ const defaultSettings = {
     sensitivity: 8,
     tagCount: 10,
     tagSize: 3,
-    renderLimitLinear: 15412,
-    renderLimit: 1542,
-    lowLODDist: 50
+    renderLimit: 500_000, //faces
 }
 
 const settings = Object.assign({}, structuredClone(defaultSettings))

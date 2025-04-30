@@ -1,4 +1,4 @@
-// https://www.geeksforgeeks.org/implementation-queue-javascript/
+
 export default class Queue {
 
     constructor() {

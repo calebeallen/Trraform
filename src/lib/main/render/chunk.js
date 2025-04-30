@@ -13,20 +13,20 @@ class BaseChunk {
 
         this.id = `l${layer}_${mapIdx.toString(16)}`
         this.parent = parent
-        this.children = []
         this.childrenLoaded = new Set()
         this.sections = null
 
         this.mesh = null
         this.isLoaded = false
         this._loading = null
+        this.faceCount = 0
         
         const childIndices = root.chunkMaps[layer][mapIdx]
 
         if(layer == 0) {
             
             for(const childIdx of childIndices)
-                this.children.push(new BaseChunk(layer + 1, this, childIdx))
+                new BaseChunk(layer + 1, this, childIdx)
 
         } else if (layer == 1) { // create depth 0 standard chunks (base case)
 
@@ -41,8 +41,6 @@ class BaseChunk {
                     chunk.plots.push(plot)
                     plot.chunk = chunk
                 }
-                
-                this.children.push(chunk)
 
             }
 
@@ -65,11 +63,10 @@ class BaseChunk {
             const m4 = new Matrix4()
             m4.scale(new Vector3())
 
-            for(let i = range[0]; i < range[1]; i++){
-
-
+            for(let i = range[0]; i < range[1]; i++)
                 this.mesh.setMatrixAt(i, m4)
-            }
+
+            root.renderedFaces -= (range[0] - range[1]) * 12
 
         } else {
             
@@ -77,21 +74,19 @@ class BaseChunk {
 
                 this.mesh.setMatrixAt(i, matrices[j])
 
+            root.renderedFaces += (range[0] - range[1]) * 12
+
         }
 
         this.mesh.instanceMatrix.needsUpdate = true
-        
 
     }
 
-    // for removing the 
     load(){
 
         if(this._loading === null)
 
             this._loading = new Promise(async resolve => {
-
-                // console.log(this.id)
 
                 // load parent chain and unload low detail section
                 if(this.parent !== null)
@@ -132,7 +127,7 @@ class BaseChunk {
                         const scale = max.clone().sub(min)
 
                         m4.compose(center, quat, scale)
-                        mesh.setMatrixAt(i, m4)
+                        mesh.setMatrixAt(i, m4.clone())
 
                         color.setRGB(f32[j+6],f32[j+7],f32[j+8])
                         mesh.setColorAt(i, color)
@@ -143,6 +138,9 @@ class BaseChunk {
                     sections[id] = { range, matrices }
 
                 }
+
+                this.faceCount = totalBoxes * 12
+                root.renderedFaces += this.faceCount
                 
                 this.sections = sections
                 this.mesh = mesh
@@ -161,18 +159,30 @@ class BaseChunk {
 
     unload(){
 
-        if(this.childrenLoaded.size !== 0)
-            throw new Error("Cannot upload chunk that has children loaded.")
+        if(!this.isLoaded)
+            return true
 
-        // load low detail section again
-        if(this.parent !== null)
-            this.parent.cullSection(this, false)
+        if(this.childrenLoaded.size > 0)
+            return false
 
-        // clear mesh
-        // create child id => section vertex ranges map
+        if(this.parent !== null){
+            this.parent.childrenLoaded.delete(this.id)
+            if(this.parent instanceof BaseChunk)
+                this.parent.cullSection(this, false)
+        }
 
+        refs.scene.remove(this.mesh)
+        root.renderedFaces -= this.faceCount
+        this.mesh = null
         this._loading = null
         this.isLoaded = false
+        this.faceCount = 0
+        this.sections = null
+
+        if(this.parent !== null && this.parent.id !== "l0_0")
+            this.parent.unload()
+
+        return true
 
     }
 
@@ -186,7 +196,6 @@ class Chunk {
         this.parent = parent
     
         this.mesh = null
-        this.children = []
         this.plots = []
         this.childrenLoaded = new Set()
         this._loading = null
@@ -245,6 +254,9 @@ class Chunk {
                 const mergeTask = new Task( "merge_geometries", { geometryData : packaged } )
                 const merged = await mergeTask.run()
 
+                this.faceCount = merged.index.length / 3
+                root.renderedFaces += this.faceCount
+
                 // create mesh
                 const geometry = new BufferGeometry()
                 geometry.setAttribute("position", new BufferAttribute(merged.position, 3))
@@ -282,24 +294,32 @@ class Chunk {
 
     }
 
-
     async unload(){
 
-        if(!this.isLoaded || this.childrenLoaded.size)
+        if(!this.isLoaded)
+            return true
+
+        if(this.childrenLoaded.size > 0)
             return false
 
-        if(this.parent instanceof BaseChunk)
-            this.parent.cullSection(this, false)
-
-        this.parent.childrenLoaded.remove(this.id)
+        this.parent.childrenLoaded.delete(this.id)
 
         for(const plot of this.plots)
             await plot.safeClear()
 
-        refs.scene.remove(mesh)
+        if(this.parent instanceof BaseChunk)
+            this.parent.cullSection(this, false)
+        
+        refs.scene.remove(this.mesh)
+        root.renderedFaces -= this.faceCount
+
         this.mesh = null
         this._loading = null
         this.isLoaded = false
+        this.faceCount = 0
+
+        if(this.parent instanceof BaseChunk)
+            this.parent.unload()
 
         return true
 

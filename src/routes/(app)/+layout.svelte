@@ -53,7 +53,7 @@
     
     onMount(async () => {
 
-        const stored = localStorage.getItem("settings")
+        const stored = localStorage.getItem("settings_0")
         if(stored)
             Object.assign(settings, JSON.parse(stored))
 

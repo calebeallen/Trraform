@@ -1,6 +1,5 @@
-
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
-import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, LinearSRGBColorSpace, Mesh, MeshBasicMaterial, Vector3, Texture } from "three"
+import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, LinearSRGBColorSpace, Mesh, MeshBasicMaterial, Vector3, Texture, ClampToEdgeWrapping, Matrix3 } from "three"
 import { ColorLibrary } from "$lib/common/colorLibrary"
 import { PLOT_COUNT } from "$lib/common/constants"
 import { CONVERTING, FACES_CONVERTED, REFS, TOTAL_CONVERT } from "$lib/editor/store"
@@ -68,6 +67,105 @@ export default class GLBConverter {
     dispose(){
 
         this.chunks = null
+
+    }
+
+    loadImagePlane( file ){
+
+        TOTAL_CONVERT.set(0)
+
+        return new Promise(( resolve, reject ) => {
+
+            const image = new Image()
+            image.src = URL.createObjectURL(file)
+
+            image.onload = () => {
+                //extract and resize textures
+                const { width, height } = image
+                const osCanvas = new OffscreenCanvas( width, height )
+                const osCtx = osCanvas.getContext( '2d', { willReadFrequently: true } )
+                osCtx.drawImage( image, 0, 0, width, height )
+
+                 // Scale mesh to match image aspect ratio
+                 const aspectRatio = width / height
+
+                // Create plane geometry with UV coordinates
+                const geometry = new BufferGeometry()
+                const vertices = new Float32Array([
+                    1 * aspectRatio, -1, 0,  // top right
+                    -1 * aspectRatio, -1, 0,  // top left
+                    -1 * aspectRatio,  1, 0,  // bottom left
+                     1 * aspectRatio,  1, 0,  // bottom right
+                ].map(x => x * REFS.buildSize / 2))
+                const uvs = new Float32Array([
+                    0, 0,  // bottom left
+                    1, 0,  // bottom right
+                    1, 1,  // top right
+                    0, 1,   // top left
+                ])
+                const indices = new Uint16Array([0, 1, 2, 0, 2, 3])
+
+                geometry.setAttribute('position', new BufferAttribute(vertices, 3))
+                geometry.setAttribute('uv', new BufferAttribute(uvs, 2))
+                geometry.setIndex(new BufferAttribute(indices, 1))
+
+                // Create texture
+                const texture = new Texture(image)
+                texture.needsUpdate = true
+
+                // Create material with the texture
+                const material = new MeshBasicMaterial({
+                    map: texture,
+                    side: DoubleSide,
+                    transparent: true
+                })
+
+                // Create mesh and add to group
+                const mesh = new Mesh(geometry, material)
+                
+
+                const uvMatrix = new Matrix3()
+                uvMatrix[0] = -1
+                uvMatrix[4] = -1
+                uvMatrix[8] = -1
+
+                const imgData = osCtx.getImageData(0, 0, width, height)
+                const pixels = new Uint8ClampedArray(imgData.data)
+                for (let y = 0; y < height/2; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const topIdx = (y * width + x) * 4
+                        const bottomIdx = ((height - 1 - y) * width + x) * 4
+                        for (let i = 0; i < 4; i++) {
+                            const temp = pixels[topIdx + i]
+                            pixels[topIdx + i] = pixels[bottomIdx + i]
+                            pixels[bottomIdx + i] = temp
+                        }
+                    }
+                }
+
+                //create chunk with all     necessary data
+                this.chunks.push({
+                    type: 'texture',
+                    position: copyTypedArray(vertices),
+                    indicies: copyTypedArray(indices),
+                    uv: copyTypedArray(uvs),
+                    texture: pixels,
+                    width: width,
+                    height: height,
+                    wrapS: ClampToEdgeWrapping,
+                    wrapT: ClampToEdgeWrapping,
+                    uvMatrix: Array.from(uvMatrix.elements)
+                })
+
+                TOTAL_CONVERT.update(x => x + indices.length / 3)
+
+                this.mesh = mesh
+                this.max = new Vector3(REFS.buildSize / 2, REFS.buildSize / 2, REFS.buildSize / 2)
+                this.min = this.max.clone().multiplyScalar(-1)
+                resolve()
+            }
+
+        })
 
     }
 

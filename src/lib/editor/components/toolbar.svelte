@@ -1,4 +1,3 @@
-
 <script>
 
     import { InitTransformable, ModifyEvent, TransformEvent, COLOR_SELECT, MODE, OBJECT_SELECT, OVERLAP, REFS, SHOW_BLOCK_PANEL, CONVERTING, addEvent, NEW_BUILD_MODAL, EndTransformable, ConvertEvent, SELECTED, DOWNLOAD_MODAL, NOTIFICATION, COLOR_INDEX } from "$lib/editor/store"
@@ -136,7 +135,7 @@
 
         let ext = file.name.split(".")
 
-        ext = ext[ext.length - 1]
+        ext = ext[ext.length - 1].toLowerCase()
 
         if(ext === "glb"){
 
@@ -159,6 +158,26 @@
 
                 pushNotification(NOTIFICATION, "Import failed", `Could not import ${file.name}.`)
 
+            }
+
+        } else if (["png", "jpg", "jpeg", "webp"].includes(ext)) {
+
+            try {
+                const converter = new GLBConverter()
+                await converter.loadImagePlane(file)
+
+                beforeModeSwitch({ detail : "place" })
+
+                REFS.transform = new TransformableGlb( converter )
+                REFS.transform.addToScene()
+
+                addEvent([new InitTransformable(REFS.transform)], $MODE, "transform-glb")
+
+                //prevents ui lag
+                setTimeout( () => $MODE = "transform-glb", 1 )
+
+            } catch(e) {
+                pushNotification(NOTIFICATION, "Import failed", `Could not import ${file.name}.`)
             }
 
         } else {
@@ -393,8 +412,9 @@
     <Tool on:click={() => importInput.click()} tipHeader="Import">
         <img src="/upload.svg" alt="upload" slot="icon">
         <div class="mt-1 space-y-1" slot="tipContent">
-            <div class="text-xs">Import .trra or .glb files.</div>
+            <div class="text-xs">Import .trra, .glb, or image files.</div>
             <div class="text-xs"><b>3D Model Converter (Beta):</b> Convert GLB format models to blocks and add them to your build.</div>
+            <div class="text-xs"><b>Image Import:</b> Convert images to textured planes in your build.</div>
         </div>
     </Tool>
     <div class="divider"></div>

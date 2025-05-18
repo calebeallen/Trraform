@@ -118,7 +118,7 @@
     <div class="flex flex-col items-center">
         <h1 class="text-4xl font-bold text-center lg:text-5xl">New Build {size}x{size}x{size}</h1>
         {#if size > BUILD_SIZE_STD}
-            <h2 class="w-full mt-2 text-lg font-semibold text-center text-zinc-300">This size is available to subscription users only.</h2>
+            <h2 class="w-full mt-2 text-lg font-semibold text-center text-zinc-300">This size is available to supporters only.</h2>
         {/if}
     </div>
 </div>
